@@ -2,6 +2,12 @@
 * FILENAME:     BACK_loop.h             
 * DESCRIPTION:  background code header file
 * AUTHOR:       Mitja Nemec
+* START DATE:   16.1.2009
+* VERSION:      1.0
+*
+* CHANGES : 
+* VERSION   DATE        WHO         DETAIL 
+* 1.0       16.1.2009   Mitja Nemec Initial version
 *
 ****************************************************************/
 #ifndef     __BACK_LOOP_H__
@@ -10,11 +16,14 @@
 #include    "F28x_Project.h"
 #include    "define.h"
 #include    "globals.h"
+#include    "FB_bipolar.h"
 
-#include    "PWM_drv.h"
 #include 	"PCB_util.h"
 
 #include	"COMM_handlers.h"
+
+#include    "SD_card.h"
+#include    "UP_time.h"
     
 /**************************************************************
 * Funkcija, ki se izvaja v ozadju med obratovanjem
