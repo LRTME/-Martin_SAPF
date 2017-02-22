@@ -12,7 +12,7 @@
 
 /**************************************************************
 * Funckija ki brcne zunanji WatchDog (WD_KICK) se lahko
-* kliče samo iz periodicne prekinitve
+* klice samo iz periodicne prekinitve
 **************************************************************/
 extern void PCB_WD_KICK_int(void);
 

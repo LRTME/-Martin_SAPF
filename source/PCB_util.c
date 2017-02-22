@@ -15,7 +15,7 @@
 // trajanje brce (us)
 #define PCB_WD_WIDTH   100L
 
-#define PCB_WD_KICK_ON ((SAMP_FREQ * PCB_WD_WIDTH) / 1000000L)
+#define PCB_WD_KICK_ON ((SAMPLE_FREQ * PCB_WD_WIDTH) / 1000000L)
 // za merjenje casa za brcanje Watch dog
 static unsigned int  counter = 0;
 
@@ -38,7 +38,7 @@ void PCB_WD_KICK_int(void)
 
     // povecamo stevec prekinitev
     counter = counter + 1;
-    if (counter > (SAMP_FREQ / PCB_WD_FREQ) )
+    if (counter > (SAMPLE_FREQ / PCB_WD_FREQ) )
     {
         counter = 0;
     }
