@@ -26,19 +26,19 @@ extern bool PCB_CPLD_trip(void);
 /**************************************************************
 * Funckija, ki vrne stanje "over_voltage" z CPLD (over_voltage)
 **************************************************************/
-extern bool PCB_CPLD_over_voltage(void);
+/*extern bool PCB_CPLD_over_voltage(void);
 
 /**************************************************************
 * Funckija, ki vrne stanje "over_current_supply" s CPLD
 * (over_current_supply)
 **************************************************************/
-extern bool PCB_CPLD_over_current_supply(void);
+/*extern bool PCB_CPLD_over_current_supply(void);
 
 /**************************************************************
 * Funckija, ki vrne stanje "over_current_filter" s CPLD
 * (over_current_filter)
 **************************************************************/
-extern bool PCB_CPLD_over_current_filter(void);
+/*extern bool PCB_CPLD_over_current_filter(void);
 
 /**************************************************************
 * Funkcije izhodov na CPLD
