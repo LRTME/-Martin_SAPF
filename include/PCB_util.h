@@ -41,6 +41,19 @@ extern void PCB_CPLD_over_current_supply(void);
 extern void PCB_CPLD_over_current_filter(void);
 
 /**************************************************************
+* Funkcije izhodov na CPLD
+***************************************************************
+* Funckija izhoda MOSFET_MCU
+**************************************************************/
+extern void PCB_CPLD_MOSFET_MCU(void);
+
+/**************************************************************
+* Funckija izhoda LATCH_RESET
+**************************************************************/
+extern void PCB_CPLD_LATCH_RESET(void);
+
+
+/**************************************************************
 * Funkcije za vklop/izklop relejev
 ***************************************************************
 * Funckija, ki vklopi Rele1 (Supply_main_relay)
