@@ -54,7 +54,7 @@ extern void PCB_CPLD_LATCH_RESET(void);
 
 
 /**************************************************************
-* Funkcije za vklop/izklop relejev
+* Funkcije za vklop/izklop relejev (preko CPLD)
 ***************************************************************
 * Funckija, ki vklopi Rele1 (Supply_main_relay)
 **************************************************************/
