@@ -17,7 +17,9 @@
 extern void PCB_WD_KICK_int(void);
 
 /**************************************************************
+* Funkcije za branje signalov s CPLD
 ***************************************************************
+* Funckija, ki vrne stanje "trip" s CPLD (trip)
 **************************************************************/
 extern void PCB_CPLD_trip(void);
 
@@ -27,11 +29,13 @@ extern void PCB_CPLD_trip(void);
 extern void PCB_CPLD_over_voltage(void);
 
 /**************************************************************
+* Funckija, ki vrne stanje "over_current_supply" s CPLD
 * (over_current_supply)
 **************************************************************/
 extern void PCB_CPLD_over_current_supply(void);
 
 /**************************************************************
+* Funckija, ki vrne stanje "over_current_filter" s CPLD
 * (over_current_filter)
 **************************************************************/
 extern void PCB_CPLD_over_current_filter(void);
