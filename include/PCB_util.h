@@ -143,7 +143,7 @@ extern void PCB_LEDcard_toggle(void);
 /**************************************************************
 * Funckija ki vrne stanje strojne zascite
 **************************************************************/
-extern bool PCB_HW_trip(void);
+/*extern bool PCB_HW_trip(void);
 
 
 /**************************************************************
