@@ -50,7 +50,7 @@ void PCB_WD_KICK_int(void)
 **************************************************************/
 bool PCB_CPLD_trip(void)
 {
-	if (GpioDataRegs.GPADAT.bit.GPIO14 == 1)
+	if (GpioDataRegs.GPADAT.bit.GPIO19 == 1)
     {
         return (FALSE);
     }
@@ -137,7 +137,7 @@ void PCB_relay2_off(void)
 **************************************************************/
 void PCB_relay3_on(void)
 {
-	GpioDataRegs.GPASET.bit.GPIO19 = 1;
+	GpioDataRegs.GPCSET.bit.GPIO72 = 1;
 }
 
 /**************************************************************
@@ -145,7 +145,7 @@ void PCB_relay3_on(void)
 **************************************************************/
 void PCB_relay3_off(void)
 {
-	GpioDataRegs.GPACLEAR.bit.GPIO19 = 1;
+	GpioDataRegs.GPCCLEAR.bit.GPIO72 = 1;
 }
 /*************************************************************/
 
@@ -156,7 +156,7 @@ void PCB_relay3_off(void)
 **************************************************************/
 void PCB_LED_FAULT_on(void)
 {
-	GpioDataRegs.GPBSET.bit.GPIO40 = 1;
+	GpioDataRegs.GPASET.bit.GPIO12 = 1;
 }
 
 /**************************************************************
@@ -164,7 +164,7 @@ void PCB_LED_FAULT_on(void)
 **************************************************************/
 void PCB_LED_FAULT_off(void)
 {
-	GpioDataRegs.GPBCLEAR.bit.GPIO40 = 1;
+	GpioDataRegs.GPACLEAR.bit.GPIO12 = 1;
 }
 
 /**************************************************************
@@ -172,7 +172,7 @@ void PCB_LED_FAULT_off(void)
 **************************************************************/
 void PCB_LED_READY_on(void)
 {
-	GpioDataRegs.GPBSET.bit.GPIO50 = 1;
+	GpioDataRegs.GPBSET.bit.GPIO38 = 1;
 }
 
 /**************************************************************
@@ -180,7 +180,7 @@ void PCB_LED_READY_on(void)
 **************************************************************/
 void PCB_LED_READY_off(void)
 {
-	GpioDataRegs.GPBCLEAR.bit.GPIO50 = 1;
+	GpioDataRegs.GPBCLEAR.bit.GPIO38 = 1;
 }
 
 /**************************************************************
@@ -188,7 +188,7 @@ void PCB_LED_READY_off(void)
 **************************************************************/
 void PCB_LED_WORKING_on(void)
 {
-	GpioDataRegs.GPASET.bit.GPIO15 = 1;
+	GpioDataRegs.GPASET.bit.GPIO18 = 1;
 }
 
 /**************************************************************
@@ -196,7 +196,7 @@ void PCB_LED_WORKING_on(void)
 **************************************************************/
 void PCB_LED_WORKING_off(void)
 {
-	GpioDataRegs.GPACLEAR.bit.GPIO15 = 1;
+	GpioDataRegs.GPACLEAR.bit.GPIO18 = 1;
 }
 /*************************************************************/
 
@@ -207,7 +207,7 @@ void PCB_LED_WORKING_off(void)
 **************************************************************/
 bool PCB_SW_ENABLE(void)
 {
-	if (GpioDataRegs.GPBDAT.bit.GPIO51 == 1)
+	if (GpioDataRegs.GPBDAT.bit.GPIO39 == 1)
     {
         return (FALSE);
     }
@@ -222,7 +222,7 @@ bool PCB_SW_ENABLE(void)
 **************************************************************/
 bool PCB_SW_RESET(void)
 {
-	if (GpioDataRegs.GPADAT.bit.GPIO16 == 1)
+	if (GpioDataRegs.GPCDAT.bit.GPIO69 == 1)
     {
         return (FALSE);
     }
