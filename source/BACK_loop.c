@@ -37,6 +37,9 @@ void BACK_loop(void)
     {
         // hendlanje komunikacije
         COMM_runtime();
+
+        pulse_gen();
+        SW_detect();
 		
 		// test tipk in LEDic
 		

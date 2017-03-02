@@ -268,14 +268,80 @@ void PCB_LEDcard_toggle(void)
 **************************************************************/
 void PCB_init(void)
 {
-    EALLOW;
-
+/**************************************************************/
     /* IZHODI */
-    // LED na card-u
-    GPIO_SetupPinMux(83, GPIO_MUX_CPU1, 0);
-    GPIO_SetupPinOptions(83, GPIO_OUTPUT, GPIO_PUSHPULL);
+    	// TODO
 
+        //Releji
+        // GPIO29 - Supply_main_relay (Relay 1)
+        GPIO_SetupPinMux(29, GPIO_MUX_CPU1, 0);
+        GPIO_SetupPinOptions(29, GPIO_OUTPUT, GPIO_PUSHPULL);
+        PCB_relay1_off();
 
-    EDIS;
+        // GPIO23 - Supply_resistor_relay (Relay 2)
+        GPIO_SetupPinMux(23, GPIO_MUX_CPU1, 0);
+        GPIO_SetupPinOptions(23, GPIO_OUTPUT, GPIO_PUSHPULL);
+        PCB_relay2_off();
 
+        // GPIO72 - Filter_main_relay (Relay 3)
+        GPIO_SetupPinMux(72, GPIO_MUX_CPU1, 0);
+        GPIO_SetupPinOptions(72, GPIO_OUTPUT, GPIO_PUSHPULL);
+        PCB_relay3_off();
+
+    	//LEDice
+        // GPIO12 - LED_FAULT
+        GPIO_SetupPinMux(12, GPIO_MUX_CPU1, 0);
+        GPIO_SetupPinOptions(12, GPIO_OUTPUT, GPIO_PUSHPULL);
+
+        // GPIO38 - LED_READY
+        GPIO_SetupPinMux(38, GPIO_MUX_CPU1, 0);
+        GPIO_SetupPinOptions(38, GPIO_OUTPUT, GPIO_PUSHPULL);
+
+        // GPIO18 - LED_WORKING
+        GPIO_SetupPinMux(18, GPIO_MUX_CPU1, 0);
+        GPIO_SetupPinOptions(18, GPIO_OUTPUT, GPIO_PUSHPULL);
+
+        // LED na card-u
+        GPIO_SetupPinMux(83, GPIO_MUX_CPU1, 0);
+        GPIO_SetupPinOptions(83, GPIO_OUTPUT, GPIO_PUSHPULL);
+
+        //WD kick
+        // GPIO33 - WD kick
+        GPIO_SetupPinMux(33, GPIO_MUX_CPU1, 0);
+        GPIO_SetupPinOptions(33, GPIO_OUTPUT, GPIO_PUSHPULL);
+
+        //CPLD
+        // GPIO25 - MOSFET_MCU
+        GPIO_SetupPinMux(25, GPIO_MUX_CPU1, 0);
+        GPIO_SetupPinOptions(25, GPIO_OUTPUT, GPIO_PUSHPULL);
+
+        // GPIO27 - LATCH_RESET
+        GPIO_SetupPinMux(27, GPIO_MUX_CPU1, 0);
+        GPIO_SetupPinOptions(27, GPIO_OUTPUT, GPIO_PUSHPULL);
+
+/***************************************************************/
+
+        /* VHODI */
+        //Tipke
+        // GPIO39 - SW_ENABLE
+        GPIO_SetupPinMux(39, GPIO_MUX_CPU1, 0);
+        GPIO_SetupPinOptions(39, GPIO_INPUT, GPIO_INPUT);
+
+        // GPIO26 - SW_RESET
+        GPIO_SetupPinMux(69, GPIO_MUX_CPU1, 0);
+        GPIO_SetupPinOptions(69, GPIO_INPUT, GPIO_INPUT);
+
+        //CPLD
+        //
+/***************************************************************/
+
+        // postavim v privzeto stanje
+
+        PCB_relay1_off();
+        PCB_relay2_off();
+        PCB_relay3_off();
+
+        PCB_LED_FAULT_off();
+		PCB_LED_READY_off();
+		PCB_LED_WORKING_off();
 }
