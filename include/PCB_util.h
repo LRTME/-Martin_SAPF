@@ -24,22 +24,25 @@ extern void PCB_WD_KICK_int(void);
 extern bool PCB_CPLD_trip(void);
 
 /**************************************************************
-* Funckija, ki vrne stanje "over_voltage" z CPLD (over_voltage)
+* Funckije stanj "over_voltage" z CPLD (over_voltage)
 **************************************************************/
-//extern bool PCB_CPLD_over_voltage(void);
-
+extern void PCB_CPLD_over_voltage_YES(void);
+extern void PCB_CPLD_over_voltage_NO(void);
+extern bool PCB_CPLD_over_voltage_stat(void);
 /**************************************************************
-* Funckija, ki vrne stanje "over_current_supply" s CPLD
+* Funckije stanj "over_current_supply" s CPLD
 * (over_current_supply)
 **************************************************************/
-//extern bool PCB_CPLD_over_current_supply(void);
-
+extern void PCB_CPLD_over_current_supply_YES(void);
+extern void PCB_CPLD_over_current_supply_NO(void);
+extern bool PCB_CPLD_over_current_supply_stat(void);
 /**************************************************************
-* Funckija, ki vrne stanje "over_current_filter" s CPLD
+* Funckije stanj "over_current_filter" s CPLD
 * (over_current_filter)
 **************************************************************/
-//extern bool PCB_CPLD_over_current_filter(void);
-
+extern void PCB_CPLD_over_current_filter_YES(void);
+extern void PCB_CPLD_over_current_filter_NO(void);
+extern bool PCB_CPLD_over_current_filter_stat(void);
 /**************************************************************
 * Funkcije izhodov na CPLD
 ***************************************************************

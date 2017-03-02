@@ -25,6 +25,7 @@ bool pulse_10ms = FALSE;
 
 void SW_detect(void);
 void pulse_gen(void);
+void test1(void);
 
 /**************************************************************
 * Funkcija, ki se izvaja v ozadju med obratovanjem
@@ -41,29 +42,7 @@ void BACK_loop(void)
         pulse_gen();
         SW_detect();
 		
-		// test tipk in LEDic
-		
-		if (ENABLE_SW == TRUE)
-		{
-			PCB_LED_WORKING_on();
-			PCB_LED_READY_on();
-			asm(" NOP");
-		}
-		else
-		{
-			PCB_LED_WORKING_off();
-			PCB_LED_READY_off();
-		}
-		
-		if (RESET_SW == TRUE)
-		{
-			PCB_LED_FAULT_on();
-			asm(" NOP");
-		}
-		else
-		{
-			PCB_LED_FAULT_off();
-		}
+		test1();
 
         // vsake toliko èasa spremenji stanje luèk
 /*        if (interrupt_cnt == 0)
@@ -74,9 +53,24 @@ void BACK_loop(void)
 			
         }
 */
+
+		/*	state machine	*/
+
+	/*	switch(state)
+		{
+		case Standby:
+			break;
+		case Working:
+			break;
+		case Fault:
+			break;
+		}
+    */
         asm(" NOP");
-    }   // end of while(1)
-}       // end of BACK_loop
+        PCB_WD_KICK_int();
+        // end of while(1)
+	}
+}// end of BACK_loop
 
 void pulse_gen(void)
 {
@@ -239,4 +233,34 @@ void SW_detect(void)
     }
     // da je pulz dolg res samo in samo eno iteracijo
 
+}
+
+
+void test1(void)
+{
+	// test tipk in LEDic
+
+			if (ENABLE_SW == TRUE)
+			{
+				PCB_LED_WORKING_on();
+				PCB_LED_READY_on();
+				PCB_relay1_on();
+			}
+			else
+			{
+				PCB_LED_WORKING_off();
+				PCB_LED_READY_off();
+				PCB_relay1_off();
+			}
+
+			if (RESET_SW == TRUE)
+			{
+				PCB_LED_FAULT_on();
+				PCB_relay2_on();
+			}
+			else
+			{
+				PCB_LED_FAULT_off();
+				PCB_relay2_off();
+			}
 }
