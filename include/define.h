@@ -11,19 +11,19 @@
 #include	"stdbool.h"
 #include	"stdint.h"
 
-// frekvenca PWM-ja
+// frekvenca PWM-ja (20kHz)
 #define     SWITCH_FREQ     20000L
 
 // veèkratnik preklopne frekvence
 #define     SAMP_PRESCALE   1
 
-// Vzorèna frekvenca
+// Vzorèna frekvenca (20kHz)
 #define     SAMPLE_FREQ     (SWITCH_FREQ/SAMP_PRESCALE)
 
 // vzorèna perioda
 #define     SAMPLE_TIME     (1.0/SAMPLE_FREQ)
 
-// frekvenca procesorja v Hz
+// frekvenca procesorja v Hz (200 MHz)
 #define     CPU_FREQ        200000000L
 
 // definicije matematiènih konstant

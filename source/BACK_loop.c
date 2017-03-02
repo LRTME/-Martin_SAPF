@@ -9,7 +9,7 @@
 
 // deklaracije statiènih lokalnih spremenljivk
 
-bool ENABLE_SW = FALSE;  		// pulz, ko pritisnemo na tipko ENABLE
+bool ENABLE_SW = FALSE;  			// pulz, ko pritisnemo na tipko ENABLE
 bool RESET_SW = FALSE;  			// pulz, ko pritisnemo na tipko RESET
 
 bool pulse_1000ms = FALSE;
@@ -47,6 +47,7 @@ void BACK_loop(void)
 		{
 			PCB_LED_WORKING_on();
 			PCB_LED_READY_on();
+			asm(" NOP");
 		}
 		else
 		{
@@ -57,6 +58,7 @@ void BACK_loop(void)
 		if (RESET_SW == TRUE)
 		{
 			PCB_LED_FAULT_on();
+			asm(" NOP");
 		}
 		else
 		{
@@ -64,14 +66,14 @@ void BACK_loop(void)
 		}
 
         // vsake toliko èasa spremenji stanje luèk
-        if (interrupt_cnt == 0)
+/*        if (interrupt_cnt == 0)
         {
             PCB_LEDcard_toggle();
             // in pocakam najmanj 50 us - da ne bi slucajno izvedel tega dvakrat
             DELAY_US(50L);
 			
         }
-
+*/
         asm(" NOP");
     }   // end of while(1)
 }       // end of BACK_loop
@@ -183,6 +185,7 @@ void pulse_gen(void)
 void SW_detect(void)
 {
     // lokalne spremenljivke
+	//100ms debounce
     const int SW_ON_cnt_limit = 10;
 
     static int ENABLE_SW_cnt = 0;
@@ -191,7 +194,7 @@ void SW_detect(void)
     bool ENABLE_SW_new;
     bool RESET_SW_new;
 
-    // scan every cca 0.05s
+    // scan every 10ms
     if (pulse_10ms == 1)
     {
         // preberem stanja tipk
@@ -213,12 +216,7 @@ void SW_detect(void)
         // ce je tipka pritisnjena dovolj casa, javi programu - samo enkrat
         if (ENABLE_SW_cnt == SW_ON_cnt_limit)
         {
-            ENABLE_SW = TRUE;
-        }
-        // sicer pa ne javi
-        else
-        {
-            ENABLE_SW = FALSE;
+            ENABLE_SW = !ENABLE_SW;
         }
 
         // ali smo pritisnili na tipko 2
@@ -236,18 +234,9 @@ void SW_detect(void)
         // ce je tipka pritisnjena dovolj casa, javi programu - samo enkrat
         if (RESET_SW_cnt == SW_ON_cnt_limit)
         {
-            RESET_SW = TRUE;
-        }
-        // sicer pa ne javi
-        else
-        {
-            RESET_SW = FALSE;
+            RESET_SW = !RESET_SW;
         }
     }
     // da je pulz dolg res samo in samo eno iteracijo
-    else
-    {
-        ENABLE_SW = FALSE;
-        RESET_SW = FALSE;
-    }
+
 }
