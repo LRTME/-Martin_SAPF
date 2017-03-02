@@ -23,8 +23,8 @@ bool pulse_10ms = FALSE;
 
 // pototipi funkcij
 
-void detekcija_tipk(void);
-void pulzni_gen(void);
+void SW_detect(void);
+void pulse_gen(void);
 
 /**************************************************************
 * Funkcija, ki se izvaja v ozadju med obratovanjem
@@ -73,7 +73,7 @@ void BACK_loop(void)
     }   // end of while(1)
 }       // end of BACK_loop
 
-void pulzni_gen(void)
+void pulse_gen(void)
 {
     static long interrupt_cnt_old_500ms = 0;
     static long interrupt_cnt_old_100ms = 0;
@@ -177,7 +177,7 @@ void pulzni_gen(void)
     }
 }
 
-void detekcija_tipk(void)
+void SW_detect(void)
 {
     // lokalne spremenljivke
     const int SW_ON_cnt_limit = 10;
