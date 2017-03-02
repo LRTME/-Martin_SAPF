@@ -23,7 +23,7 @@ static unsigned int  counter = 0;
 * Funckija ki brcne zunanji WatchDog se lahko
 * kliče samo iz periodicne prekinitve
 **************************************************************/
-#pragma CODE_SECTION(PCB_kick_WD_int, "ramfuncs");
+#pragma CODE_SECTION(PCB_WD_KICK_int, "ramfuncs");
 void PCB_WD_KICK_int(void)
 {
     // brcnemo Watch dog
@@ -63,20 +63,20 @@ bool PCB_CPLD_trip(void)
 /**************************************************************
 * Funckija, ki vrne stanje "over_voltage" z CPLD (over_voltage)
 **************************************************************/
-/*bool PCB_CPLD_over_voltage(void)
+//bool PCB_CPLD_over_voltage(void)
 
 /**************************************************************
 * Funckija, ki vrne stanje "over_current_supply" s CPLD
 * (over_current_supply)
 **************************************************************/
-/*bool PCB_CPLD_over_current_supply(void)
+//bool PCB_CPLD_over_current_supply(void)
 
 /**************************************************************
 * Funckija, ki vrne stanje "over_current_filter" s CPLD
 * (over_current_filter)
 **************************************************************/
-/*bool PCB_CPLD_over_current_filter(void)
-/*************************************************************/
+//bool PCB_CPLD_over_current_filter(void)
+
 
 /**************************************************************
 * Funkcije izhodov na CPLD
