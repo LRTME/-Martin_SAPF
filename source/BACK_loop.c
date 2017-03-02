@@ -9,8 +9,8 @@
 
 // deklaracije statiènih lokalnih spremenljivk
 
-bool ENABLE_tipka = FALSE;  		// pulz, ko pritisnemo na tipko ENABLE
-bool RESET_tipka = FALSE;  			// pulz, ko pritisnemo na tipko RESET
+bool ENABLE_SW = FALSE;  		// pulz, ko pritisnemo na tipko ENABLE
+bool RESET_SW = FALSE;  			// pulz, ko pritisnemo na tipko RESET
 
 bool pulse_1000ms = FALSE;
 bool pulse_500ms = FALSE;
@@ -40,7 +40,7 @@ void BACK_loop(void)
 		
 		// test tipk in LEDic
 		
-		if (ENABLE_tipka == TRUE)
+		if (ENABLE_SW == TRUE)
 		{
 			PCB_LED_WORKING_on();
 			PCB_LED_READY_on();
@@ -51,7 +51,7 @@ void BACK_loop(void)
 			PCB_LED_READY_off();
 		}
 		
-		if (RESET_tipka == TRUE)
+		if (RESET_SW == TRUE)
 		{
 			PCB_LED_FAULT_on();
 		}
@@ -180,71 +180,71 @@ void pulzni_gen(void)
 void detekcija_tipk(void)
 {
     // lokalne spremenljivke
-    const int sw_on_cnt_limit = 10;
+    const int SW_ON_cnt_limit = 10;
 
-    static int ENABLE_tipka_cnt = 0;
-    static int RESET_tipka_cnt = 0;
+    static int ENABLE_SW_cnt = 0;
+    static int RESET_SW_cnt = 0;
 
-    bool ENABLE_tipka_new;
-    bool RESET_tipka_new;
+    bool ENABLE_SW_new;
+    bool RESET_SW_new;
 
     // scan every cca 0.05s
     if (pulse_10ms == 1)
     {
         // preberem stanja tipk
-        ENABLE_tipka_new = PCB_SW_ENABLE();
-        RESET_tipka_new = PCB_SW_RESET();
+        ENABLE_SW_new = PCB_SW_ENABLE();
+        RESET_SW_new = PCB_SW_RESET();
 
         // ali smo pritisnili na tipko ENABLE
-        // ce je tipka pritisnjena, stopaj koliko casa je prisitsnjena
-        if (ENABLE_tipka_new == TRUE)
+        // ce je tipka pritisnjena, stopaj koliko casa je prisitsnjena (debounce)
+        if (ENABLE_SW_new == TRUE)
         {
-            ENABLE_tipka_cnt = ENABLE_tipka_cnt + 1;
+            ENABLE_SW_cnt = ENABLE_SW_cnt + 1;
         }
         // ce ni pritisnjena resetiraj stevec
         else
         {
-            ENABLE_tipka_cnt = 0;
+            ENABLE_SW_cnt = 0;
         }
 
         // ce je tipka pritisnjena dovolj casa, javi programu - samo enkrat
-        if (ENABLE_tipka_cnt == sw_on_cnt_limit)
+        if (ENABLE_SW_cnt == SW_ON_cnt_limit)
         {
-            ENABLE_tipka = TRUE;
+            ENABLE_SW = TRUE;
         }
         // sicer pa ne javi
         else
         {
-            ENABLE_tipka = FALSE;
+            ENABLE_SW = FALSE;
         }
 
         // ali smo pritisnili na tipko 2
         // ce je tipka pritisnjena, stopaj koliko casa je prisitsnjena
-        if (reset_tipka_new == TRUE)
+        if (RESET_SW_new == TRUE)
         {
-            reset_tipka_cnt = reset_tipka_cnt + 1;
+            RESET_SW_cnt = RESET_SW_cnt + 1;
         }
         // ce ni pritisnjena resetiraj stevec
         else
         {
-            reset_tipka_cnt = 0;
+            RESET_SW_cnt = 0;
         }
 
         // ce je tipka pritisnjena dovolj casa, javi programu - samo enkrat
-        if (reset_tipka_cnt == sw_on_cnt_limit)
+        if (RESET_SW_cnt == SW_ON_cnt_limit)
         {
-            reset_tipka = TRUE;
+            RESET_SW = TRUE;
         }
         // sicer pa ne javi
         else
         {
-            reset_tipka = FALSE;
+            RESET_SW = FALSE;
         }
     }
     // da je pulz dolg res samo in samo eno iteracijo
     else
     {
-        en_tipka = FALSE;
-        reset_tipka = FALSE;
+        ENABLE_SW = FALSE;
+        RESET_SW = FALSE;
     }
 }
