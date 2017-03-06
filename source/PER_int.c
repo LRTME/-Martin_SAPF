@@ -107,6 +107,7 @@ void interrupt PER_int(void)
     
     // stopam
     TIC_stop();
+	PCB_WD_KICK_int();
 
 }   // end of PWM_int
 

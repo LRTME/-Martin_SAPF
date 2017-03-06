@@ -67,7 +67,7 @@ void BACK_loop(void)
 		}
     */
         asm(" NOP");
-        PCB_WD_KICK_int();
+
         // end of while(1)
 	}
 }// end of BACK_loop
