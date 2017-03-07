@@ -21,7 +21,7 @@ static unsigned int  counter = 0;
 
 /**************************************************************
 * Funckija ki brcne zunanji WatchDog se lahko
-* kliče samo iz periodicne prekinitve
+* klice samo iz periodicne prekinitve - GPIO33
 **************************************************************/
 #pragma CODE_SECTION(PCB_WD_KICK_int, "ramfuncs");
 void PCB_WD_KICK_int(void)
@@ -46,7 +46,7 @@ void PCB_WD_KICK_int(void)
 /**************************************************************
 * Funkcije za branje signalov s CPLD
 ***************************************************************
-* Funckija, ki vrne stanje "trip" s CPLD (trip)
+* Funckija, ki vrne stanje "trip" s CPLD (trip) - GPIO19
 **************************************************************/
 bool PCB_CPLD_trip(void)
 {
@@ -61,7 +61,8 @@ bool PCB_CPLD_trip(void)
 }
 
 /**************************************************************
-* Funckija, ki obravnava stanje "over_voltage" z CPLD (over_voltage)
+* Funckija, ki obravnava stanje "over_voltage" z CPLD
+* (over_voltage) - GPIO17
 **************************************************************/
 void PCB_CPLD_over_voltage_YES(void)
 {
@@ -89,7 +90,7 @@ bool PCB_CPLD_over_voltage_stat(void)
 
 /**************************************************************
 * Funckija, ki vrne stanje "over_current_supply" s CPLD
-* (over_current_supply)
+* (over_current_supply) - GPIO11
 **************************************************************/
 void PCB_CPLD_over_current_supply_YES(void)
 {
@@ -117,7 +118,7 @@ bool PCB_CPLD_over_current_supply_stat(void)
 
 /**************************************************************
 * Funckija, ki vrne stanje "over_current_filter" s CPLD
-* (over_current_filter)
+* (over_current_filter) - GPIO15
 **************************************************************/
 void PCB_CPLD_over_current_filter_YES(void)
 {
@@ -146,7 +147,7 @@ bool PCB_CPLD_over_current_filter_stat(void)
 /**************************************************************
 * Funkcije izhodov na CPLD
 ***************************************************************
-* Funckija izhoda MOSFET_MCU
+* Funckija izhoda MOSFET_MCU - GPIO25
 **************************************************************/
 void PCB_CPLD_MOSFET_MCU_on(void)
 {
@@ -159,7 +160,7 @@ void PCB_CPLD_MOSFET_MCU_off(void)
 }
 
 /**************************************************************
-* Funckija izhoda LATCH_RESET
+* Funckija izhoda LATCH_RESET - GPIO27
 **************************************************************/
 void PCB_CPLD_LATCH_RESET_on(void)
 {
@@ -170,13 +171,10 @@ void PCB_CPLD_LATCH_RESET_off(void)
 {
 	GpioDataRegs.GPACLEAR.bit.GPIO27 = 1;
 }
-/*************************************************************/
-
-
 /**************************************************************
-* Funkcije za vklop/izklop relejev
+* Funkcije za vklop/izklop relejev (preko CPLD)
 ***************************************************************
-* Funckija, ki vklopi Rele1 (Supply_main_relay)
+* Funckija, ki vklopi Rele1 (Supply_main_relay) - GPIO29
 **************************************************************/
 void PCB_relay1_on(void)
 {
@@ -192,7 +190,7 @@ void PCB_relay1_off(void)
 }
 
 /**************************************************************
-* Funckija, ki vklopi Rele2 (Supply_resistor_relay)
+* Funckija, ki vklopi Rele2 (Supply_resistor_relay) - GPIO23
 **************************************************************/
 void PCB_relay2_on(void)
 {
@@ -208,7 +206,7 @@ void PCB_relay2_off(void)
 }
 
 /**************************************************************
-* Funckija, ki vklopi Rele3 (Filter_main_relay)
+* Funckija, ki vklopi Rele3 (Filter_main_relay) - GPIO72
 **************************************************************/
 void PCB_relay3_on(void)
 {
@@ -351,17 +349,14 @@ void PCB_init(void)
         // GPIO29 - Supply_main_relay (Relay 1)
         GPIO_SetupPinMux(29, GPIO_MUX_CPU1, 0);
         GPIO_SetupPinOptions(29, GPIO_OUTPUT, GPIO_PUSHPULL);
-        PCB_relay1_off();
 
         // GPIO23 - Supply_resistor_relay (Relay 2)
         GPIO_SetupPinMux(23, GPIO_MUX_CPU1, 0);
         GPIO_SetupPinOptions(23, GPIO_OUTPUT, GPIO_PUSHPULL);
-        PCB_relay2_off();
 
         // GPIO72 - Filter_main_relay (Relay 3)
         GPIO_SetupPinMux(72, GPIO_MUX_CPU1, 0);
         GPIO_SetupPinOptions(72, GPIO_OUTPUT, GPIO_PUSHPULL);
-        PCB_relay3_off();
 
     	//LEDice
         // GPIO12 - LED_FAULT

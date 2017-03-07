@@ -256,11 +256,15 @@ void test1(void)
 			if (RESET_SW == TRUE)
 			{
 				PCB_LED_FAULT_on();
-				PCB_relay2_on();
+				//PCB_relay2_on();
+				//PCB_relay3_on();
+				PCB_CPLD_MOSFET_MCU_on();
 			}
 			else
 			{
 				PCB_LED_FAULT_off();
-				PCB_relay2_off();
+				//PCB_relay2_off();
+				//PCB_relay3_off();
+				PCB_CPLD_MOSFET_MCU_off();
 			}
 }

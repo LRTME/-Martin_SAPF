@@ -48,14 +48,13 @@ extern bool PCB_CPLD_over_current_filter_stat(void);
 ***************************************************************
 * Funckija izhoda MOSFET_MCU
 **************************************************************/
-extern void PCB_CPLD_MOSFET_MCU(void);
-
+extern void PCB_CPLD_MOSFET_MCU_on(void);
+extern void PCB_CPLD_MOSFET_MCU_off(void);
 /**************************************************************
 * Funckija izhoda LATCH_RESET
 **************************************************************/
-extern void PCB_CPLD_LATCH_RESET(void);
-
-
+extern void PCB_CPLD_LATCH_RESET_on(void);
+extern void PCB_CPLD_LATCH_RESET_off(void);
 /**************************************************************
 * Funkcije za vklop/izklop relejev (preko CPLD)
 ***************************************************************
