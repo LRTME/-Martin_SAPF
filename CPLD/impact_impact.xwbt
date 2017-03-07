@@ -1,0 +1,8 @@
+INTSTYLE=impact
+INFILE=D:\Mitja\Projekti\SerijskiFilterEnoF\Programi\CPLD_logika\impact.xsl
+OUTFILE=D:\Mitja\Projekti\SerijskiFilterEnoF\Programi\CPLD_logika\impact.xsl
+FAMILY=Single
+PART=Single
+WORKINGDIR=D:\Mitja\Projekti\SerijskiFilterEnoF\Programi\CPLD_logika
+LICENSE=iMPACT
+USER_INFO=iMPACT

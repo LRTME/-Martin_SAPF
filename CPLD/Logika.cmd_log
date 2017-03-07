@@ -1,0 +1,32 @@
+xst -intstyle ise -ifn "D:/Mitja/Projekti/SerijskiFilterEnoF/Programi/CPLD_logika/Logika.xst" -ofn "D:/Mitja/Projekti/SerijskiFilterEnoF/Programi/CPLD_logika/Logika.syr" 
+xst -intstyle ise -ifn "D:/Mitja/Projekti/SerijskiFilterEnoF/Programi/CPLD_logika/Logika.xst" -ofn "D:/Mitja/Projekti/SerijskiFilterEnoF/Programi/CPLD_logika/Logika.syr" 
+xst -intstyle ise -ifn "D:/Mitja/Projekti/SerijskiFilterEnoF/Programi/CPLD_logika/Logika.xst" -ofn "D:/Mitja/Projekti/SerijskiFilterEnoF/Programi/CPLD_logika/Logika.syr" 
+xst -intstyle ise -ifn "D:/Mitja/Projekti/SerijskiFilterEnoF/Programi/CPLD_logika/Logika.xst" -ofn "D:/Mitja/Projekti/SerijskiFilterEnoF/Programi/CPLD_logika/Logika.syr" 
+ngdbuild -intstyle ise -dd _ngo -i -p xc9536xl-VQ64-10 Logika.ngc Logika.ngd  
+cpldfit -intstyle ise -p xc9536xl-10-VQ64 -ofmt vhdl -optimize density -htmlrpt -loc on -slew fast -init low -inputs 54 -pterms 25 -unused float -power std -terminate keeper Logika.ngd 
+XSLTProcess Logika_build.xml 
+tsim -intstyle ise Logika Logika.nga 
+taengine -intstyle ise -f Logika -w --format html1 -l Logika_html/tim/timing_report.htm 
+ngdbuild -intstyle ise -dd _ngo -uc Logika.ucf -p xc9536xl-VQ64-10 Logika.ngc Logika.ngd  
+cpldfit -intstyle ise -p xc9536xl-10-VQ64 -ofmt vhdl -optimize density -htmlrpt -loc on -slew fast -init low -inputs 54 -pterms 25 -unused float -power std -terminate keeper Logika.ngd 
+XSLTProcess Logika_build.xml 
+tsim -intstyle ise Logika Logika.nga 
+hprep6 -s IEEE1149 -n Logika -i Logika 
+xst -intstyle ise -ifn "D:/Mitja/Projekti/SerijskiFilterEnoF/Programi/CPLD_logika/Logika.xst" -ofn "D:/Mitja/Projekti/SerijskiFilterEnoF/Programi/CPLD_logika/Logika.syr" 
+ngdbuild -intstyle ise -dd _ngo -uc Logika.ucf -p xc9536xl-VQ64-10 Logika.ngc Logika.ngd  
+cpldfit -intstyle ise -p xc9536xl-10-VQ64 -ofmt vhdl -optimize density -htmlrpt -loc on -slew fast -init low -inputs 54 -pterms 25 -unused float -power std -terminate keeper Logika.ngd 
+XSLTProcess Logika_build.xml 
+tsim -intstyle ise Logika Logika.nga 
+hprep6 -s IEEE1149 -n Logika -i Logika 
+xst -intstyle ise -ifn "D:/Mitja/Projekti/SerijskiFilterEnoF/Programi/CPLD_logika/Logika.xst" -ofn "D:/Mitja/Projekti/SerijskiFilterEnoF/Programi/CPLD_logika/Logika.syr" 
+ngdbuild -intstyle ise -dd _ngo -uc Logika.ucf -p xc9536xl-VQ64-10 Logika.ngc Logika.ngd  
+cpldfit -intstyle ise -p xc9536xl-10-VQ64 -ofmt vhdl -optimize density -htmlrpt -loc on -slew fast -init low -inputs 54 -pterms 25 -unused float -power std -terminate keeper Logika.ngd 
+XSLTProcess Logika_build.xml 
+tsim -intstyle ise Logika Logika.nga 
+hprep6 -s IEEE1149 -n Logika -i Logika 
+xst -intstyle ise -ifn "D:/Mitja/Projekti/SerijskiFilterEnoF/Programi/CPLD_logika/Logika.xst" -ofn "D:/Mitja/Projekti/SerijskiFilterEnoF/Programi/CPLD_logika/Logika.syr" 
+ngdbuild -intstyle ise -dd _ngo -uc Logika.ucf -p xc9536xl-VQ64-10 Logika.ngc Logika.ngd  
+cpldfit -intstyle ise -p xc9536xl-10-VQ64 -ofmt vhdl -optimize density -htmlrpt -loc on -slew fast -init low -inputs 54 -pterms 25 -unused float -power std -terminate keeper Logika.ngd 
+XSLTProcess Logika_build.xml 
+tsim -intstyle ise Logika Logika.nga 
+hprep6 -s IEEE1149 -n Logika -i Logika 

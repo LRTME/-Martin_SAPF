@@ -1,0 +1,367 @@
+<html><body>
+<pre>
+ 
+cpldfit:  version O.76xd                            Xilinx Inc.
+                                  Fitter Report
+Design Name: Logika                              Date:  4- 5-2016,  2:00PM
+Device Used: XC9536XL-10-VQ64
+Fitting Status: Successful
+
+*************************  Mapped Resource Summary  **************************
+
+Macrocells     Product Terms    Function Block   Registers      Pins           
+Used/Tot       Used/Tot         Inps Used/Tot    Used/Tot       Used/Tot       
+11 /36  ( 31%) 16  /180  (  9%) 19 /108 ( 18%)   0  /36  (  0%) 18 /36  ( 50%)
+
+** Function Block Resources **
+
+Function    Mcells      FB Inps     Pterms      IO          
+Block       Used/Tot    Used/Tot    Used/Tot    Used/Tot    
+FB1           4/18        8/54        7/90       6/18
+FB2           7/18       11/54        9/90      12/18
+             -----       -----       -----      -----    
+             11/36       19/108      16/180     18/36 
+
+* - Resource is exhausted
+
+** Global Control Resources **
+
+Global clock net(s) unused.
+Global output enable net(s) unused.
+Global set/reset net(s) unused.
+
+** Pin Resources **
+
+Signal Type    Required     Mapped  |  Pin Type            Used    Total 
+------------------------------------|------------------------------------
+Input         :    9           9    |  I/O              :    16      30
+Output        :    9           9    |  GCK/IO           :     1       3
+Bidirectional :    0           0    |  GTS/IO           :     0       2
+GCK           :    0           0    |  GSR/IO           :     1       1
+GTS           :    0           0    |
+GSR           :    0           0    |
+                 ----        ----
+        Total     18          18
+
+** Power Data **
+
+There are 11 macrocells in high performance mode (MCHP).
+There are 0 macrocells in low power mode (MCLP).
+End of Mapped Resource Summary
+**************************  Errors and Warnings  ***************************
+
+WARNING:Cpld - Unable to retrieve the path to the iSE Project Repository. Will
+   use the default filename of 'Logika.ise'.
+INFO:Cpld - Inferring BUFG constraint for signal 'TZ_IF' based upon the LOC
+   constraint 'P17'. It is recommended that you declare this BUFG explicitedly
+   in your design. Note that for certain device families the output of a BUFG
+   constraint can not drive a gated clock, and the BUFG constraint will be
+   ignored.
+WARNING:Cpld:1239 - The global clock designation (BUFG) on signal 'TZ_IF_IBUF'
+   is ignored. Most likely the signal is gated and therefore cannot be used as a
+   global control signal.
+WARNING:Cpld - The signal(s) 'over_voltage_and0002' are in combinational
+   feedback loops.
+   These signals may cause hazards/glitches. Apply the NOREDUCE parameter to the
+   hazard reduction circuitry.
+   Timing analysis of paths involving this node may be inaccurate or incomplete.
+WARNING:Cpld - The signal(s) 'WD_LATCH_and0001' are in combinational feedback
+   loops.
+   These signals may cause hazards/glitches. Apply the NOREDUCE parameter to the
+   hazard reduction circuitry.
+   Timing analysis of paths involving this node may be inaccurate or incomplete.
+WARNING:Cpld - The signal(s) 'over_current_supply_and0002' are in combinational
+   feedback loops.
+   These signals may cause hazards/glitches. Apply the NOREDUCE parameter to the
+   hazard reduction circuitry.
+   Timing analysis of paths involving this node may be inaccurate or incomplete.
+WARNING:Cpld - The signal(s) 'over_current_filter_and0002' are in combinational
+   feedback loops.
+   These signals may cause hazards/glitches. Apply the NOREDUCE parameter to the
+   hazard reduction circuitry.
+   Timing analysis of paths involving this node may be inaccurate or incomplete.
+*************************  Summary of Mapped Logic  ************************
+
+** 9 Outputs **
+
+Signal               Total Total Loc     Pin  Pin     Pin     Pwr  Slew Reg Init
+Name                 Pts   Inps          No.  Type    Use     Mode Rate State
+over_current_supply  2     3     FB1_1   9    I/O     O       STD  FAST 
+PWM_OE               1     4     FB1_11  25   I/O     O       STD  FAST 
+over_current_filter  2     3     FB2_1   8    I/O     O       STD  FAST 
+over_voltage         2     3     FB2_2   7    I/O     O       STD  FAST 
+trip                 1     4     FB2_4   6    I/O     O       STD  FAST 
+Supply_main          1     5     FB2_14  48   I/O     O       STD  FAST 
+Filter_main          1     5     FB2_15  45   I/O     O       STD  FAST 
+Supply_resistor      1     5     FB2_16  44   I/O     O       STD  FAST 
+MOSFET               1     5     FB2_17  43   I/O     O       STD  FAST 
+
+** 2 Buried Nodes **
+
+Signal               Total Total Loc     Pwr  Reg Init
+Name                 Pts   Inps          Mode State
+WD_LATCH_and0001     2     3     FB1_17  STD  
+$OpTx$FX_DC$1        2     3     FB1_18  STD  
+
+** 9 Inputs **
+
+Signal               Loc     Pin  Pin     Pin     
+Name                         No.  Type    Use     
+TZ_IS                FB1_6   19   I/O     I
+TZ_IF                FB1_7   17   GCK/I/O I
+TZ_UF                FB1_8   20   I/O     I
+WD_OUT               FB1_14  35   I/O     I
+MOSFET_MCU           FB2_6   64   GSR/I/O I
+LATCH_RESET          FB2_7   63   I/O     I
+Filter_main_mcu      FB2_8   62   I/O     I
+Supply_resistor_mcu  FB2_10  60   I/O     I
+Supply_main_mcu      FB2_11  57   I/O     I
+
+Legend:
+Pin No. - ~ - User Assigned
+**************************  Function Block Details  ************************
+Legend:
+Total Pt     - Total product terms used by the macrocell signal
+Imp Pt       - Product terms imported from other macrocells
+Exp Pt       - Product terms exported to other macrocells
+               in direction shown
+Unused Pt    - Unused local product terms remaining in macrocell
+Loc          - Location where logic was mapped in device
+Pin Type/Use - I  - Input             GCK - Global Clock
+               O  - Output            GTS - Global Output Enable
+              (b) - Buried macrocell  GSR - Global Set/Reset
+X            - Signal used as input to the macrocell logic.
+Pin No.      - ~  - User Assigned
+*********************************** FB1  ***********************************
+Number of function block inputs used/remaining:               8/46
+Number of signals used by logic mapping into function block:  8
+Signal              Total   Imp   Exp Unused  Loc     Pin   Pin     Pin
+Name                Pt      Pt    Pt  Pt               #    Type    Use
+over_current_supply   2       0     0   3     FB1_1   9     I/O     O
+(unused)              0       0     0   5     FB1_2   10    I/O     
+(unused)              0       0     0   5     FB1_3   15    GCK/I/O 
+(unused)              0       0     0   5     FB1_4   11    I/O     
+(unused)              0       0     0   5     FB1_5   16    GCK/I/O 
+(unused)              0       0     0   5     FB1_6   19    I/O     I
+(unused)              0       0     0   5     FB1_7   17    GCK/I/O I
+(unused)              0       0     0   5     FB1_8   20    I/O     I
+(unused)              0       0     0   5     FB1_9   22    I/O     
+(unused)              0       0     0   5     FB1_10  24    I/O     
+PWM_OE                1       0     0   4     FB1_11  25    I/O     O
+(unused)              0       0     0   5     FB1_12  27    I/O     
+(unused)              0       0     0   5     FB1_13  33    I/O     
+(unused)              0       0     0   5     FB1_14  35    I/O     I
+(unused)              0       0     0   5     FB1_15  36    I/O     
+(unused)              0       0     0   5     FB1_16  38    I/O     
+WD_LATCH_and0001      2       0     0   3     FB1_17  42    I/O     (b)
+$OpTx$FX_DC$1         2       0     0   3     FB1_18  39    I/O     (b)
+
+Signals Used by Logic in Function Block
+  1: $OpTx$FX_DC$1      4: WD_LATCH_and0001      7: over_current_supply 
+  2: LATCH_RESET        5: WD_OUT                8: over_voltage 
+  3: TZ_IS              6: over_current_filter 
+
+Signal                        1         2         3         4 FB
+Name                0----+----0----+----0----+----0----+----0 Inputs
+over_current_supply  .XX...X................................. 3
+PWM_OE               X....XXX................................ 4
+WD_LATCH_and0001     .X.XX................................... 3
+$OpTx$FX_DC$1        .X.XX................................... 3
+                    0----+----1----+----2----+----3----+----4
+                              0         0         0         0
+*********************************** FB2  ***********************************
+Number of function block inputs used/remaining:               11/43
+Number of signals used by logic mapping into function block:  11
+Signal              Total   Imp   Exp Unused  Loc     Pin   Pin     Pin
+Name                Pt      Pt    Pt  Pt               #    Type    Use
+over_current_filter   2       0     0   3     FB2_1   8     I/O     O
+over_voltage          2       0     0   3     FB2_2   7     I/O     O
+(unused)              0       0     0   5     FB2_3   5     GTS/I/O 
+trip                  1       0     0   4     FB2_4   6     I/O     O
+(unused)              0       0     0   5     FB2_5   2     GTS/I/O 
+(unused)              0       0     0   5     FB2_6   64    GSR/I/O I
+(unused)              0       0     0   5     FB2_7   63    I/O     I
+(unused)              0       0     0   5     FB2_8   62    I/O     I
+(unused)              0       0     0   5     FB2_9   61    I/O     
+(unused)              0       0     0   5     FB2_10  60    I/O     I
+(unused)              0       0     0   5     FB2_11  57    I/O     I
+(unused)              0       0     0   5     FB2_12  56    I/O     
+(unused)              0       0     0   5     FB2_13  50    I/O     
+Supply_main           1       0     0   4     FB2_14  48    I/O     O
+Filter_main           1       0     0   4     FB2_15  45    I/O     O
+Supply_resistor       1       0     0   4     FB2_16  44    I/O     O
+MOSFET                1       0     0   4     FB2_17  43    I/O     O
+(unused)              0       0     0   5     FB2_18  49    I/O     
+
+Signals Used by Logic in Function Block
+  1: $OpTx$FX_DC$1      5: Supply_main_mcu       9: over_current_filter 
+  2: Filter_main_mcu    6: Supply_resistor_mcu  10: over_current_supply 
+  3: LATCH_RESET        7: TZ_IF                11: over_voltage 
+  4: MOSFET_MCU         8: TZ_UF               
+
+Signal                        1         2         3         4 FB
+Name                0----+----0----+----0----+----0----+----0 Inputs
+over_current_filter  ..X...X.X............................... 3
+over_voltage         ..X....X..X............................. 3
+trip                 X.......XXX............................. 4
+Supply_main          X...X...XXX............................. 5
+Filter_main          XX......XXX............................. 5
+Supply_resistor      X....X..XXX............................. 5
+MOSFET               X..X....XXX............................. 5
+                    0----+----1----+----2----+----3----+----4
+                              0         0         0         0
+*******************************  Equations  ********************************
+
+********** Mapped Logic **********
+
+
+$OpTx$FX_DC$1 <= ((NOT WD_OUT AND NOT WD_LATCH_and0001)
+	OR (NOT WD_LATCH_and0001 AND NOT LATCH_RESET));
+
+
+Filter_main <= (Filter_main_mcu AND over_current_filter AND 
+	over_current_supply AND over_voltage AND NOT $OpTx$FX_DC$1);
+
+
+MOSFET <= (MOSFET_MCU AND over_current_filter AND 
+	over_current_supply AND over_voltage AND NOT $OpTx$FX_DC$1);
+
+
+PWM_OE <= NOT ((over_current_filter AND over_current_supply AND 
+	over_voltage AND NOT $OpTx$FX_DC$1));
+
+
+Supply_main <= (Supply_main_mcu AND over_current_filter AND 
+	over_current_supply AND over_voltage AND NOT $OpTx$FX_DC$1);
+
+
+Supply_resistor <= (Supply_resistor_mcu AND over_current_filter AND 
+	over_current_supply AND over_voltage AND NOT $OpTx$FX_DC$1);
+
+
+WD_LATCH_and0001 <= ((WD_OUT AND WD_LATCH_and0001)
+	OR (WD_OUT AND LATCH_RESET));
+
+
+over_current_filter <= ((LATCH_RESET AND TZ_IF)
+	OR (TZ_IF AND over_current_filter));
+
+
+over_current_supply <= ((LATCH_RESET AND TZ_IS)
+	OR (TZ_IS AND over_current_supply));
+
+
+over_voltage <= ((LATCH_RESET AND TZ_UF)
+	OR (TZ_UF AND over_voltage));
+
+
+trip <= (over_current_filter AND over_current_supply AND 
+	over_voltage AND NOT $OpTx$FX_DC$1);
+
+Register Legend:
+ FDCPE (Q,D,C,CLR,PRE,CE); 
+ FTCPE (Q,D,C,CLR,PRE,CE); 
+ LDCP  (Q,D,G,CLR,PRE); 
+
+******************************  Device Pin Out *****************************
+
+Device : XC9536XL-10-VQ64
+
+
+   -----------------------------------------------  
+  /48 47 46 45 44 43 42 41 40 39 38 37 36 35 34 33 \
+ | 49                                           32 | 
+ | 50                                           31 | 
+ | 51                                           30 | 
+ | 52                                           29 | 
+ | 53                                           28 | 
+ | 54                                           27 | 
+ | 55                                           26 | 
+ | 56              XC9536XL-10-VQ64             25 | 
+ | 57                                           24 | 
+ | 58                                           23 | 
+ | 59                                           22 | 
+ | 60                                           21 | 
+ | 61                                           20 | 
+ | 62                                           19 | 
+ | 63                                           18 | 
+ | 64                                           17 | 
+ \ 1  2  3  4  5  6  7  8  9  10 11 12 13 14 15 16 /
+   -----------------------------------------------  
+
+
+Pin Signal                         Pin Signal                        
+No. Name                           No. Name                          
+  1 NC                               33 KPR                           
+  2 KPR                              34 NC                            
+  3 VCC                              35 WD_OUT                        
+  4 NC                               36 KPR                           
+  5 KPR                              37 VCC                           
+  6 trip                             38 KPR                           
+  7 over_voltage                     39 KPR                           
+  8 over_current_filter              40 NC                            
+  9 over_current_supply              41 GND                           
+ 10 KPR                              42 KPR                           
+ 11 KPR                              43 MOSFET                        
+ 12 NC                               44 Supply_resistor               
+ 13 NC                               45 Filter_main                   
+ 14 NC                               46 NC                            
+ 15 KPR                              47 NC                            
+ 16 KPR                              48 Supply_main                   
+ 17 TZ_IF                            49 KPR                           
+ 18 NC                               50 KPR                           
+ 19 TZ_IS                            51 NC                            
+ 20 TZ_UF                            52 NC                            
+ 21 GND                              53 TDO                           
+ 22 KPR                              54 GND                           
+ 23 NC                               55 VCC                           
+ 24 KPR                              56 KPR                           
+ 25 PWM_OE                           57 Supply_main_mcu               
+ 26 NC                               58 NC                            
+ 27 KPR                              59 NC                            
+ 28 TDI                              60 Supply_resistor_mcu           
+ 29 TMS                              61 KPR                           
+ 30 TCK                              62 Filter_main_mcu               
+ 31 NC                               63 LATCH_RESET                   
+ 32 NC                               64 MOSFET_MCU                    
+
+
+Legend :  NC  = Not Connected, unbonded pin
+         PGND = Unused I/O configured as additional Ground pin
+         TIE  = Unused I/O floating -- must tie to VCC, GND or other signal
+         KPR  = Unused I/O with weak keeper (leave unconnected)
+         VCC  = Dedicated Power Pin
+         GND  = Dedicated Ground Pin
+         TDI  = Test Data In, JTAG pin
+         TDO  = Test Data Out, JTAG pin
+         TCK  = Test Clock, JTAG pin
+         TMS  = Test Mode Select, JTAG pin
+  PROHIBITED  = User reserved pin
+****************************  Compiler Options  ****************************
+
+Following is a list of all global compiler options used by the fitter run.
+
+Device(s) Specified                         : xc9536xl-10-VQ64
+Optimization Method                         : DENSITY
+Multi-Level Logic Optimization              : ON
+Ignore Timing Specifications                : OFF
+Default Register Power Up Value             : LOW
+Keep User Location Constraints              : ON
+What-You-See-Is-What-You-Get                : OFF
+Exhaustive Fitting                          : OFF
+Keep Unused Inputs                          : OFF
+Slew Rate                                   : FAST
+Power Mode                                  : STD
+Ground on Unused IOs                        : OFF
+Set I/O Pin Termination                     : KEEPER
+Global Clock Optimization                   : ON
+Global Set/Reset Optimization               : ON
+Global Ouput Enable Optimization            : ON
+Input Limit                                 : 54
+Pterm Limit                                 : 25
+</pre>
+<form><span class="pgRef"><table width="90%" align="center"><tr>
+<td align="left"><input type="button" onclick="javascript:parent.leftnav.showTop()" onmouseover="window.status='goto top of page'; return true;" onmouseout="window.status=''" value="back to top"></td>
+<td align="right"><input type="button" onclick="window.print()" onmouseover="window.status='print page'; return true;" onmouseout="window.status=''" value="print page"></td>
+</tr></table></span></form>
+</body></html>

@@ -1,0 +1,35 @@
+Pin Freeze File:  version O.76xd
+
+9536XL64 XC9536XL-10-VQ64
+Filter_main_mcu S:PIN62
+LATCH_RESET S:PIN63
+MOSFET_MCU S:PIN64
+Supply_main_mcu S:PIN57
+Supply_resistor_mcu S:PIN60
+TZ_IF S:PIN17
+TZ_IS S:PIN19
+TZ_UF S:PIN20
+WD_OUT S:PIN35
+Filter_main S:PIN45
+MOSFET S:PIN43
+PWM_OE S:PIN25
+Supply_main S:PIN48
+Supply_resistor S:PIN44
+over_current_filter S:PIN8
+over_current_supply S:PIN9
+over_voltage S:PIN7
+trip S:PIN6
+
+
+;The remaining section of the .gyd file is for documentation purposes only.
+;It shows where your internal equations were placed in the last successful fit.
+
+PARTITION FB1_1 over_current_supply_OBUF
+PARTITION FB1_11 PWM_OE_OBUF
+PARTITION FB1_17 WD_LATCH_and0001 $OpTx$FX_DC$1
+PARTITION FB2_1 over_current_filter_OBUF over_voltage_OBUF
+PARTITION FB2_4 trip_OBUF
+PARTITION FB2_14 Supply_main_OBUF Filter_main_OBUF Supply_resistor_OBUF MOSFET_OBUF
+		
+
+

@@ -1,0 +1,93 @@
+Release 8.1i - Fit O.76xd
+Copyright(c) 1995-2003 Xilinx Inc. All rights reserved
+
+ 4- 5-2016  2:00PM
+
+NOTE: This file is designed to be imported into a spreadsheet program
+such as Microsoft Excel for viewing, printing and sorting. The pipe '|'
+character is used as the data field separator.
+This file is also designed to support parsing.
+
+Input file:  Logika.ngd
+output file: Logika.pad
+Part type:   xc9536xl
+Speed grade: -10
+Package:     vq64
+
+Pinout by Pin Number:
+
+-----|-----|-----|-----|-----|-----|-----|-----|-----|-----|
+Pin Number|Signal Name|Pin Usage|Pin Name|Direction|IO Standard|IO Bank Number|{blank}|Slew Rate|Termination|{blank}|Voltage|Constraint|
+P1|TIE||.||||||||||
+P2|TIE||I/O/GTS2||||||||||
+P3|VCC||VCCINT||||||||||
+P4|TIE||.||||||||||
+P5|TIE||I/O/GTS1||||||||||
+P6|trip|O|I/O|OUTPUT|||||||||
+P7|over_voltage|O|I/O|OUTPUT|||||||||
+P8|over_current_filter|O|I/O|OUTPUT|||||||||
+P9|over_current_supply|O|I/O|OUTPUT|||||||||
+P10|TIE||I/O||||||||||
+P11|TIE||I/O||||||||||
+P12|TIE||.||||||||||
+P13|TIE||.||||||||||
+P14|TIE||.||||||||||
+P15|TIE||I/O/GCK1||||||||||
+P16|TIE||I/O/GCK2||||||||||
+P17|TZ_IF|I|I/O/GCK3|INPUT|||||||||
+P18|TIE||.||||||||||
+P19|TZ_IS|I|I/O|INPUT|||||||||
+P20|TZ_UF|I|I/O|INPUT|||||||||
+P21|GND||GND||||||||||
+P22|TIE||I/O||||||||||
+P23|TIE||.||||||||||
+P24|TIE||I/O||||||||||
+P25|PWM_OE|O|I/O|OUTPUT|||||||||
+P26|TIE||.||||||||||
+P27|TIE||I/O||||||||||
+P28|TDI||TDI||||||||||
+P29|TMS||TMS||||||||||
+P30|TCK||TCK||||||||||
+P31|TIE||.||||||||||
+P32|TIE||.||||||||||
+P33|TIE||I/O||||||||||
+P34|TIE||.||||||||||
+P35|WD_OUT|I|I/O|INPUT|||||||||
+P36|TIE||I/O||||||||||
+P37|VCC||VCCINT||||||||||
+P38|TIE||I/O||||||||||
+P39|TIE||I/O||||||||||
+P40|TIE||.||||||||||
+P41|GND||GND||||||||||
+P42|TIE||I/O||||||||||
+P43|MOSFET|O|I/O|OUTPUT|||||||||
+P44|Supply_resistor|O|I/O|OUTPUT|||||||||
+P45|Filter_main|O|I/O|OUTPUT|||||||||
+P46|TIE||.||||||||||
+P47|TIE||.||||||||||
+P48|Supply_main|O|I/O|OUTPUT|||||||||
+P49|TIE||I/O||||||||||
+P50|TIE||I/O||||||||||
+P51|TIE||.||||||||||
+P52|TIE||.||||||||||
+P53|TDO||TDO||||||||||
+P54|GND||GND||||||||||
+P55|VCC||VCCIO||||||||||
+P56|TIE||I/O||||||||||
+P57|Supply_main_mcu|I|I/O|INPUT|||||||||
+P58|TIE||.||||||||||
+P59|TIE||.||||||||||
+P60|Supply_resistor_mcu|I|I/O|INPUT|||||||||
+P61|TIE||I/O||||||||||
+P62|Filter_main_mcu|I|I/O|INPUT|||||||||
+P63|LATCH_RESET|I|I/O|INPUT|||||||||
+P64|MOSFET_MCU|I|I/O/GSR|INPUT|||||||||
+
+To preserve the pinout above for future design iterations in
+Project Navigator simply execute the (Lock Pins) process
+located under the (Implement Design) process in a toolbox named
+(Optional Implementation Tools) or invoke PIN2UCF from the
+command line. The location constraints will be written into your
+specified UCF file
+
+

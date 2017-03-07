@@ -1,0 +1,536 @@
+NDS Database:  version O.76xd
+
+NDS_INFO | xc9500xl | 9536XL64 | XC9536XL-10-VQ64
+
+DEVICE | 9536XL | 9536XL64 | 
+
+NETWORK | Logika | 0 | 0 | 16391
+
+MACROCELL_INSTANCE | Inv+OptxMapped | PWM_OE_OBUF | Logika_COPY_0_COPY_0 | 2155872512 | 4 | 1
+INPUT_NODE_TYPE | 1 | 100 | NOTYPE
+NODE | over_current_filter_and0002 | 439 | ? | 0 | 16 | Logika_COPY_0_COPY_0 | NULL | over_current_filter_OBUF.Q | over_current_filter_OBUF | 1 | 0 | MC_UIM
+INPUT_NODE_TYPE | 1 | 100 | NOTYPE
+NODE | over_current_supply_and0002 | 442 | ? | 0 | 16 | Logika_COPY_0_COPY_0 | NULL | over_current_supply_OBUF.Q | over_current_supply_OBUF | 1 | 0 | MC_UIM
+INPUT_NODE_TYPE | 1 | 100 | NOTYPE
+NODE | over_voltage_and0002 | 445 | ? | 0 | 16 | Logika_COPY_0_COPY_0 | NULL | over_voltage_OBUF.Q | over_voltage_OBUF | 1 | 0 | MC_UIM
+INPUT_NODE_TYPE | 1 | 100 | NOTYPE
+NODE | $OpTx$FX_DC$1.UIM | 456 | ? | 0 | 0 | Logika_COPY_0_COPY_0 | NULL | $OpTx$FX_DC$1.Q | $OpTx$FX_DC$1 | 1 | 0 | MC_UIM
+OUTPUT_NODE_TYPE | 0 | 0 | MC_Q
+NODE | PWM_OE_OBUF$Q | 425 | ? | 0 | 0 | Logika_COPY_0_COPY_0 | NULL | PWM_OE_OBUF.Q | PWM_OE_OBUF | 0 | 0 | MC_Q
+
+SIGNAL_INSTANCE | PWM_OE_OBUF.SI | PWM_OE_OBUF | 0 | 4 | 2
+INPUT_NODE_TYPE | 1 | 100 | NOTYPE
+NODE | over_current_filter_and0002 | 439 | ? | 0 | 16 | Logika_COPY_0_COPY_0 | NULL | over_current_filter_OBUF.Q | over_current_filter_OBUF | 1 | 0 | MC_UIM
+INPUT_NODE_TYPE | 1 | 100 | NOTYPE
+NODE | over_current_supply_and0002 | 442 | ? | 0 | 16 | Logika_COPY_0_COPY_0 | NULL | over_current_supply_OBUF.Q | over_current_supply_OBUF | 1 | 0 | MC_UIM
+INPUT_NODE_TYPE | 1 | 100 | NOTYPE
+NODE | over_voltage_and0002 | 445 | ? | 0 | 16 | Logika_COPY_0_COPY_0 | NULL | over_voltage_OBUF.Q | over_voltage_OBUF | 1 | 0 | MC_UIM
+INPUT_NODE_TYPE | 1 | 100 | NOTYPE
+NODE | $OpTx$FX_DC$1.UIM | 456 | ? | 0 | 0 | Logika_COPY_0_COPY_0 | NULL | $OpTx$FX_DC$1.Q | $OpTx$FX_DC$1 | 1 | 0 | MC_UIM
+OUTPUT_NODE_TYPE | 1 | 9 | MC_SI_D1
+SIGNAL | NODE | PWM_OE_OBUF.D1 | 467 | ? | 0 | 4096 | PWM_OE_OBUF | NULL | NULL | PWM_OE_OBUF.SI | 1 | 9 | MC_SI_D1
+SPPTERM | 0 | IV_ZERO
+OUTPUT_NODE_TYPE | 2 | 9 | MC_SI_D2
+SIGNAL | NODE | PWM_OE_OBUF.D2 | 468 | ? | 0 | 4096 | PWM_OE_OBUF | NULL | NULL | PWM_OE_OBUF.SI | 2 | 9 | MC_SI_D2
+SPPTERM | 4 | IV_TRUE | over_current_filter_and0002 | IV_TRUE | over_current_supply_and0002 | IV_TRUE | over_voltage_and0002 | IV_FALSE | $OpTx$FX_DC$1.UIM
+
+SRFF_INSTANCE | PWM_OE_OBUF.REG | PWM_OE_OBUF | 0 | 1 | 1
+INPUT_NODE_TYPE | 0 | 8 | SRFF_D
+NODE | PWM_OE_OBUF.D | 466 | ? | 0 | 0 | PWM_OE_OBUF | NULL | NULL | PWM_OE_OBUF.XOR | 0 | 7 | ALU_F
+OUTPUT_NODE_TYPE | 0 | 8 | SRFF_Q
+NODE | PWM_OE_OBUF.Q | 469 | ? | 0 | 0 | PWM_OE_OBUF | NULL | NULL | PWM_OE_OBUF.REG | 0 | 8 | SRFF_Q
+
+INPUT_INSTANCE | 0 | 0 | NULL | WD_OUT_IBUF | Logika_COPY_0_COPY_0 | 16 | 1 | 1
+INPUT_NODE_TYPE | 0 | 5 | II_IN
+NODE | WD_OUT | 457 | PI | 0 | 0 | Logika_COPY_0_COPY_0 | NULL | NULL | NULL | 0 | 100 | NOTYPE
+OUTPUT_NODE_TYPE | 0 | 5 | II_IMUX
+NODE | WD_OUT_IBUF | 426 | ? | 0 | 0 | Logika_COPY_0_COPY_0 | NULL | NULL | WD_OUT_IBUF | 0 | 5 | II_IMUX
+
+INPUT_INSTANCE | 0 | 0 | NULL | LATCH_RESET_IBUF | Logika_COPY_0_COPY_0 | 16 | 1 | 1
+INPUT_NODE_TYPE | 0 | 5 | II_IN
+NODE | LATCH_RESET | 458 | PI | 0 | 0 | Logika_COPY_0_COPY_0 | NULL | NULL | NULL | 0 | 100 | NOTYPE
+OUTPUT_NODE_TYPE | 0 | 5 | II_IMUX
+NODE | LATCH_RESET_IBUF | 428 | ? | 0 | 0 | Logika_COPY_0_COPY_0 | NULL | NULL | LATCH_RESET_IBUF | 0 | 5 | II_IMUX
+
+MACROCELL_INSTANCE | OptxMapped | WD_LATCH_and0001 | Logika_COPY_0_COPY_0 | 2155872256 | 3 | 1
+INPUT_NODE_TYPE | 1 | 100 | NOTYPE
+NODE | WD_OUT_IBUF | 426 | ? | 0 | 0 | Logika_COPY_0_COPY_0 | NULL | NULL | WD_OUT_IBUF | 0 | 5 | II_IMUX
+INPUT_NODE_TYPE | 1 | 100 | NOTYPE
+NODE | LATCH_RESET_IBUF | 428 | ? | 0 | 0 | Logika_COPY_0_COPY_0 | NULL | NULL | LATCH_RESET_IBUF | 0 | 5 | II_IMUX
+INPUT_NODE_TYPE | 1 | 100 | NOTYPE
+NODE | WD_LATCH_and0001 | 427 | ? | 0 | 16 | Logika_COPY_0_COPY_0 | NULL | WD_LATCH_and0001.Q | WD_LATCH_and0001 | 1 | 0 | MC_UIM
+OUTPUT_NODE_TYPE | 1 | 0 | MC_UIM
+NODE | WD_LATCH_and0001 | 427 | ? | 0 | 16 | Logika_COPY_0_COPY_0 | NULL | WD_LATCH_and0001.Q | WD_LATCH_and0001 | 1 | 0 | MC_UIM
+
+SIGNAL_INSTANCE | WD_LATCH_and0001.SI | WD_LATCH_and0001 | 0 | 3 | 2
+INPUT_NODE_TYPE | 1 | 100 | NOTYPE
+NODE | WD_OUT_IBUF | 426 | ? | 0 | 0 | Logika_COPY_0_COPY_0 | NULL | NULL | WD_OUT_IBUF | 0 | 5 | II_IMUX
+INPUT_NODE_TYPE | 1 | 100 | NOTYPE
+NODE | LATCH_RESET_IBUF | 428 | ? | 0 | 0 | Logika_COPY_0_COPY_0 | NULL | NULL | LATCH_RESET_IBUF | 0 | 5 | II_IMUX
+INPUT_NODE_TYPE | 1 | 100 | NOTYPE
+NODE | WD_LATCH_and0001 | 427 | ? | 0 | 16 | Logika_COPY_0_COPY_0 | NULL | WD_LATCH_and0001.Q | WD_LATCH_and0001 | 1 | 0 | MC_UIM
+OUTPUT_NODE_TYPE | 1 | 9 | MC_SI_D1
+SIGNAL | NODE | WD_LATCH_and0001.D1 | 471 | ? | 0 | 4096 | WD_LATCH_and0001 | NULL | NULL | WD_LATCH_and0001.SI | 1 | 9 | MC_SI_D1
+SPPTERM | 0 | IV_ZERO
+OUTPUT_NODE_TYPE | 2 | 9 | MC_SI_D2
+SIGNAL | NODE | WD_LATCH_and0001.D2 | 472 | ? | 0 | 4096 | WD_LATCH_and0001 | NULL | NULL | WD_LATCH_and0001.SI | 2 | 9 | MC_SI_D2
+SPPTERM | 2 | IV_TRUE | WD_OUT_IBUF | IV_TRUE | WD_LATCH_and0001
+SPPTERM | 2 | IV_TRUE | WD_OUT_IBUF | IV_TRUE | LATCH_RESET_IBUF
+
+SRFF_INSTANCE | WD_LATCH_and0001.REG | WD_LATCH_and0001 | 0 | 1 | 1
+INPUT_NODE_TYPE | 0 | 8 | SRFF_D
+NODE | WD_LATCH_and0001.D | 470 | ? | 0 | 0 | WD_LATCH_and0001 | NULL | NULL | WD_LATCH_and0001.XOR | 0 | 7 | ALU_F
+OUTPUT_NODE_TYPE | 0 | 8 | SRFF_Q
+NODE | WD_LATCH_and0001.Q | 473 | ? | 0 | 0 | WD_LATCH_and0001 | NULL | NULL | WD_LATCH_and0001.REG | 0 | 8 | SRFF_Q
+
+INPUT_INSTANCE | 0 | 0 | NULL | Filter_main_mcu_IBUF | Logika_COPY_0_COPY_0 | 16 | 1 | 1
+INPUT_NODE_TYPE | 0 | 5 | II_IN
+NODE | Filter_main_mcu | 459 | PI | 0 | 0 | Logika_COPY_0_COPY_0 | NULL | NULL | NULL | 0 | 100 | NOTYPE
+OUTPUT_NODE_TYPE | 0 | 5 | II_IMUX
+NODE | Filter_main_mcu_IBUF | 429 | ? | 0 | 0 | Logika_COPY_0_COPY_0 | NULL | NULL | Filter_main_mcu_IBUF | 0 | 5 | II_IMUX
+
+MACROCELL_INSTANCE | OptxMapped | Filter_main_OBUF | Logika_COPY_0_COPY_0 | 2155872256 | 5 | 1
+INPUT_NODE_TYPE | 1 | 100 | NOTYPE
+NODE | Filter_main_mcu_IBUF | 429 | ? | 0 | 0 | Logika_COPY_0_COPY_0 | NULL | NULL | Filter_main_mcu_IBUF | 0 | 5 | II_IMUX
+INPUT_NODE_TYPE | 1 | 100 | NOTYPE
+NODE | over_current_filter_and0002 | 439 | ? | 0 | 16 | Logika_COPY_0_COPY_0 | NULL | over_current_filter_OBUF.Q | over_current_filter_OBUF | 1 | 0 | MC_UIM
+INPUT_NODE_TYPE | 1 | 100 | NOTYPE
+NODE | over_current_supply_and0002 | 442 | ? | 0 | 16 | Logika_COPY_0_COPY_0 | NULL | over_current_supply_OBUF.Q | over_current_supply_OBUF | 1 | 0 | MC_UIM
+INPUT_NODE_TYPE | 1 | 100 | NOTYPE
+NODE | over_voltage_and0002 | 445 | ? | 0 | 16 | Logika_COPY_0_COPY_0 | NULL | over_voltage_OBUF.Q | over_voltage_OBUF | 1 | 0 | MC_UIM
+INPUT_NODE_TYPE | 1 | 100 | NOTYPE
+NODE | $OpTx$FX_DC$1.UIM | 456 | ? | 0 | 0 | Logika_COPY_0_COPY_0 | NULL | $OpTx$FX_DC$1.Q | $OpTx$FX_DC$1 | 1 | 0 | MC_UIM
+OUTPUT_NODE_TYPE | 0 | 0 | MC_Q
+NODE | Filter_main_OBUF | 430 | ? | 0 | 0 | Logika_COPY_0_COPY_0 | NULL | Filter_main_OBUF.Q | Filter_main_OBUF | 0 | 0 | MC_Q
+
+SIGNAL_INSTANCE | Filter_main_OBUF.SI | Filter_main_OBUF | 0 | 5 | 2
+INPUT_NODE_TYPE | 1 | 100 | NOTYPE
+NODE | Filter_main_mcu_IBUF | 429 | ? | 0 | 0 | Logika_COPY_0_COPY_0 | NULL | NULL | Filter_main_mcu_IBUF | 0 | 5 | II_IMUX
+INPUT_NODE_TYPE | 1 | 100 | NOTYPE
+NODE | over_current_filter_and0002 | 439 | ? | 0 | 16 | Logika_COPY_0_COPY_0 | NULL | over_current_filter_OBUF.Q | over_current_filter_OBUF | 1 | 0 | MC_UIM
+INPUT_NODE_TYPE | 1 | 100 | NOTYPE
+NODE | over_current_supply_and0002 | 442 | ? | 0 | 16 | Logika_COPY_0_COPY_0 | NULL | over_current_supply_OBUF.Q | over_current_supply_OBUF | 1 | 0 | MC_UIM
+INPUT_NODE_TYPE | 1 | 100 | NOTYPE
+NODE | over_voltage_and0002 | 445 | ? | 0 | 16 | Logika_COPY_0_COPY_0 | NULL | over_voltage_OBUF.Q | over_voltage_OBUF | 1 | 0 | MC_UIM
+INPUT_NODE_TYPE | 1 | 100 | NOTYPE
+NODE | $OpTx$FX_DC$1.UIM | 456 | ? | 0 | 0 | Logika_COPY_0_COPY_0 | NULL | $OpTx$FX_DC$1.Q | $OpTx$FX_DC$1 | 1 | 0 | MC_UIM
+OUTPUT_NODE_TYPE | 1 | 9 | MC_SI_D1
+SIGNAL | NODE | Filter_main_OBUF.D1 | 475 | ? | 0 | 4096 | Filter_main_OBUF | NULL | NULL | Filter_main_OBUF.SI | 1 | 9 | MC_SI_D1
+SPPTERM | 0 | IV_ZERO
+OUTPUT_NODE_TYPE | 2 | 9 | MC_SI_D2
+SIGNAL | NODE | Filter_main_OBUF.D2 | 476 | ? | 0 | 4096 | Filter_main_OBUF | NULL | NULL | Filter_main_OBUF.SI | 2 | 9 | MC_SI_D2
+SPPTERM | 5 | IV_TRUE | Filter_main_mcu_IBUF | IV_TRUE | over_current_filter_and0002 | IV_TRUE | over_current_supply_and0002 | IV_TRUE | over_voltage_and0002 | IV_FALSE | $OpTx$FX_DC$1.UIM
+
+SRFF_INSTANCE | Filter_main_OBUF.REG | Filter_main_OBUF | 0 | 1 | 1
+INPUT_NODE_TYPE | 0 | 8 | SRFF_D
+NODE | Filter_main_OBUF.D | 474 | ? | 0 | 0 | Filter_main_OBUF | NULL | NULL | Filter_main_OBUF.XOR | 0 | 7 | ALU_F
+OUTPUT_NODE_TYPE | 0 | 8 | SRFF_Q
+NODE | Filter_main_OBUF.Q | 477 | ? | 0 | 0 | Filter_main_OBUF | NULL | NULL | Filter_main_OBUF.REG | 0 | 8 | SRFF_Q
+
+INPUT_INSTANCE | 0 | 0 | NULL | MOSFET_MCU_IBUF | Logika_COPY_0_COPY_0 | 16 | 1 | 1
+INPUT_NODE_TYPE | 0 | 5 | II_IN
+NODE | MOSFET_MCU | 460 | PI | 0 | 0 | Logika_COPY_0_COPY_0 | NULL | NULL | NULL | 0 | 100 | NOTYPE
+OUTPUT_NODE_TYPE | 0 | 5 | II_IMUX
+NODE | MOSFET_MCU_IBUF | 431 | ? | 0 | 0 | Logika_COPY_0_COPY_0 | NULL | NULL | MOSFET_MCU_IBUF | 0 | 5 | II_IMUX
+
+MACROCELL_INSTANCE | OptxMapped | MOSFET_OBUF | Logika_COPY_0_COPY_0 | 2155872256 | 5 | 1
+INPUT_NODE_TYPE | 1 | 100 | NOTYPE
+NODE | MOSFET_MCU_IBUF | 431 | ? | 0 | 0 | Logika_COPY_0_COPY_0 | NULL | NULL | MOSFET_MCU_IBUF | 0 | 5 | II_IMUX
+INPUT_NODE_TYPE | 1 | 100 | NOTYPE
+NODE | over_current_filter_and0002 | 439 | ? | 0 | 16 | Logika_COPY_0_COPY_0 | NULL | over_current_filter_OBUF.Q | over_current_filter_OBUF | 1 | 0 | MC_UIM
+INPUT_NODE_TYPE | 1 | 100 | NOTYPE
+NODE | over_current_supply_and0002 | 442 | ? | 0 | 16 | Logika_COPY_0_COPY_0 | NULL | over_current_supply_OBUF.Q | over_current_supply_OBUF | 1 | 0 | MC_UIM
+INPUT_NODE_TYPE | 1 | 100 | NOTYPE
+NODE | over_voltage_and0002 | 445 | ? | 0 | 16 | Logika_COPY_0_COPY_0 | NULL | over_voltage_OBUF.Q | over_voltage_OBUF | 1 | 0 | MC_UIM
+INPUT_NODE_TYPE | 1 | 100 | NOTYPE
+NODE | $OpTx$FX_DC$1.UIM | 456 | ? | 0 | 0 | Logika_COPY_0_COPY_0 | NULL | $OpTx$FX_DC$1.Q | $OpTx$FX_DC$1 | 1 | 0 | MC_UIM
+OUTPUT_NODE_TYPE | 0 | 0 | MC_Q
+NODE | MOSFET_OBUF | 432 | ? | 0 | 0 | Logika_COPY_0_COPY_0 | NULL | MOSFET_OBUF.Q | MOSFET_OBUF | 0 | 0 | MC_Q
+
+SIGNAL_INSTANCE | MOSFET_OBUF.SI | MOSFET_OBUF | 0 | 5 | 2
+INPUT_NODE_TYPE | 1 | 100 | NOTYPE
+NODE | MOSFET_MCU_IBUF | 431 | ? | 0 | 0 | Logika_COPY_0_COPY_0 | NULL | NULL | MOSFET_MCU_IBUF | 0 | 5 | II_IMUX
+INPUT_NODE_TYPE | 1 | 100 | NOTYPE
+NODE | over_current_filter_and0002 | 439 | ? | 0 | 16 | Logika_COPY_0_COPY_0 | NULL | over_current_filter_OBUF.Q | over_current_filter_OBUF | 1 | 0 | MC_UIM
+INPUT_NODE_TYPE | 1 | 100 | NOTYPE
+NODE | over_current_supply_and0002 | 442 | ? | 0 | 16 | Logika_COPY_0_COPY_0 | NULL | over_current_supply_OBUF.Q | over_current_supply_OBUF | 1 | 0 | MC_UIM
+INPUT_NODE_TYPE | 1 | 100 | NOTYPE
+NODE | over_voltage_and0002 | 445 | ? | 0 | 16 | Logika_COPY_0_COPY_0 | NULL | over_voltage_OBUF.Q | over_voltage_OBUF | 1 | 0 | MC_UIM
+INPUT_NODE_TYPE | 1 | 100 | NOTYPE
+NODE | $OpTx$FX_DC$1.UIM | 456 | ? | 0 | 0 | Logika_COPY_0_COPY_0 | NULL | $OpTx$FX_DC$1.Q | $OpTx$FX_DC$1 | 1 | 0 | MC_UIM
+OUTPUT_NODE_TYPE | 1 | 9 | MC_SI_D1
+SIGNAL | NODE | MOSFET_OBUF.D1 | 479 | ? | 0 | 4096 | MOSFET_OBUF | NULL | NULL | MOSFET_OBUF.SI | 1 | 9 | MC_SI_D1
+SPPTERM | 0 | IV_ZERO
+OUTPUT_NODE_TYPE | 2 | 9 | MC_SI_D2
+SIGNAL | NODE | MOSFET_OBUF.D2 | 480 | ? | 0 | 4096 | MOSFET_OBUF | NULL | NULL | MOSFET_OBUF.SI | 2 | 9 | MC_SI_D2
+SPPTERM | 5 | IV_TRUE | MOSFET_MCU_IBUF | IV_TRUE | over_current_filter_and0002 | IV_TRUE | over_current_supply_and0002 | IV_TRUE | over_voltage_and0002 | IV_FALSE | $OpTx$FX_DC$1.UIM
+
+SRFF_INSTANCE | MOSFET_OBUF.REG | MOSFET_OBUF | 0 | 1 | 1
+INPUT_NODE_TYPE | 0 | 8 | SRFF_D
+NODE | MOSFET_OBUF.D | 478 | ? | 0 | 0 | MOSFET_OBUF | NULL | NULL | MOSFET_OBUF.XOR | 0 | 7 | ALU_F
+OUTPUT_NODE_TYPE | 0 | 8 | SRFF_Q
+NODE | MOSFET_OBUF.Q | 481 | ? | 0 | 0 | MOSFET_OBUF | NULL | NULL | MOSFET_OBUF.REG | 0 | 8 | SRFF_Q
+
+INPUT_INSTANCE | 0 | 0 | NULL | Supply_main_mcu_IBUF | Logika_COPY_0_COPY_0 | 16 | 1 | 1
+INPUT_NODE_TYPE | 0 | 5 | II_IN
+NODE | Supply_main_mcu | 461 | PI | 0 | 0 | Logika_COPY_0_COPY_0 | NULL | NULL | NULL | 0 | 100 | NOTYPE
+OUTPUT_NODE_TYPE | 0 | 5 | II_IMUX
+NODE | Supply_main_mcu_IBUF | 433 | ? | 0 | 0 | Logika_COPY_0_COPY_0 | NULL | NULL | Supply_main_mcu_IBUF | 0 | 5 | II_IMUX
+
+MACROCELL_INSTANCE | OptxMapped | Supply_main_OBUF | Logika_COPY_0_COPY_0 | 2155872256 | 5 | 1
+INPUT_NODE_TYPE | 1 | 100 | NOTYPE
+NODE | Supply_main_mcu_IBUF | 433 | ? | 0 | 0 | Logika_COPY_0_COPY_0 | NULL | NULL | Supply_main_mcu_IBUF | 0 | 5 | II_IMUX
+INPUT_NODE_TYPE | 1 | 100 | NOTYPE
+NODE | over_current_filter_and0002 | 439 | ? | 0 | 16 | Logika_COPY_0_COPY_0 | NULL | over_current_filter_OBUF.Q | over_current_filter_OBUF | 1 | 0 | MC_UIM
+INPUT_NODE_TYPE | 1 | 100 | NOTYPE
+NODE | over_current_supply_and0002 | 442 | ? | 0 | 16 | Logika_COPY_0_COPY_0 | NULL | over_current_supply_OBUF.Q | over_current_supply_OBUF | 1 | 0 | MC_UIM
+INPUT_NODE_TYPE | 1 | 100 | NOTYPE
+NODE | over_voltage_and0002 | 445 | ? | 0 | 16 | Logika_COPY_0_COPY_0 | NULL | over_voltage_OBUF.Q | over_voltage_OBUF | 1 | 0 | MC_UIM
+INPUT_NODE_TYPE | 1 | 100 | NOTYPE
+NODE | $OpTx$FX_DC$1.UIM | 456 | ? | 0 | 0 | Logika_COPY_0_COPY_0 | NULL | $OpTx$FX_DC$1.Q | $OpTx$FX_DC$1 | 1 | 0 | MC_UIM
+OUTPUT_NODE_TYPE | 0 | 0 | MC_Q
+NODE | Supply_main_OBUF | 434 | ? | 0 | 0 | Logika_COPY_0_COPY_0 | NULL | Supply_main_OBUF.Q | Supply_main_OBUF | 0 | 0 | MC_Q
+
+SIGNAL_INSTANCE | Supply_main_OBUF.SI | Supply_main_OBUF | 0 | 5 | 2
+INPUT_NODE_TYPE | 1 | 100 | NOTYPE
+NODE | Supply_main_mcu_IBUF | 433 | ? | 0 | 0 | Logika_COPY_0_COPY_0 | NULL | NULL | Supply_main_mcu_IBUF | 0 | 5 | II_IMUX
+INPUT_NODE_TYPE | 1 | 100 | NOTYPE
+NODE | over_current_filter_and0002 | 439 | ? | 0 | 16 | Logika_COPY_0_COPY_0 | NULL | over_current_filter_OBUF.Q | over_current_filter_OBUF | 1 | 0 | MC_UIM
+INPUT_NODE_TYPE | 1 | 100 | NOTYPE
+NODE | over_current_supply_and0002 | 442 | ? | 0 | 16 | Logika_COPY_0_COPY_0 | NULL | over_current_supply_OBUF.Q | over_current_supply_OBUF | 1 | 0 | MC_UIM
+INPUT_NODE_TYPE | 1 | 100 | NOTYPE
+NODE | over_voltage_and0002 | 445 | ? | 0 | 16 | Logika_COPY_0_COPY_0 | NULL | over_voltage_OBUF.Q | over_voltage_OBUF | 1 | 0 | MC_UIM
+INPUT_NODE_TYPE | 1 | 100 | NOTYPE
+NODE | $OpTx$FX_DC$1.UIM | 456 | ? | 0 | 0 | Logika_COPY_0_COPY_0 | NULL | $OpTx$FX_DC$1.Q | $OpTx$FX_DC$1 | 1 | 0 | MC_UIM
+OUTPUT_NODE_TYPE | 1 | 9 | MC_SI_D1
+SIGNAL | NODE | Supply_main_OBUF.D1 | 483 | ? | 0 | 4096 | Supply_main_OBUF | NULL | NULL | Supply_main_OBUF.SI | 1 | 9 | MC_SI_D1
+SPPTERM | 0 | IV_ZERO
+OUTPUT_NODE_TYPE | 2 | 9 | MC_SI_D2
+SIGNAL | NODE | Supply_main_OBUF.D2 | 484 | ? | 0 | 4096 | Supply_main_OBUF | NULL | NULL | Supply_main_OBUF.SI | 2 | 9 | MC_SI_D2
+SPPTERM | 5 | IV_TRUE | Supply_main_mcu_IBUF | IV_TRUE | over_current_filter_and0002 | IV_TRUE | over_current_supply_and0002 | IV_TRUE | over_voltage_and0002 | IV_FALSE | $OpTx$FX_DC$1.UIM
+
+SRFF_INSTANCE | Supply_main_OBUF.REG | Supply_main_OBUF | 0 | 1 | 1
+INPUT_NODE_TYPE | 0 | 8 | SRFF_D
+NODE | Supply_main_OBUF.D | 482 | ? | 0 | 0 | Supply_main_OBUF | NULL | NULL | Supply_main_OBUF.XOR | 0 | 7 | ALU_F
+OUTPUT_NODE_TYPE | 0 | 8 | SRFF_Q
+NODE | Supply_main_OBUF.Q | 485 | ? | 0 | 0 | Supply_main_OBUF | NULL | NULL | Supply_main_OBUF.REG | 0 | 8 | SRFF_Q
+
+INPUT_INSTANCE | 0 | 0 | NULL | Supply_resistor_mcu_IBUF | Logika_COPY_0_COPY_0 | 16 | 1 | 1
+INPUT_NODE_TYPE | 0 | 5 | II_IN
+NODE | Supply_resistor_mcu | 462 | PI | 0 | 0 | Logika_COPY_0_COPY_0 | NULL | NULL | NULL | 0 | 100 | NOTYPE
+OUTPUT_NODE_TYPE | 0 | 5 | II_IMUX
+NODE | Supply_resistor_mcu_IBUF | 435 | ? | 0 | 0 | Logika_COPY_0_COPY_0 | NULL | NULL | Supply_resistor_mcu_IBUF | 0 | 5 | II_IMUX
+
+MACROCELL_INSTANCE | OptxMapped | Supply_resistor_OBUF | Logika_COPY_0_COPY_0 | 2155872256 | 5 | 1
+INPUT_NODE_TYPE | 1 | 100 | NOTYPE
+NODE | Supply_resistor_mcu_IBUF | 435 | ? | 0 | 0 | Logika_COPY_0_COPY_0 | NULL | NULL | Supply_resistor_mcu_IBUF | 0 | 5 | II_IMUX
+INPUT_NODE_TYPE | 1 | 100 | NOTYPE
+NODE | over_current_filter_and0002 | 439 | ? | 0 | 16 | Logika_COPY_0_COPY_0 | NULL | over_current_filter_OBUF.Q | over_current_filter_OBUF | 1 | 0 | MC_UIM
+INPUT_NODE_TYPE | 1 | 100 | NOTYPE
+NODE | over_current_supply_and0002 | 442 | ? | 0 | 16 | Logika_COPY_0_COPY_0 | NULL | over_current_supply_OBUF.Q | over_current_supply_OBUF | 1 | 0 | MC_UIM
+INPUT_NODE_TYPE | 1 | 100 | NOTYPE
+NODE | over_voltage_and0002 | 445 | ? | 0 | 16 | Logika_COPY_0_COPY_0 | NULL | over_voltage_OBUF.Q | over_voltage_OBUF | 1 | 0 | MC_UIM
+INPUT_NODE_TYPE | 1 | 100 | NOTYPE
+NODE | $OpTx$FX_DC$1.UIM | 456 | ? | 0 | 0 | Logika_COPY_0_COPY_0 | NULL | $OpTx$FX_DC$1.Q | $OpTx$FX_DC$1 | 1 | 0 | MC_UIM
+OUTPUT_NODE_TYPE | 0 | 0 | MC_Q
+NODE | Supply_resistor_OBUF | 436 | ? | 0 | 0 | Logika_COPY_0_COPY_0 | NULL | Supply_resistor_OBUF.Q | Supply_resistor_OBUF | 0 | 0 | MC_Q
+
+SIGNAL_INSTANCE | Supply_resistor_OBUF.SI | Supply_resistor_OBUF | 0 | 5 | 2
+INPUT_NODE_TYPE | 1 | 100 | NOTYPE
+NODE | Supply_resistor_mcu_IBUF | 435 | ? | 0 | 0 | Logika_COPY_0_COPY_0 | NULL | NULL | Supply_resistor_mcu_IBUF | 0 | 5 | II_IMUX
+INPUT_NODE_TYPE | 1 | 100 | NOTYPE
+NODE | over_current_filter_and0002 | 439 | ? | 0 | 16 | Logika_COPY_0_COPY_0 | NULL | over_current_filter_OBUF.Q | over_current_filter_OBUF | 1 | 0 | MC_UIM
+INPUT_NODE_TYPE | 1 | 100 | NOTYPE
+NODE | over_current_supply_and0002 | 442 | ? | 0 | 16 | Logika_COPY_0_COPY_0 | NULL | over_current_supply_OBUF.Q | over_current_supply_OBUF | 1 | 0 | MC_UIM
+INPUT_NODE_TYPE | 1 | 100 | NOTYPE
+NODE | over_voltage_and0002 | 445 | ? | 0 | 16 | Logika_COPY_0_COPY_0 | NULL | over_voltage_OBUF.Q | over_voltage_OBUF | 1 | 0 | MC_UIM
+INPUT_NODE_TYPE | 1 | 100 | NOTYPE
+NODE | $OpTx$FX_DC$1.UIM | 456 | ? | 0 | 0 | Logika_COPY_0_COPY_0 | NULL | $OpTx$FX_DC$1.Q | $OpTx$FX_DC$1 | 1 | 0 | MC_UIM
+OUTPUT_NODE_TYPE | 1 | 9 | MC_SI_D1
+SIGNAL | NODE | Supply_resistor_OBUF.D1 | 487 | ? | 0 | 4096 | Supply_resistor_OBUF | NULL | NULL | Supply_resistor_OBUF.SI | 1 | 9 | MC_SI_D1
+SPPTERM | 0 | IV_ZERO
+OUTPUT_NODE_TYPE | 2 | 9 | MC_SI_D2
+SIGNAL | NODE | Supply_resistor_OBUF.D2 | 488 | ? | 0 | 4096 | Supply_resistor_OBUF | NULL | NULL | Supply_resistor_OBUF.SI | 2 | 9 | MC_SI_D2
+SPPTERM | 5 | IV_TRUE | Supply_resistor_mcu_IBUF | IV_TRUE | over_current_filter_and0002 | IV_TRUE | over_current_supply_and0002 | IV_TRUE | over_voltage_and0002 | IV_FALSE | $OpTx$FX_DC$1.UIM
+
+SRFF_INSTANCE | Supply_resistor_OBUF.REG | Supply_resistor_OBUF | 0 | 1 | 1
+INPUT_NODE_TYPE | 0 | 8 | SRFF_D
+NODE | Supply_resistor_OBUF.D | 486 | ? | 0 | 0 | Supply_resistor_OBUF | NULL | NULL | Supply_resistor_OBUF.XOR | 0 | 7 | ALU_F
+OUTPUT_NODE_TYPE | 0 | 8 | SRFF_Q
+NODE | Supply_resistor_OBUF.Q | 489 | ? | 0 | 0 | Supply_resistor_OBUF | NULL | NULL | Supply_resistor_OBUF.REG | 0 | 8 | SRFF_Q
+
+INPUT_INSTANCE | 0 | 0 | NULL | TZ_IF_IBUF | Logika_COPY_0_COPY_0 | 16 | 1 | 1
+INPUT_NODE_TYPE | 0 | 5 | II_IN
+NODE | TZ_IF | 463 | PI | 0 | 0 | Logika_COPY_0_COPY_0 | NULL | NULL | NULL | 0 | 100 | NOTYPE
+OUTPUT_NODE_TYPE | 0 | 5 | II_IMUX
+NODE | TZ_IF_IBUF | 437 | ? | 0 | 0 | Logika_COPY_0_COPY_0 | NULL | NULL | TZ_IF_IBUF | 0 | 5 | II_IMUX
+
+MACROCELL_INSTANCE | OptxMapped | over_current_filter_OBUF | Logika_COPY_0_COPY_0 | 2155872256 | 3 | 2
+INPUT_NODE_TYPE | 1 | 100 | NOTYPE
+NODE | TZ_IF_IBUF | 437 | ? | 0 | 0 | Logika_COPY_0_COPY_0 | NULL | NULL | TZ_IF_IBUF | 0 | 5 | II_IMUX
+INPUT_NODE_TYPE | 1 | 100 | NOTYPE
+NODE | over_current_filter_and0002 | 439 | ? | 0 | 16 | Logika_COPY_0_COPY_0 | NULL | over_current_filter_OBUF.Q | over_current_filter_OBUF | 1 | 0 | MC_UIM
+INPUT_NODE_TYPE | 1 | 100 | NOTYPE
+NODE | LATCH_RESET_IBUF | 428 | ? | 0 | 0 | Logika_COPY_0_COPY_0 | NULL | NULL | LATCH_RESET_IBUF | 0 | 5 | II_IMUX
+OUTPUT_NODE_TYPE | 0 | 0 | MC_Q
+NODE | over_current_filter_OBUF | 438 | ? | 0 | 0 | Logika_COPY_0_COPY_0 | NULL | over_current_filter_OBUF.Q | over_current_filter_OBUF | 0 | 0 | MC_Q
+OUTPUT_NODE_TYPE | 1 | 0 | MC_UIM
+NODE | over_current_filter_and0002 | 439 | ? | 0 | 16 | Logika_COPY_0_COPY_0 | NULL | over_current_filter_OBUF.Q | over_current_filter_OBUF | 1 | 0 | MC_UIM
+
+SIGNAL_INSTANCE | over_current_filter_OBUF.SI | over_current_filter_OBUF | 0 | 3 | 2
+INPUT_NODE_TYPE | 1 | 100 | NOTYPE
+NODE | TZ_IF_IBUF | 437 | ? | 0 | 0 | Logika_COPY_0_COPY_0 | NULL | NULL | TZ_IF_IBUF | 0 | 5 | II_IMUX
+INPUT_NODE_TYPE | 1 | 100 | NOTYPE
+NODE | over_current_filter_and0002 | 439 | ? | 0 | 16 | Logika_COPY_0_COPY_0 | NULL | over_current_filter_OBUF.Q | over_current_filter_OBUF | 1 | 0 | MC_UIM
+INPUT_NODE_TYPE | 1 | 100 | NOTYPE
+NODE | LATCH_RESET_IBUF | 428 | ? | 0 | 0 | Logika_COPY_0_COPY_0 | NULL | NULL | LATCH_RESET_IBUF | 0 | 5 | II_IMUX
+OUTPUT_NODE_TYPE | 1 | 9 | MC_SI_D1
+SIGNAL | NODE | over_current_filter_OBUF.D1 | 491 | ? | 0 | 4096 | over_current_filter_OBUF | NULL | NULL | over_current_filter_OBUF.SI | 1 | 9 | MC_SI_D1
+SPPTERM | 0 | IV_ZERO
+OUTPUT_NODE_TYPE | 2 | 9 | MC_SI_D2
+SIGNAL | NODE | over_current_filter_OBUF.D2 | 492 | ? | 0 | 4096 | over_current_filter_OBUF | NULL | NULL | over_current_filter_OBUF.SI | 2 | 9 | MC_SI_D2
+SPPTERM | 2 | IV_TRUE | LATCH_RESET_IBUF | IV_TRUE | TZ_IF_IBUF
+SPPTERM | 2 | IV_TRUE | TZ_IF_IBUF | IV_TRUE | over_current_filter_and0002
+
+SRFF_INSTANCE | over_current_filter_OBUF.REG | over_current_filter_OBUF | 0 | 1 | 1
+INPUT_NODE_TYPE | 0 | 8 | SRFF_D
+NODE | over_current_filter_OBUF.D | 490 | ? | 0 | 0 | over_current_filter_OBUF | NULL | NULL | over_current_filter_OBUF.XOR | 0 | 7 | ALU_F
+OUTPUT_NODE_TYPE | 0 | 8 | SRFF_Q
+NODE | over_current_filter_OBUF.Q | 493 | ? | 0 | 0 | over_current_filter_OBUF | NULL | NULL | over_current_filter_OBUF.REG | 0 | 8 | SRFF_Q
+
+INPUT_INSTANCE | 0 | 0 | NULL | TZ_IS_IBUF | Logika_COPY_0_COPY_0 | 16 | 1 | 1
+INPUT_NODE_TYPE | 0 | 5 | II_IN
+NODE | TZ_IS | 464 | PI | 0 | 0 | Logika_COPY_0_COPY_0 | NULL | NULL | NULL | 0 | 100 | NOTYPE
+OUTPUT_NODE_TYPE | 0 | 5 | II_IMUX
+NODE | TZ_IS_IBUF | 440 | ? | 0 | 0 | Logika_COPY_0_COPY_0 | NULL | NULL | TZ_IS_IBUF | 0 | 5 | II_IMUX
+
+MACROCELL_INSTANCE | OptxMapped | over_current_supply_OBUF | Logika_COPY_0_COPY_0 | 2155872256 | 3 | 2
+INPUT_NODE_TYPE | 1 | 100 | NOTYPE
+NODE | TZ_IS_IBUF | 440 | ? | 0 | 0 | Logika_COPY_0_COPY_0 | NULL | NULL | TZ_IS_IBUF | 0 | 5 | II_IMUX
+INPUT_NODE_TYPE | 1 | 100 | NOTYPE
+NODE | over_current_supply_and0002 | 442 | ? | 0 | 16 | Logika_COPY_0_COPY_0 | NULL | over_current_supply_OBUF.Q | over_current_supply_OBUF | 1 | 0 | MC_UIM
+INPUT_NODE_TYPE | 1 | 100 | NOTYPE
+NODE | LATCH_RESET_IBUF | 428 | ? | 0 | 0 | Logika_COPY_0_COPY_0 | NULL | NULL | LATCH_RESET_IBUF | 0 | 5 | II_IMUX
+OUTPUT_NODE_TYPE | 0 | 0 | MC_Q
+NODE | over_current_supply_OBUF | 441 | ? | 0 | 0 | Logika_COPY_0_COPY_0 | NULL | over_current_supply_OBUF.Q | over_current_supply_OBUF | 0 | 0 | MC_Q
+OUTPUT_NODE_TYPE | 1 | 0 | MC_UIM
+NODE | over_current_supply_and0002 | 442 | ? | 0 | 16 | Logika_COPY_0_COPY_0 | NULL | over_current_supply_OBUF.Q | over_current_supply_OBUF | 1 | 0 | MC_UIM
+
+SIGNAL_INSTANCE | over_current_supply_OBUF.SI | over_current_supply_OBUF | 0 | 3 | 2
+INPUT_NODE_TYPE | 1 | 100 | NOTYPE
+NODE | TZ_IS_IBUF | 440 | ? | 0 | 0 | Logika_COPY_0_COPY_0 | NULL | NULL | TZ_IS_IBUF | 0 | 5 | II_IMUX
+INPUT_NODE_TYPE | 1 | 100 | NOTYPE
+NODE | over_current_supply_and0002 | 442 | ? | 0 | 16 | Logika_COPY_0_COPY_0 | NULL | over_current_supply_OBUF.Q | over_current_supply_OBUF | 1 | 0 | MC_UIM
+INPUT_NODE_TYPE | 1 | 100 | NOTYPE
+NODE | LATCH_RESET_IBUF | 428 | ? | 0 | 0 | Logika_COPY_0_COPY_0 | NULL | NULL | LATCH_RESET_IBUF | 0 | 5 | II_IMUX
+OUTPUT_NODE_TYPE | 1 | 9 | MC_SI_D1
+SIGNAL | NODE | over_current_supply_OBUF.D1 | 495 | ? | 0 | 4096 | over_current_supply_OBUF | NULL | NULL | over_current_supply_OBUF.SI | 1 | 9 | MC_SI_D1
+SPPTERM | 0 | IV_ZERO
+OUTPUT_NODE_TYPE | 2 | 9 | MC_SI_D2
+SIGNAL | NODE | over_current_supply_OBUF.D2 | 496 | ? | 0 | 4096 | over_current_supply_OBUF | NULL | NULL | over_current_supply_OBUF.SI | 2 | 9 | MC_SI_D2
+SPPTERM | 2 | IV_TRUE | LATCH_RESET_IBUF | IV_TRUE | TZ_IS_IBUF
+SPPTERM | 2 | IV_TRUE | TZ_IS_IBUF | IV_TRUE | over_current_supply_and0002
+
+SRFF_INSTANCE | over_current_supply_OBUF.REG | over_current_supply_OBUF | 0 | 1 | 1
+INPUT_NODE_TYPE | 0 | 8 | SRFF_D
+NODE | over_current_supply_OBUF.D | 494 | ? | 0 | 0 | over_current_supply_OBUF | NULL | NULL | over_current_supply_OBUF.XOR | 0 | 7 | ALU_F
+OUTPUT_NODE_TYPE | 0 | 8 | SRFF_Q
+NODE | over_current_supply_OBUF.Q | 497 | ? | 0 | 0 | over_current_supply_OBUF | NULL | NULL | over_current_supply_OBUF.REG | 0 | 8 | SRFF_Q
+
+INPUT_INSTANCE | 0 | 0 | NULL | TZ_UF_IBUF | Logika_COPY_0_COPY_0 | 16 | 1 | 1
+INPUT_NODE_TYPE | 0 | 5 | II_IN
+NODE | TZ_UF | 465 | PI | 0 | 0 | Logika_COPY_0_COPY_0 | NULL | NULL | NULL | 0 | 100 | NOTYPE
+OUTPUT_NODE_TYPE | 0 | 5 | II_IMUX
+NODE | TZ_UF_IBUF | 443 | ? | 0 | 0 | Logika_COPY_0_COPY_0 | NULL | NULL | TZ_UF_IBUF | 0 | 5 | II_IMUX
+
+MACROCELL_INSTANCE | OptxMapped | over_voltage_OBUF | Logika_COPY_0_COPY_0 | 2155872256 | 3 | 2
+INPUT_NODE_TYPE | 1 | 100 | NOTYPE
+NODE | TZ_UF_IBUF | 443 | ? | 0 | 0 | Logika_COPY_0_COPY_0 | NULL | NULL | TZ_UF_IBUF | 0 | 5 | II_IMUX
+INPUT_NODE_TYPE | 1 | 100 | NOTYPE
+NODE | over_voltage_and0002 | 445 | ? | 0 | 16 | Logika_COPY_0_COPY_0 | NULL | over_voltage_OBUF.Q | over_voltage_OBUF | 1 | 0 | MC_UIM
+INPUT_NODE_TYPE | 1 | 100 | NOTYPE
+NODE | LATCH_RESET_IBUF | 428 | ? | 0 | 0 | Logika_COPY_0_COPY_0 | NULL | NULL | LATCH_RESET_IBUF | 0 | 5 | II_IMUX
+OUTPUT_NODE_TYPE | 0 | 0 | MC_Q
+NODE | over_voltage_OBUF | 444 | ? | 0 | 0 | Logika_COPY_0_COPY_0 | NULL | over_voltage_OBUF.Q | over_voltage_OBUF | 0 | 0 | MC_Q
+OUTPUT_NODE_TYPE | 1 | 0 | MC_UIM
+NODE | over_voltage_and0002 | 445 | ? | 0 | 16 | Logika_COPY_0_COPY_0 | NULL | over_voltage_OBUF.Q | over_voltage_OBUF | 1 | 0 | MC_UIM
+
+SIGNAL_INSTANCE | over_voltage_OBUF.SI | over_voltage_OBUF | 0 | 3 | 2
+INPUT_NODE_TYPE | 1 | 100 | NOTYPE
+NODE | TZ_UF_IBUF | 443 | ? | 0 | 0 | Logika_COPY_0_COPY_0 | NULL | NULL | TZ_UF_IBUF | 0 | 5 | II_IMUX
+INPUT_NODE_TYPE | 1 | 100 | NOTYPE
+NODE | over_voltage_and0002 | 445 | ? | 0 | 16 | Logika_COPY_0_COPY_0 | NULL | over_voltage_OBUF.Q | over_voltage_OBUF | 1 | 0 | MC_UIM
+INPUT_NODE_TYPE | 1 | 100 | NOTYPE
+NODE | LATCH_RESET_IBUF | 428 | ? | 0 | 0 | Logika_COPY_0_COPY_0 | NULL | NULL | LATCH_RESET_IBUF | 0 | 5 | II_IMUX
+OUTPUT_NODE_TYPE | 1 | 9 | MC_SI_D1
+SIGNAL | NODE | over_voltage_OBUF.D1 | 499 | ? | 0 | 4096 | over_voltage_OBUF | NULL | NULL | over_voltage_OBUF.SI | 1 | 9 | MC_SI_D1
+SPPTERM | 0 | IV_ZERO
+OUTPUT_NODE_TYPE | 2 | 9 | MC_SI_D2
+SIGNAL | NODE | over_voltage_OBUF.D2 | 500 | ? | 0 | 4096 | over_voltage_OBUF | NULL | NULL | over_voltage_OBUF.SI | 2 | 9 | MC_SI_D2
+SPPTERM | 2 | IV_TRUE | LATCH_RESET_IBUF | IV_TRUE | TZ_UF_IBUF
+SPPTERM | 2 | IV_TRUE | TZ_UF_IBUF | IV_TRUE | over_voltage_and0002
+
+SRFF_INSTANCE | over_voltage_OBUF.REG | over_voltage_OBUF | 0 | 1 | 1
+INPUT_NODE_TYPE | 0 | 8 | SRFF_D
+NODE | over_voltage_OBUF.D | 498 | ? | 0 | 0 | over_voltage_OBUF | NULL | NULL | over_voltage_OBUF.XOR | 0 | 7 | ALU_F
+OUTPUT_NODE_TYPE | 0 | 8 | SRFF_Q
+NODE | over_voltage_OBUF.Q | 501 | ? | 0 | 0 | over_voltage_OBUF | NULL | NULL | over_voltage_OBUF.REG | 0 | 8 | SRFF_Q
+
+MACROCELL_INSTANCE | OptxMapped | trip_OBUF | Logika_COPY_0_COPY_0 | 2155872256 | 4 | 1
+INPUT_NODE_TYPE | 1 | 100 | NOTYPE
+NODE | over_current_filter_and0002 | 439 | ? | 0 | 16 | Logika_COPY_0_COPY_0 | NULL | over_current_filter_OBUF.Q | over_current_filter_OBUF | 1 | 0 | MC_UIM
+INPUT_NODE_TYPE | 1 | 100 | NOTYPE
+NODE | over_current_supply_and0002 | 442 | ? | 0 | 16 | Logika_COPY_0_COPY_0 | NULL | over_current_supply_OBUF.Q | over_current_supply_OBUF | 1 | 0 | MC_UIM
+INPUT_NODE_TYPE | 1 | 100 | NOTYPE
+NODE | over_voltage_and0002 | 445 | ? | 0 | 16 | Logika_COPY_0_COPY_0 | NULL | over_voltage_OBUF.Q | over_voltage_OBUF | 1 | 0 | MC_UIM
+INPUT_NODE_TYPE | 1 | 100 | NOTYPE
+NODE | $OpTx$FX_DC$1.UIM | 456 | ? | 0 | 0 | Logika_COPY_0_COPY_0 | NULL | $OpTx$FX_DC$1.Q | $OpTx$FX_DC$1 | 1 | 0 | MC_UIM
+OUTPUT_NODE_TYPE | 0 | 0 | MC_Q
+NODE | trip_OBUF | 446 | ? | 0 | 0 | Logika_COPY_0_COPY_0 | NULL | trip_OBUF.Q | trip_OBUF | 0 | 0 | MC_Q
+
+SIGNAL_INSTANCE | trip_OBUF.SI | trip_OBUF | 0 | 4 | 2
+INPUT_NODE_TYPE | 1 | 100 | NOTYPE
+NODE | over_current_filter_and0002 | 439 | ? | 0 | 16 | Logika_COPY_0_COPY_0 | NULL | over_current_filter_OBUF.Q | over_current_filter_OBUF | 1 | 0 | MC_UIM
+INPUT_NODE_TYPE | 1 | 100 | NOTYPE
+NODE | over_current_supply_and0002 | 442 | ? | 0 | 16 | Logika_COPY_0_COPY_0 | NULL | over_current_supply_OBUF.Q | over_current_supply_OBUF | 1 | 0 | MC_UIM
+INPUT_NODE_TYPE | 1 | 100 | NOTYPE
+NODE | over_voltage_and0002 | 445 | ? | 0 | 16 | Logika_COPY_0_COPY_0 | NULL | over_voltage_OBUF.Q | over_voltage_OBUF | 1 | 0 | MC_UIM
+INPUT_NODE_TYPE | 1 | 100 | NOTYPE
+NODE | $OpTx$FX_DC$1.UIM | 456 | ? | 0 | 0 | Logika_COPY_0_COPY_0 | NULL | $OpTx$FX_DC$1.Q | $OpTx$FX_DC$1 | 1 | 0 | MC_UIM
+OUTPUT_NODE_TYPE | 1 | 9 | MC_SI_D1
+SIGNAL | NODE | trip_OBUF.D1 | 503 | ? | 0 | 4096 | trip_OBUF | NULL | NULL | trip_OBUF.SI | 1 | 9 | MC_SI_D1
+SPPTERM | 0 | IV_ZERO
+OUTPUT_NODE_TYPE | 2 | 9 | MC_SI_D2
+SIGNAL | NODE | trip_OBUF.D2 | 504 | ? | 0 | 4096 | trip_OBUF | NULL | NULL | trip_OBUF.SI | 2 | 9 | MC_SI_D2
+SPPTERM | 4 | IV_TRUE | over_current_filter_and0002 | IV_TRUE | over_current_supply_and0002 | IV_TRUE | over_voltage_and0002 | IV_FALSE | $OpTx$FX_DC$1.UIM
+
+SRFF_INSTANCE | trip_OBUF.REG | trip_OBUF | 0 | 1 | 1
+INPUT_NODE_TYPE | 0 | 8 | SRFF_D
+NODE | trip_OBUF.D | 502 | ? | 0 | 0 | trip_OBUF | NULL | NULL | trip_OBUF.XOR | 0 | 7 | ALU_F
+OUTPUT_NODE_TYPE | 0 | 8 | SRFF_Q
+NODE | trip_OBUF.Q | 505 | ? | 0 | 0 | trip_OBUF | NULL | NULL | trip_OBUF.REG | 0 | 8 | SRFF_Q
+
+OUTPUT_INSTANCE | 0 | PWM_OE | Logika_COPY_0_COPY_0 | 7 | 1 | 1
+INPUT_NODE_TYPE | 0 | 6 | OI_IN
+NODE | PWM_OE_OBUF$Q | 425 | ? | 0 | 0 | Logika_COPY_0_COPY_0 | NULL | PWM_OE_OBUF.Q | PWM_OE_OBUF | 0 | 0 | MC_Q
+OUTPUT_NODE_TYPE | 0 | 6 | OI_OUT
+NODE | PWM_OE | 447 | PO | 0 | 0 | Logika_COPY_0_COPY_0 | NULL | NULL | PWM_OE | 0 | 6 | OI_OUT
+
+OUTPUT_INSTANCE | 0 | Filter_main | Logika_COPY_0_COPY_0 | 7 | 1 | 1
+INPUT_NODE_TYPE | 0 | 6 | OI_IN
+NODE | Filter_main_OBUF | 430 | ? | 0 | 0 | Logika_COPY_0_COPY_0 | NULL | Filter_main_OBUF.Q | Filter_main_OBUF | 0 | 0 | MC_Q
+OUTPUT_NODE_TYPE | 0 | 6 | OI_OUT
+NODE | Filter_main | 448 | PO | 0 | 0 | Logika_COPY_0_COPY_0 | NULL | NULL | Filter_main | 0 | 6 | OI_OUT
+
+OUTPUT_INSTANCE | 0 | MOSFET | Logika_COPY_0_COPY_0 | 7 | 1 | 1
+INPUT_NODE_TYPE | 0 | 6 | OI_IN
+NODE | MOSFET_OBUF | 432 | ? | 0 | 0 | Logika_COPY_0_COPY_0 | NULL | MOSFET_OBUF.Q | MOSFET_OBUF | 0 | 0 | MC_Q
+OUTPUT_NODE_TYPE | 0 | 6 | OI_OUT
+NODE | MOSFET | 449 | PO | 0 | 0 | Logika_COPY_0_COPY_0 | NULL | NULL | MOSFET | 0 | 6 | OI_OUT
+
+OUTPUT_INSTANCE | 0 | Supply_main | Logika_COPY_0_COPY_0 | 7 | 1 | 1
+INPUT_NODE_TYPE | 0 | 6 | OI_IN
+NODE | Supply_main_OBUF | 434 | ? | 0 | 0 | Logika_COPY_0_COPY_0 | NULL | Supply_main_OBUF.Q | Supply_main_OBUF | 0 | 0 | MC_Q
+OUTPUT_NODE_TYPE | 0 | 6 | OI_OUT
+NODE | Supply_main | 450 | PO | 0 | 0 | Logika_COPY_0_COPY_0 | NULL | NULL | Supply_main | 0 | 6 | OI_OUT
+
+OUTPUT_INSTANCE | 0 | Supply_resistor | Logika_COPY_0_COPY_0 | 7 | 1 | 1
+INPUT_NODE_TYPE | 0 | 6 | OI_IN
+NODE | Supply_resistor_OBUF | 436 | ? | 0 | 0 | Logika_COPY_0_COPY_0 | NULL | Supply_resistor_OBUF.Q | Supply_resistor_OBUF | 0 | 0 | MC_Q
+OUTPUT_NODE_TYPE | 0 | 6 | OI_OUT
+NODE | Supply_resistor | 451 | PO | 0 | 0 | Logika_COPY_0_COPY_0 | NULL | NULL | Supply_resistor | 0 | 6 | OI_OUT
+
+OUTPUT_INSTANCE | 0 | over_current_filter | Logika_COPY_0_COPY_0 | 7 | 1 | 1
+INPUT_NODE_TYPE | 0 | 6 | OI_IN
+NODE | over_current_filter_OBUF | 438 | ? | 0 | 0 | Logika_COPY_0_COPY_0 | NULL | over_current_filter_OBUF.Q | over_current_filter_OBUF | 0 | 0 | MC_Q
+OUTPUT_NODE_TYPE | 0 | 6 | OI_OUT
+NODE | over_current_filter | 452 | PO | 0 | 0 | Logika_COPY_0_COPY_0 | NULL | NULL | over_current_filter | 0 | 6 | OI_OUT
+
+OUTPUT_INSTANCE | 0 | over_current_supply | Logika_COPY_0_COPY_0 | 7 | 1 | 1
+INPUT_NODE_TYPE | 0 | 6 | OI_IN
+NODE | over_current_supply_OBUF | 441 | ? | 0 | 0 | Logika_COPY_0_COPY_0 | NULL | over_current_supply_OBUF.Q | over_current_supply_OBUF | 0 | 0 | MC_Q
+OUTPUT_NODE_TYPE | 0 | 6 | OI_OUT
+NODE | over_current_supply | 453 | PO | 0 | 0 | Logika_COPY_0_COPY_0 | NULL | NULL | over_current_supply | 0 | 6 | OI_OUT
+
+OUTPUT_INSTANCE | 0 | over_voltage | Logika_COPY_0_COPY_0 | 7 | 1 | 1
+INPUT_NODE_TYPE | 0 | 6 | OI_IN
+NODE | over_voltage_OBUF | 444 | ? | 0 | 0 | Logika_COPY_0_COPY_0 | NULL | over_voltage_OBUF.Q | over_voltage_OBUF | 0 | 0 | MC_Q
+OUTPUT_NODE_TYPE | 0 | 6 | OI_OUT
+NODE | over_voltage | 454 | PO | 0 | 0 | Logika_COPY_0_COPY_0 | NULL | NULL | over_voltage | 0 | 6 | OI_OUT
+
+OUTPUT_INSTANCE | 0 | trip | Logika_COPY_0_COPY_0 | 7 | 1 | 1
+INPUT_NODE_TYPE | 0 | 6 | OI_IN
+NODE | trip_OBUF | 446 | ? | 0 | 0 | Logika_COPY_0_COPY_0 | NULL | trip_OBUF.Q | trip_OBUF | 0 | 0 | MC_Q
+OUTPUT_NODE_TYPE | 0 | 6 | OI_OUT
+NODE | trip | 455 | PO | 0 | 0 | Logika_COPY_0_COPY_0 | NULL | NULL | trip | 0 | 6 | OI_OUT
+
+MACROCELL_INSTANCE | SoftPfbk | $OpTx$FX_DC$1 | Logika_COPY_0_COPY_0 | 2181038080 | 3 | 1
+INPUT_NODE_TYPE | 1 | 100 | NOTYPE
+NODE | WD_LATCH_and0001 | 427 | ? | 0 | 16 | Logika_COPY_0_COPY_0 | NULL | WD_LATCH_and0001.Q | WD_LATCH_and0001 | 1 | 0 | MC_UIM
+INPUT_NODE_TYPE | 1 | 100 | NOTYPE
+NODE | LATCH_RESET_IBUF | 428 | ? | 0 | 0 | Logika_COPY_0_COPY_0 | NULL | NULL | LATCH_RESET_IBUF | 0 | 5 | II_IMUX
+INPUT_NODE_TYPE | 1 | 100 | NOTYPE
+NODE | WD_OUT_IBUF | 426 | ? | 0 | 0 | Logika_COPY_0_COPY_0 | NULL | NULL | WD_OUT_IBUF | 0 | 5 | II_IMUX
+OUTPUT_NODE_TYPE | 1 | 0 | MC_UIM
+NODE | $OpTx$FX_DC$1.UIM | 456 | ? | 0 | 0 | Logika_COPY_0_COPY_0 | NULL | $OpTx$FX_DC$1.Q | $OpTx$FX_DC$1 | 1 | 0 | MC_UIM
+
+SIGNAL_INSTANCE | $OpTx$FX_DC$1.SI | $OpTx$FX_DC$1 | 0 | 3 | 2
+INPUT_NODE_TYPE | 1 | 100 | NOTYPE
+NODE | WD_LATCH_and0001 | 427 | ? | 0 | 16 | Logika_COPY_0_COPY_0 | NULL | WD_LATCH_and0001.Q | WD_LATCH_and0001 | 1 | 0 | MC_UIM
+INPUT_NODE_TYPE | 1 | 100 | NOTYPE
+NODE | LATCH_RESET_IBUF | 428 | ? | 0 | 0 | Logika_COPY_0_COPY_0 | NULL | NULL | LATCH_RESET_IBUF | 0 | 5 | II_IMUX
+INPUT_NODE_TYPE | 1 | 100 | NOTYPE
+NODE | WD_OUT_IBUF | 426 | ? | 0 | 0 | Logika_COPY_0_COPY_0 | NULL | NULL | WD_OUT_IBUF | 0 | 5 | II_IMUX
+OUTPUT_NODE_TYPE | 1 | 9 | MC_SI_D1
+SIGNAL | NODE | $OpTx$FX_DC$1.D1 | 507 | ? | 0 | 4096 | $OpTx$FX_DC$1 | NULL | NULL | $OpTx$FX_DC$1.SI | 1 | 9 | MC_SI_D1
+SPPTERM | 0 | IV_ZERO
+OUTPUT_NODE_TYPE | 2 | 9 | MC_SI_D2
+SIGNAL | NODE | $OpTx$FX_DC$1.D2 | 508 | ? | 0 | 4096 | $OpTx$FX_DC$1 | NULL | NULL | $OpTx$FX_DC$1.SI | 2 | 9 | MC_SI_D2
+SPPTERM | 2 | IV_FALSE | WD_OUT_IBUF | IV_FALSE | WD_LATCH_and0001
+SPPTERM | 2 | IV_FALSE | WD_LATCH_and0001 | IV_FALSE | LATCH_RESET_IBUF
+
+SRFF_INSTANCE | $OpTx$FX_DC$1.REG | $OpTx$FX_DC$1 | 0 | 1 | 1
+INPUT_NODE_TYPE | 0 | 8 | SRFF_D
+NODE | $OpTx$FX_DC$1.D | 506 | ? | 0 | 0 | $OpTx$FX_DC$1 | NULL | NULL | $OpTx$FX_DC$1.XOR | 0 | 7 | ALU_F
+OUTPUT_NODE_TYPE | 0 | 8 | SRFF_Q
+NODE | $OpTx$FX_DC$1.Q | 509 | ? | 0 | 0 | $OpTx$FX_DC$1 | NULL | NULL | $OpTx$FX_DC$1.REG | 0 | 8 | SRFF_Q
+
+FB_INSTANCE | FOOBAR1_ | Logika_COPY_0_COPY_0 | 0 | 0 | 0
+FBPIN | 1 | over_current_supply_OBUF | 1 | NULL | 0 | over_current_supply | 1 | 9 | 49152
+FBPIN | 6 | NULL | 0 | TZ_IS_IBUF | 1 | NULL | 0 | 19 | 49152
+FBPIN | 7 | NULL | 0 | TZ_IF_IBUF | 1 | NULL | 0 | 17 | 57344
+FBPIN | 8 | NULL | 0 | TZ_UF_IBUF | 1 | NULL | 0 | 20 | 49152
+FBPIN | 11 | PWM_OE_OBUF | 1 | NULL | 0 | PWM_OE | 1 | 25 | 49152
+FBPIN | 14 | NULL | 0 | WD_OUT_IBUF | 1 | NULL | 0 | 35 | 49152
+FBPIN | 17 | WD_LATCH_and0001 | 1 | NULL | 0 | NULL | 0 | 42 | 49152
+FBPIN | 18 | $OpTx$FX_DC$1 | 1 | NULL | 0 | NULL | 0 | 39 | 49152
+
+FB_INSTANCE | FOOBAR2_ | Logika_COPY_0_COPY_0 | 0 | 0 | 0
+FBPIN | 1 | over_current_filter_OBUF | 1 | NULL | 0 | over_current_filter | 1 | 8 | 49152
+FBPIN | 2 | over_voltage_OBUF | 1 | NULL | 0 | over_voltage | 1 | 7 | 49152
+FBPIN | 4 | trip_OBUF | 1 | NULL | 0 | trip | 1 | 6 | 49152
+FBPIN | 6 | NULL | 0 | MOSFET_MCU_IBUF | 1 | NULL | 0 | 64 | 51200
+FBPIN | 7 | NULL | 0 | LATCH_RESET_IBUF | 1 | NULL | 0 | 63 | 49152
+FBPIN | 8 | NULL | 0 | Filter_main_mcu_IBUF | 1 | NULL | 0 | 62 | 49152
+FBPIN | 10 | NULL | 0 | Supply_resistor_mcu_IBUF | 1 | NULL | 0 | 60 | 49152
+FBPIN | 11 | NULL | 0 | Supply_main_mcu_IBUF | 1 | NULL | 0 | 57 | 49152
+FBPIN | 14 | Supply_main_OBUF | 1 | NULL | 0 | Supply_main | 1 | 48 | 49152
+FBPIN | 15 | Filter_main_OBUF | 1 | NULL | 0 | Filter_main | 1 | 45 | 49152
+FBPIN | 16 | Supply_resistor_OBUF | 1 | NULL | 0 | Supply_resistor | 1 | 44 | 49152
+FBPIN | 17 | MOSFET_OBUF | 1 | NULL | 0 | MOSFET | 1 | 43 | 49152
+
+FB_INSTANCE | INPUTPINS_FOOBAR3_ | Logika_COPY_0_COPY_0 | 0 | 0 | 0
+
+
+FB_ORDER_OF_INPUTS | FOOBAR1_ | 0 | over_current_filter_and0002 | NULL | 1 | over_voltage_and0002 | NULL | 4 | LATCH_RESET | 63 | 12 | TZ_IS | 19 | 16 | WD_LATCH_and0001 | NULL
+FB_ORDER_OF_INPUTS | FOOBAR1_ | 17 | $OpTx$FX_DC$1.UIM | NULL | 20 | over_current_supply_and0002 | NULL | 52 | WD_OUT | 35
+
+FB_IMUX_INDEX | FOOBAR1_ | 18 | 19 | -1 | -1 | 40 | -1 | -1 | -1 | -1 | -1 | -1 | -1 | 66 | -1 | -1 | -1 | 16 | 17 | -1 | -1 | 0 | -1 | -1 | -1 | -1 | -1 | -1 | -1 | -1 | -1 | -1 | -1 | -1 | -1 | -1 | -1 | -1 | -1 | -1 | -1 | -1 | -1 | -1 | -1 | -1 | -1 | -1 | -1 | -1 | -1 | -1 | -1 | 63 | -1
+
+
+FB_ORDER_OF_INPUTS | FOOBAR2_ | 0 | over_current_filter_and0002 | NULL | 1 | over_voltage_and0002 | NULL | 4 | LATCH_RESET | 63 | 14 | TZ_UF | 20 | 17 | $OpTx$FX_DC$1.UIM | NULL
+FB_ORDER_OF_INPUTS | FOOBAR2_ | 19 | MOSFET_MCU | 64 | 20 | over_current_supply_and0002 | NULL | 21 | TZ_IF | 17 | 27 | Supply_main_mcu | 57 | 29 | Supply_resistor_mcu | 60
+FB_ORDER_OF_INPUTS | FOOBAR2_ | 34 | Filter_main_mcu | 62
+
+FB_IMUX_INDEX | FOOBAR2_ | 18 | 19 | -1 | -1 | 40 | -1 | -1 | -1 | -1 | -1 | -1 | -1 | -1 | -1 | 68 | -1 | -1 | 17 | -1 | 42 | 0 | 64 | -1 | -1 | -1 | -1 | -1 | 39 | -1 | 37 | -1 | -1 | -1 | -1 | 38 | -1 | -1 | -1 | -1 | -1 | -1 | -1 | -1 | -1 | -1 | -1 | -1 | -1 | -1 | -1 | -1 | -1 | -1 | -1
+

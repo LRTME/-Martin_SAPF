@@ -1,0 +1,5 @@
+# begin LFP file D:\Mitja\Projekti\SerijskiFilterEnoF\Programi\CPLD_logika\Logika.lfp
+designfile Logika.vhd
+parttype xc9536xl-vq64-10
+bus_delimiter 0;
+set_busdelim_onsave 1;
