@@ -74,116 +74,63 @@ void ADC_init(void)
 
     // ADCA channel setup
     EALLOW;
-    AdcaRegs.ADCSOC0CTL.bit.CHSEL = 2;          //SOC0 will convert pin A2
+    //A0 - u_f
+    AdcaRegs.ADCSOC0CTL.bit.CHSEL = 0;          //SOC0 will convert pin A0
     AdcaRegs.ADCSOC0CTL.bit.ACQPS = acqps_set;  //sample window
     AdcaRegs.ADCSOC0CTL.bit.TRIGSEL = 5;        //trigger on ePWM1 SOCA/C
 
-    AdcaRegs.ADCSOC1CTL.bit.CHSEL = 3;          //SOC1 will convert pin A3
+    //A1 - u_out
+    AdcaRegs.ADCSOC1CTL.bit.CHSEL = 1;          //SOC1 will convert pin A1
     AdcaRegs.ADCSOC1CTL.bit.ACQPS = acqps_set;  //sample window
     AdcaRegs.ADCSOC1CTL.bit.TRIGSEL = 5;        //trigger on ePWM1 SOCA/C
 
-    AdcaRegs.ADCSOC2CTL.bit.CHSEL = 4;          //SOC2 will convert pin A4
+    //A3 - u_ac
+    AdcaRegs.ADCSOC2CTL.bit.CHSEL = 3;          //SOC2 will convert pin A3
     AdcaRegs.ADCSOC2CTL.bit.ACQPS = acqps_set;  //sample window
     AdcaRegs.ADCSOC2CTL.bit.TRIGSEL = 5;        //trigger on ePWM1 SOCA/C
-
-    AdcaRegs.ADCSOC3CTL.bit.CHSEL = 5;          //SOC3 will convert pin A5
-    AdcaRegs.ADCSOC3CTL.bit.ACQPS = acqps_set;  //sample window
-    AdcaRegs.ADCSOC3CTL.bit.TRIGSEL = 5;        //trigger on ePWM1 SOCA/C
 
     AdcaRegs.ADCSOC5CTL.bit.CHSEL = 13;         //SOC5 will convert pin temperature
     AdcaRegs.ADCSOC5CTL.bit.ACQPS = 140;        //sample window 700 ns
     AdcaRegs.ADCSOC5CTL.bit.TRIGSEL = 5;        //trigger on ePWM1 SOCA/C
 
-    AdcaRegs.ADCINTSEL1N2.bit.INT1SEL = 3;      //end of SOC3 will set INT1 flag
+    AdcaRegs.ADCINTSEL1N2.bit.INT1SEL = 2;      //end of SOC2 will set INT1 flag
     AdcaRegs.ADCINTSEL1N2.bit.INT1E = 1;        //enable INT1 flag
     AdcaRegs.ADCINTFLGCLR.bit.ADCINT1 = 1;      //make sure INT1 flag is cleared
 
-    AdcaRegs.ADCSOC4CTL.bit.CHSEL = 12;         //SOC4 will convert pin A12 - DACA
-    AdcaRegs.ADCSOC4CTL.bit.ACQPS = 511;        //sample window
-    AdcaRegs.ADCSOC4CTL.bit.TRIGSEL = 5;        //trigger on ePWM1 SOCA/C
-
-    AdcaRegs.ADCINTSEL1N2.bit.INT2SEL = 4;      //end of SOC4 will set INT1 flag
-    AdcaRegs.ADCINTSEL1N2.bit.INT2E = 1;        //enable INT2 flag
-    AdcaRegs.ADCINTFLGCLR.bit.ADCINT2 = 1;      //make sure INT2 flag is cleared
-
     // ADCB channel setup
-    AdcbRegs.ADCSOC0CTL.bit.CHSEL = 2;          //SOC0 will convert pin B2
+    //B0 - LEM_IF
+    AdcbRegs.ADCSOC0CTL.bit.CHSEL = 0;          //SOC0 will convert pin B0
     AdcbRegs.ADCSOC0CTL.bit.ACQPS = acqps_set;  //sample window
     AdcbRegs.ADCSOC0CTL.bit.TRIGSEL = 5;        //trigger on ePWM1 SOCA/C
 
-    AdcbRegs.ADCSOC1CTL.bit.CHSEL = 3;          //SOC1 will convert pin B3
+    //B1 - DEL_UDC
+    AdcbRegs.ADCSOC1CTL.bit.CHSEL = 1;          //SOC1 will convert pin B1
     AdcbRegs.ADCSOC1CTL.bit.ACQPS = acqps_set;  //sample window
     AdcbRegs.ADCSOC1CTL.bit.TRIGSEL = 5;        //trigger on ePWM1 SOCA/C
 
-    AdcbRegs.ADCSOC2CTL.bit.CHSEL = 4;          //SOC2 will convert pin B4
+    //B3 - LEM_IS
+    AdcbRegs.ADCSOC2CTL.bit.CHSEL = 3;          //SOC2 will convert pin B3
     AdcbRegs.ADCSOC2CTL.bit.ACQPS = acqps_set;  //sample window
-    AdcbRegs.ADCSOC2CTL.bit.TRIGSEL = 5;        //trigger on ePWM1 SOCA/C
-
-    AdcbRegs.ADCSOC3CTL.bit.CHSEL = 5;          //SOC3 will convert pin B5
-    AdcbRegs.ADCSOC3CTL.bit.ACQPS = acqps_set;  //sample window
-    AdcbRegs.ADCSOC3CTL.bit.TRIGSEL = 5;        //trigger on ePWM1 SOCA/C
-
-    AdcbRegs.ADCSOC4CTL.bit.CHSEL = 12;         //SOC4 will convert pin A12 - DACA
-    AdcbRegs.ADCSOC4CTL.bit.ACQPS = 511;        //sample window
-    AdcbRegs.ADCSOC4CTL.bit.TRIGSEL = 5;        //trigger on ePWM1 SOCA/C
-
-    AdcbRegs.ADCINTSEL1N2.bit.INT2SEL = 4;      //end of SOC4 will set INT1 flag
-    AdcbRegs.ADCINTSEL1N2.bit.INT2E = 1;        //enable INT2 flag
-    AdcbRegs.ADCINTFLGCLR.bit.ADCINT2 = 1;      //make sure INT2 flag is cleared
-
-    AdcbRegs.ADCSOC5CTL.bit.CHSEL = 12;         //SOC4 will convert pin A12 - DACA
-    AdcbRegs.ADCSOC5CTL.bit.ACQPS = 511;        //sample window
-    AdcbRegs.ADCSOC5CTL.bit.TRIGSEL = 5;        //trigger on ePWM1 SOCA/C
-
-    AdcbRegs.ADCINTSEL3N4.bit.INT3SEL = 4;      //end of SOC4 will set INT1 flag
-    AdcbRegs.ADCINTSEL3N4.bit.INT3E = 1;        //enable INT2 flag
-    AdcbRegs.ADCINTFLGCLR.bit.ADCINT3 = 1;      //make sure INT2 flag is cleared
-
-    // ADCC channel setup
-    AdccRegs.ADCSOC0CTL.bit.CHSEL = 2;          //SOC0 will convert pin C2
-    AdccRegs.ADCSOC0CTL.bit.ACQPS = acqps_set;  //sample window
-    AdccRegs.ADCSOC0CTL.bit.TRIGSEL = 5;        //trigger on ePWM1 SOCA/C
-
-    AdccRegs.ADCSOC4CTL.bit.CHSEL = 12;         //SOC4 will convert pin A12 - DACA
-    AdccRegs.ADCSOC4CTL.bit.ACQPS = 511;        //sample window
-    AdccRegs.ADCSOC4CTL.bit.TRIGSEL = 5;        //trigger on ePWM1 SOCA/C
-
-    AdccRegs.ADCINTSEL1N2.bit.INT2SEL = 4;      //end of SOC4 will set INT1 flag
-    AdccRegs.ADCINTSEL1N2.bit.INT2E = 1;        //enable INT2 flag
-    AdccRegs.ADCINTFLGCLR.bit.ADCINT2 = 1;      //make sure INT2 flag is cleared
+    AdcbRegs.ADCSOC2CTL.bit.TRIGSEL = 5;        //trigger on ePWM1 SOCB/D
 
     // ADCD channel setup
-    AdcdRegs.ADCSOC0CTL.bit.CHSEL = 2;          //SOC0 will convert pin D2
+    //D0 - M_TEMP
+    AdcdRegs.ADCSOC0CTL.bit.CHSEL = 0;          //SOC0 will convert pin D0
     AdcdRegs.ADCSOC0CTL.bit.ACQPS = acqps_set;  //sample window
-    AdcdRegs.ADCSOC0CTL.bit.TRIGSEL = 5;        //trigger on ePWM1 SOCA/C
-
-    AdcdRegs.ADCSOC1CTL.bit.CHSEL = 3;          //SOC1 will convert pin D3
-    AdcdRegs.ADCSOC1CTL.bit.ACQPS = acqps_set;  //sample window
-    AdcdRegs.ADCSOC1CTL.bit.TRIGSEL = 5;        //trigger on ePWM1 SOCA/C
-
-    AdcdRegs.ADCSOC2CTL.bit.CHSEL = 4;          //SOC2 will convert pin D4
-    AdcdRegs.ADCSOC2CTL.bit.ACQPS = acqps_set;  //sample window
-    AdcdRegs.ADCSOC2CTL.bit.TRIGSEL = 5;        //trigger on ePWM1 SOCA/C
-
-    AdcdRegs.ADCSOC3CTL.bit.CHSEL = 5;          //SOC3 will convert pin D5
-    AdcdRegs.ADCSOC3CTL.bit.ACQPS = acqps_set;  //sample window
-    AdcdRegs.ADCSOC3CTL.bit.TRIGSEL = 5;        //trigger on ePWM1 SOCA/C
-
-    AdcdRegs.ADCSOC4CTL.bit.CHSEL = 12;         //SOC4 will convert pin A12 - DACA
-    AdcdRegs.ADCSOC4CTL.bit.ACQPS = 511;        //sample window
-    AdcdRegs.ADCSOC4CTL.bit.TRIGSEL = 5;        //trigger on ePWM1 SOCA/C
-
-    AdcdRegs.ADCINTSEL1N2.bit.INT2SEL = 4;      //end of SOC4 will set INT1 flag
-    AdcdRegs.ADCINTSEL1N2.bit.INT2E = 1;        //enable INT2 flag
-    AdcdRegs.ADCINTFLGCLR.bit.ADCINT2 = 1;      //make sure INT2 flag is cleared
+    AdcdRegs.ADCSOC0CTL.bit.TRIGSEL = 5;        //trigger on ePWM1 SOCB/D
 
     EDIS;
 
     // Proženje ADC-ja
-    ADC_MODUL1.ETSEL.bit.SOCASEL = ET_CTR_ZERO;    //sproži prekinitev na periodo
-    ADC_MODUL1.ETPS.bit.SOCAPRD = 1;     //ob vsakem prvem dogodku
-    ADC_MODUL1.ETCLR.bit.SOCA = 1;       //clear possible flag
-    ADC_MODUL1.ETSEL.bit.SOCAEN = 1;     //enable ADC Start Of conversion
+    ADC_MODUL1.ETSEL.bit.SOCASEL = ET_CTR_ZERO;	//sproži prekinitev na periodo
+    ADC_MODUL1.ETPS.bit.SOCAPRD = 1;			//ob vsakem prvem dogodku
+    ADC_MODUL1.ETCLR.bit.SOCA = 1;				//clear possible flag
+    ADC_MODUL1.ETSEL.bit.SOCAEN = 1;			//enable ADC Start Of conversion
+
+    ADC_MODUL1.ETSEL.bit.SOCBSEL = ET_CTR_ZERO;	//sproži prekinitev na periodo
+    ADC_MODUL1.ETPS.bit.SOCBPRD = 1;			//ob vsakem prvem dogodku
+    ADC_MODUL1.ETCLR.bit.SOCB = 1;				//clear possible flag
+    ADC_MODUL1.ETSEL.bit.SOCBEN = 1;			//enable ADC Start Of conversion
 
     // pocakam, da se stabilizira
     DELAY_US(1000L);

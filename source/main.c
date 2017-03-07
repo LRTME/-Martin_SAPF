@@ -32,7 +32,7 @@ void main(void)
     COMM_initialization();
 
     // inicializiram DAC - do use internal reference
-    DAC_init(TRUE);
+    //DAC_init(TRUE);
 
     // inicializiram ADC in PWM modul
     ADC_init();
