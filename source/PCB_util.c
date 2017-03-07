@@ -29,11 +29,11 @@ void PCB_WD_KICK_int(void)
     // brcnemo Watch dog
     if (counter <= PCB_WD_KICK_ON)
     {
-        GpioDataRegs.GPBCLEAR.bit.GPIO33 = 1;
+        GpioDataRegs.GPBSET.bit.GPIO33 = 1;
     }
     else
     {
-        GpioDataRegs.GPBSET.bit.GPIO33 = 1;
+        GpioDataRegs.GPBCLEAR.bit.GPIO33 = 1;
     }
 
     // povecamo stevec prekinitev
@@ -148,17 +148,27 @@ bool PCB_CPLD_over_current_filter_stat(void)
 ***************************************************************
 * Funckija izhoda MOSFET_MCU
 **************************************************************/
-void PCB_CPLD_MOSFET_MCU(void)
+void PCB_CPLD_MOSFET_MCU_on(void)
 {
 	GpioDataRegs.GPASET.bit.GPIO25 = 1;
+}
+
+void PCB_CPLD_MOSFET_MCU_off(void)
+{
+	GpioDataRegs.GPACLEAR.bit.GPIO25 = 1;
 }
 
 /**************************************************************
 * Funckija izhoda LATCH_RESET
 **************************************************************/
-void PCB_CPLD_LATCH_RESET(void)
+void PCB_CPLD_LATCH_RESET_on(void)
 {
 	GpioDataRegs.GPASET.bit.GPIO27 = 1;
+}
+
+void PCB_CPLD_LATCH_RESET_off(void)
+{
+	GpioDataRegs.GPACLEAR.bit.GPIO27 = 1;
 }
 /*************************************************************/
 
@@ -419,6 +429,8 @@ void PCB_init(void)
 		PCB_CPLD_over_voltage_NO();
 		PCB_CPLD_over_current_supply_NO();
 		PCB_CPLD_over_current_filter_NO();
+
+		PCB_CPLD_LATCH_RESET_on();
 
         PCB_relay1_off();
         PCB_relay2_off();
