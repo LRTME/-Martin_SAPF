@@ -25,14 +25,6 @@ float	cpu_temp = 0.0;
 
 float	napetost = 0.0;
 
-// NTC
-float beta_NTC = 3988;
-float R_NTC25 = 5000;
-float T_NTC25 = 298;
-float V_NTC = 0.0;
-float R_NTC = 0.0;
-float T_NTC = 0.0;
-
 // spremenljikva s katero štejemo kolikokrat se je prekinitev predolgo izvajala
 int interrupt_overflow_counter = 0;
 
@@ -86,10 +78,7 @@ void interrupt PER_int(void)
 
     //napetost = ADC_B3/4096.0;
 
-    V_NTC = M_TEMP_adc * (3.3/4096.0);
-    R_NTC = 5100 * ((5/V_NTC) - 1);
-
-    T_NTC = (T_NTC25 * beta_NTC)/(beta_NTC - T_NTC25 * log(R_NTC25/R_NTC)) - 273;
+    NTC_temp();
     // naracunam temperaturo
     //cpu_temp = GetTemperatureC(ADC_TEMP);
 

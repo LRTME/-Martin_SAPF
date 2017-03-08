@@ -244,13 +244,13 @@ void test1(void)
 			{
 				PCB_LED_WORKING_on();
 				PCB_LED_READY_on();
-				PCB_relay1_on();
+				//PCB_relay3_on();
 			}
 			else
 			{
 				PCB_LED_WORKING_off();
 				PCB_LED_READY_off();
-				PCB_relay1_off();
+				//PCB_relay3_off();
 			}
 
 			if (RESET_SW == TRUE)
@@ -258,13 +258,13 @@ void test1(void)
 				PCB_LED_FAULT_on();
 				//PCB_relay2_on();
 				//PCB_relay3_on();
-				PCB_CPLD_MOSFET_MCU_on();
+				//PCB_CPLD_MOSFET_MCU_on();
 			}
 			else
 			{
 				PCB_LED_FAULT_off();
 				//PCB_relay2_off();
 				//PCB_relay3_off();
-				PCB_CPLD_MOSFET_MCU_off();
+				//PCB_CPLD_MOSFET_MCU_off();
 			}
 }

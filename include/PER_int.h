@@ -18,6 +18,7 @@
 #include    "math.h"
 
 #include    "DLOG_gen.h"
+#include	"NTC_temp.h"
 
 /**************************************************************
 * Funckija, ki pripravi vse potrebno za izvajanje
