@@ -22,7 +22,6 @@ long    interrupt_cycles = 0;
 
 // temperatura procesorja
 float	cpu_temp = 0.0;
-
 float	napetost = 0.0;
 
 // spremenljikva s katero štejemo kolikokrat se je prekinitev predolgo izvajala
@@ -74,11 +73,13 @@ void interrupt PER_int(void)
     }
 
     // pocakam da ADC konca s pretvorbo
-    ADC_wait();
+   // ADC_wait();
 
     //napetost = ADC_B3/4096.0;
 
-    NTC_temp();
+    // izracun napetosti, tokov in temperature hladilnika
+    get_electrical();
+
     // naracunam temperaturo
     //cpu_temp = GetTemperatureC(ADC_TEMP);
 
@@ -150,4 +151,5 @@ void PER_int_setup(void)
     // (za razhoršèevanje main zanke in BACK_loop zanke)
     SetDBGIER(M_INT3);
 }
+
 

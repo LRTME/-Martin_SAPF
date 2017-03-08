@@ -18,8 +18,7 @@
 #include    "math.h"
 
 #include    "DLOG_gen.h"
-#include	"NTC_temp.h"
-
+#include	"get_electrical.h"
 /**************************************************************
 * Funckija, ki pripravi vse potrebno za izvajanje
 * prekinitvene rutine
