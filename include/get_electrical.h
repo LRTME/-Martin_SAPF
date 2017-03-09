@@ -24,6 +24,7 @@
 
 // korekcijska faktorja (meritev osciloskop)
 #define		U_AC_CORR_F		0.963752665
+#define		DEL_UDC_CORR_F	1.002150538
 #define		U_OUT_CORR_F	0.967880085
 
 extern void get_electrical(void);
