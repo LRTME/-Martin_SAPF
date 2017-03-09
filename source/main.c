@@ -34,9 +34,13 @@ void main(void)
     // inicializiram ADC in PWM modul
     ADC_init();
     PWM_init();
+    FB_init();
 
     // inicializiram peridoièno prekinitev za regulacijo motorja
     PER_int_setup();
+
+    // zagon PWM enot
+    FB_start();
 
     // omogocim prekinitve
     EINT;
