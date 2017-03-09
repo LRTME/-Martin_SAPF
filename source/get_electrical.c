@@ -13,8 +13,8 @@ float   IF = 0.0;
 float   IS_offset = 2048;
 float   IF_offset = 2048;
 
-float   IS_gain = -(15.0 / 0.625 ) * (7.5 / 6.2) * (3.3 / 4096);
-float   IF_gain = -(15.0 / 0.625 ) * (7.5 / 6.2) * (3.3 / 4096);
+float   IS_gain = (15.0 / 0.625 ) * (7.5 / 6.2) * (3.3 / 4096);
+float   IF_gain = (25.0 / 0.625 ) * (7.5 / 6.2) * (3.3 / 4096);
 
 long    current_offset_counter = 0;
 
@@ -25,14 +25,14 @@ float   u_f = 0.0;
 float   u_out = 0.0;
 
 float   u_ac_offset = 2048.0;
-float   DEL_UDC_offset = 0.0;
-float   u_f_offset = 0.0;
-float   u_out_offset = 0.0;
+float   DEL_UDC_offset = 2048.0;
+float   u_f_offset = 2048.0;
+float   u_out_offset = 2048.0;
 
-float   u_ac_gain = ((1.8 + 36.0) / 1.8) * (-1.0) * (3.3 / 4096);
-float   DEL_UDC_gain = ((3.6 + 62.0) / 3.6) * (3.3 / 4096);
-float   u_f_gain = ((3.6 + 62.0) / 3.6) * (3.3 / 4096);
-float   u_out_gain = ((3.6 + 62.0) / 3.6) * (3.3 / 4096);
+float   u_ac_gain = ((1000 + 0.47) / (5 * 0.47)) * U_AC_CORR_F * (-1.0) * (3.3 / 4096);
+float   DEL_UDC_gain = ((36 + 1.8) / (5 * 1.8)) * (-1.0) * (3.3 / 4096);
+float   u_f_gain = ((36 + 1.8) / (5 * 1.8)) * (-1.0) * (3.3 / 4096);
+float   u_out_gain = ((1000 + 0.47) / (5 * 0.47)) * U_OUT_CORR_F * (-1.0) * (3.3 / 4096);
 
 // NTC
 float beta_NTC = 3988;
@@ -46,10 +46,15 @@ float T_NTC = 0.0;
 DC_float    napetost_dc_f = DC_FLOAT_DEFAULTS;
 float   napetost_dc_filtered = 0.0;
 
-// prvi harmonik in RMS omrežne napetosti
+// prvi harmonik in RMS vhodne omrežne napetosti (u_ac)
 DFT_float   u_ac_dft = DFT_FLOAT_DEFAULTS;
 float   u_ac_rms = 0.0;
 float   u_ac_form = 0.0;
+
+// prvi harmonik in RMS izhodne napetosti (u_out)
+DFT_float   u_out_dft = DFT_FLOAT_DEFAULTS;
+float   u_out_rms = 0.0;
+float   u_out_form = 0.0;
 
 // regulacija napetosti enosmernega tokokroga
 PID_float   DEL_UDC_reg = PID_FLOAT_DEFAULTS;
@@ -110,18 +115,25 @@ void get_electrical(void)
     static float   IS_offset_calib = 0;
     static float   IF_offset_calib = 0.0;
     static float   u_ac_offset_calib = 0.0;
+    static float   DEL_UDC_offset_calib = 0.0;
+    static float   u_f_offset_calib = 0.0;
+    static float   u_out_offset_calib = 0.0;
 
     // pocakam da ADC konca s pretvorbo
     ADC_wait();
     // poberem vrednosti iz AD pretvornika
+
     // kalibracija preostalega toka
     if (   (start_calibration == TRUE)
         && (calibration_done == FALSE))
     {
         // akumuliram offset
-        IS_offset_calib = IS_offset_calib + IS;
-        IF_offset_calib = IF_offset_calib + IF;
-        u_ac_offset_calib = u_ac_offset_calib + u_ac;
+        IS_offset_calib = IS_offset_calib + IS_adc;
+        IF_offset_calib = IF_offset_calib + IF_adc;
+        u_ac_offset_calib = u_ac_offset_calib + u_ac_adc;
+        DEL_UDC_offset_calib = DEL_UDC_offset_calib + DEL_UDC_adc;
+        u_f_offset_calib = u_f_offset_calib + u_f_adc;
+        u_out_offset_calib = u_out_offset_calib + u_out_adc;
 
         // ko potece dovolj casa, sporocim da lahko grem naprej
         // in izracunam povprecni offset
@@ -129,39 +141,56 @@ void get_electrical(void)
         if (current_offset_counter == (SAMPLE_FREQ * 1L))
         {
             calibration_done = TRUE;
+            start_calibration = FALSE;
             IS_offset = IS_offset_calib / (SAMPLE_FREQ*1L);
             IF_offset = IF_offset_calib / (SAMPLE_FREQ*1L);
             u_ac_offset = u_ac_offset_calib / (SAMPLE_FREQ*1L);
+            DEL_UDC_offset = DEL_UDC_offset_calib / (SAMPLE_FREQ*1L);
+            u_f_offset = u_f_offset_calib / (SAMPLE_FREQ*1L);
+            u_out_offset = u_out_offset_calib / (SAMPLE_FREQ*1L);
         }
 
         IS = 0.0;
         IF = 0.0;
         u_ac = 0.0;
+        DEL_UDC = 0.0;
+        u_f = 0.0;
+        u_out = 0.0;
     }
     else
     {
-        IS = IS_gain * (IS - IS_offset);
-        IF = IF_gain * (IF - IF_offset);
-        u_ac = u_ac_gain * (u_ac - u_ac_offset);
+        IS = IS_gain * (IS_adc - IS_offset);
+        IF = IF_gain * (IF_adc - IF_offset);
+        u_ac = u_ac_gain * (u_ac_adc - u_ac_offset);
+        DEL_UDC = DEL_UDC_gain * (DEL_UDC_adc - DEL_UDC_offset);
+        u_f = u_f_gain * (u_f_adc - u_f_offset);
+        u_out = u_out_gain * (u_out_adc - u_out_offset);
     }
-
-    // se napetosti
-    DEL_UDC = DEL_UDC_gain * (DEL_UDC - DEL_UDC_offset);
-    u_f = u_f_gain * (u_f - u_f_offset);
-    u_out = u_out_gain * (u_out - u_out_offset);
 
     // temperatura hladilnika
     temperatura = NTC_temp();
 
-    // porcunam DFT omrežne napetosti
+    // porcunam DFT napetosti
+    // vhodna omrežna napetost - u_ac
     u_ac_dft.In = u_ac;
     DFT_FLOAT_MACRO(u_ac_dft);
 
-    // naraèunam amplitudo omrežne napetosti
+    // izhodna napetost - u_out
+    u_out_dft.In = u_out;
+    DFT_FLOAT_MACRO(u_out_dft);
+
+    // naraèunam amplitudo omrežne napetosti - u_ac
     u_ac_rms = ZSQRT2 * sqrt(u_ac_dft.SumA * u_ac_dft.SumA + u_ac_dft.SumB *u_ac_dft.SumB);
 
     // normiram, da dobim obliko
     u_ac_form = u_ac_dft.Out / (u_ac_rms * SQRT2);
+
+    // naraèunam amplitudo izhodne napetosti - u_out
+    u_out_rms = ZSQRT2 * sqrt(u_out_dft.SumA * u_out_dft.SumA + u_out_dft.SumB *u_out_dft.SumB);
+
+    // normiram, da dobim obliko
+    u_out_form = u_out_dft.Out / (u_out_rms * SQRT2);
+
 
     // filtriram DC link napetost
     napetost_dc_f.In = DEL_UDC;
