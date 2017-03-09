@@ -22,6 +22,10 @@
 #include    "ABF_float.h"
 #include    "DELAY_float.h"
 
+// korekcijska faktorja (meritev osciloskop)
+#define		U_AC_CORR_F		0.963752665
+#define		U_OUT_CORR_F	0.967880085
+
 extern void get_electrical(void);
 
 #endif /* INCLUDE_GET_ELECTRICAL_H_ */

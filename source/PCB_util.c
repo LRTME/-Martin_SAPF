@@ -76,7 +76,7 @@ void PCB_CPLD_over_voltage_NO(void)
 }
 
 
-bool PCB_CPLD_over_voltage_stat(void)
+/*bool PCB_CPLD_over_voltage_stat(void)
 {
 	if(GpioDataRegs.GPADAT.bit.GPIO17 == 1)
 	{
@@ -86,7 +86,7 @@ bool PCB_CPLD_over_voltage_stat(void)
 	{
 		return (FALSE);
 	}
-}
+}*/
 
 /**************************************************************
 * Funckija, ki vrne stanje "over_current_supply" s CPLD
@@ -104,7 +104,7 @@ void PCB_CPLD_over_current_supply_NO(void)
 }
 
 
-bool PCB_CPLD_over_current_supply_stat(void)
+/*bool PCB_CPLD_over_current_supply_stat(void)
 {
 	if(GpioDataRegs.GPADAT.bit.GPIO11 == 1)
 	{
@@ -115,7 +115,7 @@ bool PCB_CPLD_over_current_supply_stat(void)
 		return (FALSE);
 	}
 }
-
+*/
 /**************************************************************
 * Funckija, ki vrne stanje "over_current_filter" s CPLD
 * (over_current_filter) - GPIO15
@@ -132,7 +132,7 @@ void PCB_CPLD_over_current_filter_NO(void)
 }
 
 
-bool PCB_CPLD_over_current_filter_stat(void)
+/*bool PCB_CPLD_over_current_filter_stat(void)
 {
 	if(GpioDataRegs.GPADAT.bit.GPIO15 == 1)
 	{
@@ -143,7 +143,7 @@ bool PCB_CPLD_over_current_filter_stat(void)
 		return (FALSE);
 	}
 }
-
+*/
 /**************************************************************
 * Funkcije izhodov na CPLD
 ***************************************************************
@@ -421,9 +421,9 @@ void PCB_init(void)
 
         // postavim v privzeto stanje
 
-		PCB_CPLD_over_voltage_NO();
-		PCB_CPLD_over_current_supply_NO();
-		PCB_CPLD_over_current_filter_NO();
+		PCB_CPLD_over_voltage_YES();
+		PCB_CPLD_over_current_supply_YES();
+		PCB_CPLD_over_current_filter_YES();
 
 		PCB_CPLD_LATCH_RESET_on();
 
