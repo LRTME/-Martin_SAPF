@@ -22,9 +22,9 @@
 #define     u_out_adc  		(AdcaResultRegs.ADCRESULT1)		//A1
 #define     u_ac_adc       	(AdcaResultRegs.ADCRESULT3)		//A3
 
-#define     IF_adc 			(AdcbResultRegs.ADCRESULT0)		//B0
+#define     LEM_IF_adc 		(AdcbResultRegs.ADCRESULT0)		//B0
 #define     DEL_UDC_adc		(AdcbResultRegs.ADCRESULT1)		//B1
-#define     IS_adc 			(AdcbResultRegs.ADCRESULT3)		//B3
+#define     LEM_IS_adc 		(AdcbResultRegs.ADCRESULT2)		//B3
 
 #define     M_TEMP_adc     	(AdcdResultRegs.ADCRESULT0)		//D0
 

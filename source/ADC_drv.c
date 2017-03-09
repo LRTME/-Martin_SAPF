@@ -85,15 +85,15 @@ void ADC_init(void)
     AdcaRegs.ADCSOC1CTL.bit.TRIGSEL = 5;        //trigger on ePWM1 SOCA/C
 
     //A3 - u_ac
-    AdcaRegs.ADCSOC3CTL.bit.CHSEL = 3;          //SOC3 will convert pin A3
-    AdcaRegs.ADCSOC3CTL.bit.ACQPS = acqps_set;  //sample window
-    AdcaRegs.ADCSOC3CTL.bit.TRIGSEL = 5;        //trigger on ePWM1 SOCA/C
+    AdcaRegs.ADCSOC2CTL.bit.CHSEL = 3;          //SOC2 will convert pin A3
+    AdcaRegs.ADCSOC2CTL.bit.ACQPS = acqps_set;  //sample window
+    AdcaRegs.ADCSOC2CTL.bit.TRIGSEL = 5;        //trigger on ePWM1 SOCA/C
 
     AdcaRegs.ADCSOC5CTL.bit.CHSEL = 13;         //SOC5 will convert pin temperature
     AdcaRegs.ADCSOC5CTL.bit.ACQPS = 140;        //sample window 700 ns
     AdcaRegs.ADCSOC5CTL.bit.TRIGSEL = 5;        //trigger on ePWM1 SOCA/C
 
-    AdcaRegs.ADCINTSEL1N2.bit.INT1SEL = 3;      //end of SOC3 will set INT1 flag
+    AdcaRegs.ADCINTSEL1N2.bit.INT1SEL = 2;      //end of SOC2 will set INT1 flag
     AdcaRegs.ADCINTSEL1N2.bit.INT1E = 1;        //enable INT1 flag
     AdcaRegs.ADCINTFLGCLR.bit.ADCINT1 = 1;      //make sure INT1 flag is cleared
 
@@ -109,9 +109,9 @@ void ADC_init(void)
     AdcbRegs.ADCSOC1CTL.bit.TRIGSEL = 5;        //trigger on ePWM1 SOCA/C
 
     //B3 - LEM_IS
-    AdcbRegs.ADCSOC3CTL.bit.CHSEL = 3;          //SOC2 will convert pin B3
-    AdcbRegs.ADCSOC3CTL.bit.ACQPS = acqps_set;  //sample window
-    AdcbRegs.ADCSOC3CTL.bit.TRIGSEL = 5;        //trigger on ePWM1 SOCB/D
+    AdcbRegs.ADCSOC2CTL.bit.CHSEL = 3;          //SOC2 will convert pin B3
+    AdcbRegs.ADCSOC2CTL.bit.ACQPS = acqps_set;  //sample window
+    AdcbRegs.ADCSOC2CTL.bit.TRIGSEL = 5;        //trigger on ePWM1 SOCB/D
 
     // ADCD channel setup
     //D0 - M_TEMP
