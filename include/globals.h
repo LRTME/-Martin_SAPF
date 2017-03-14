@@ -16,6 +16,25 @@
 // stevec prekinitev
 extern volatile float    interrupt_cnt;
 
+// seznam globalnih spremenljivk
+extern volatile enum STATE { Initialization = 0, Startup, Standby, Ramp_up, Working, Ramp_down, Fault, Fault_sensed} state;
+
+extern volatile enum MODE { Open_loop = 0, Control} mode;
+
+//struktura z zastavicami napake
+extern struct FAULT_FLAGS
+{
+    bool    overcurrent_bb:1;
+    bool    overcurrent_grid:1;
+    bool    HW_trip:1;
+    bool    undervoltage_dc:1;
+    bool    overvoltage_dc:1;
+    bool    undervoltage_grid:1;
+    bool    overvoltage_grid:1;
+    bool    cpu_overrun:1;
+    bool    fault_registered:1;
+} fault_flags;
+
 // kdo proži trigger
 extern volatile enum TRIGGER {Ref_cnt = 0, Napetost} trigger;
 

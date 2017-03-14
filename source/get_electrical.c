@@ -32,7 +32,7 @@ float   u_out_offset = 2048.0;
 
 float   u_ac_gain = ((1000 + 0.47) / (5 * 0.47)) * U_AC_CORR_F * (3.3 / 4096);
 float   DEL_UDC_gain = ((200 + 1.8) / (5 * 1.8)) * DEL_UDC_CORR_F * (3.3 / 4096);
-float   u_f_gain = ((36 + 1.8) / (5 * 1.8)) * (3.3 / 4096);
+float   u_f_gain = ((200 + 1.8) / (5 * 1.8)) * (3.3 / 4096);
 float   u_out_gain = ((1000 + 0.47) / (5 * 0.47)) * U_OUT_CORR_F * (3.3 / 4096);
 
 // NTC

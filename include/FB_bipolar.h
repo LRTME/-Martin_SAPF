@@ -19,6 +19,7 @@
 #include    "globals.h"
 #include	"main.h"
 
+
 /* Definicije */
 // stevilke PWM modulov, ki krmilijo mostic
 // ne pozabi spremeniti GPIO mux registrov

@@ -12,7 +12,6 @@
 ****************************************************************/
 #include "FB_bipolar.h"
 
-
 // status ali delujemo ali ne
 enum FB_STATE fb_status = FB_DIS;
 

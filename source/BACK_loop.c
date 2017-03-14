@@ -56,16 +56,17 @@ void BACK_loop(void)
 
 		/*	state machine	*/
 
-	/*	switch(state)
+		switch(state)
 		{
 		case Standby:
+			PCB_LED_READY_on();
 			break;
 		case Working:
 			break;
 		case Fault:
 			break;
 		}
-    */
+
         asm(" NOP");
 
         // end of while(1)
