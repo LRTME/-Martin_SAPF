@@ -17,7 +17,7 @@
 extern volatile float    interrupt_cnt;
 
 // seznam globalnih spremenljivk
-extern volatile enum STATE { Initialization = 0, Startup, Standby, Ramp_up, Working, Ramp_down, Fault, Fault_sensed} state;
+extern volatile enum STATE { Initialization = 0, Startup, Standby, Enable, Working, Disable, Fault, Fault_sensed} state;
 
 extern volatile enum MODE { Open_loop = 0, Control} mode;
 

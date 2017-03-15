@@ -92,7 +92,7 @@ void FB_enable(void)
 }
 
 /**************************************************************
-* vrne status (delnam/ne delam)
+* vrne status (delam/ne delam)
 * returns:  
 **************************************************************/
 int FB_status(void)
@@ -126,7 +126,7 @@ void FB_init(void)
     FB_MODUL2.TBCTL.bit.PRDLD = 0;        // shadowed period reload
     FB_MODUL2.TBCTL.bit.PHSEN = 0;        // master timer does not sync
     
-    // debug mode behafiour
+    // debug mode behaviour
     #if FB_DEBUG == 0
     FB_MODUL1.TBCTL.bit.FREE_SOFT = 0;  // stop after current cycle
     FB_MODUL2.TBCTL.bit.FREE_SOFT = 0;  // stop after current cycle
@@ -199,10 +199,10 @@ void FB_init(void)
 
     // output pin setup
     EALLOW;
-    GpioCtrlRegs.GPAMUX1.bit.GPIO0 = 1;
-    GpioCtrlRegs.GPAMUX1.bit.GPIO1 = 1;
-    GpioCtrlRegs.GPAMUX1.bit.GPIO2 = 1;
-    GpioCtrlRegs.GPAMUX1.bit.GPIO3 = 1;
+    GpioCtrlRegs.GPAMUX1.bit.GPIO0 = 1;		// ePWM1A
+    GpioCtrlRegs.GPAMUX1.bit.GPIO1 = 1;		// ePWM1B
+    GpioCtrlRegs.GPAMUX1.bit.GPIO2 = 1;		// ePWM2A
+    GpioCtrlRegs.GPAMUX1.bit.GPIO3 = 1;		// ePWM2B
     EDIS;
     
     // trip zone input pin setup

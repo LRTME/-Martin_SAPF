@@ -9,10 +9,10 @@
 
 #include    "define.h"
 
-#define     ABF_SAMP_FREQ       SAMP_FREQ
+#define     ABF_SAMPLE_FREQ       SAMPLE_FREQ
 
 // Diskretizacijski korak trackerja
-#define     ABF_SAMP_TIME       (1.0 / ABF_SAMP_FREQ)
+#define     ABF_SAMPLE_TIME       (1.0 / ABF_SAMPLE_FREQ)
 
 
 typedef struct ABF_FLOAT_STRUCT

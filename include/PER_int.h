@@ -14,11 +14,26 @@
 
 #include    "PWM_drv.h"
 #include    "ADC_drv.h"
+#include    "FB_bipolar.h"
 #include    "PCB_util.h"
 #include    "math.h"
 
 #include    "DLOG_gen.h"
-#include	"get_electrical.h"
+#include    "REF_gen.h"
+
+#include    "PID_float.h"
+#include    "DC_float.h"
+#include    "DFT_float.h"
+#include    "SLEW_float.h"
+#include    "STAT_float.h"
+#include    "ABF_float.h"
+#include    "DELAY_float.h"
+
+// korekcijski faktorji (meritev osciloskop)
+#define		U_AC_CORR_F		0.963752665
+#define		DEL_UDC_CORR_F	1.002150538
+#define		U_OUT_CORR_F	0.967880085
+
 /**************************************************************
 * Funckija, ki pripravi vse potrebno za izvajanje
 * prekinitvene rutine
