@@ -16,6 +16,8 @@ void main(void)
     EALLOW;
     ClkCfgRegs.LOSPCP.bit.LSPCLKDIV = 0;
     EDIS;
+
+labela:
     // GPIO - najprej
     InitGpio();
 
@@ -35,6 +37,7 @@ void main(void)
     ADC_init();
     PWM_init();
     FB_init();
+    BB_init();
 
     // inicializiram peridoièno prekinitev za regulacijo motorja
     PER_int_setup();
@@ -61,31 +64,32 @@ void main(void)
             // zato kar resetiram MCU, da se zaženemo še enkrat
             asm(" ESTOP0");
             DINT;
-            //goto labela;
+            goto labela;
+
             /*
             asm(" ESTOP0");
             EALLOW;
             SysCtrlRegs.WDCR = 0x0040;
             EDIS;
-            */
+			*/
         }
 
 
         // pocakam, da napetost na enosmernem tokokrogu naraste
-      /*  while (DEL_UDC < u_ac_rms * SQRT2 * (24 / 230))
+        while (DEL_UDC < u_ac_rms * SQRT2 * (24 / 230))
         {
-             DO NOTHING
-        }*/
+             /* DO NOTHING */
+        }
 
-        // kratkostièim zagonski upor
+        // kratkostièim zagonski upor R1 (100R)
         PCB_relay2_on();
         DELAY_US(1000000);
 
         // in pocakam, da napetost na enosmernem tokokrogu naraste do konca
-     /*   while (DEL_UDC < u_ac_rms * SQRT2 * (24 / 230))
+        while (DEL_UDC < u_ac_rms * SQRT2 * (24 / 230))
         {
-             DO NOTHING
-        } */
+           /*  DO NOTHING */
+        }
 
         //vklopim moènostno stopnjo in povem regulaciji da zaène delati
 
@@ -94,13 +98,13 @@ void main(void)
         FB_enable();
         state = Standby;
         // zeljeno vrednost enaccim z trenutno, da se lepo zapeljem po rampi
-        //DEL_UDC_slew.Out = DEL_UDC;
+        DEL_UDC_slew.Out = DEL_UDC;
         EINT;
         // pocakam da se napetost enosmernega kroga zapelje na nastavljeno vrednost
-     /*   while(fabs(nap_dc_reg.Fdb - nap_dc_reg.Ref) > 0.1)
+        while(fabs(DEL_UDC_reg.Fdb - DEL_UDC_reg.Ref) > 0.1)
         {
-            DO NOTHING
-        }*/
+           /* DO NOTHING */
+        }
 
         // grem v neskoncno zanko, ki se izvaja v ozadju
         BACK_loop();

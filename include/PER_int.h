@@ -15,6 +15,7 @@
 #include    "PWM_drv.h"
 #include    "ADC_drv.h"
 #include    "FB_bipolar.h"
+#include	"BB_2phase_shift.h"
 #include    "PCB_util.h"
 #include    "math.h"
 
