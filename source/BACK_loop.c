@@ -26,6 +26,8 @@ bool pulse_10ms = FALSE;
 void SW_detect(void);
 void pulse_gen(void);
 void test1(void);
+void fault_sensed_fcn(void);
+void fault_fcn(void);
 
 /**************************************************************
 * Funkcija, ki se izvaja v ozadju med obratovanjem
@@ -42,7 +44,7 @@ void BACK_loop(void)
         pulse_gen();
         SW_detect();
 		
-		test1();
+		//test1();
 
         // vsake toliko èasa spremenji stanje luèk
 /*        if (interrupt_cnt == 0)
@@ -62,8 +64,13 @@ void BACK_loop(void)
 			PCB_LED_READY_on();
 			break;
 		case Working:
+			PCB_LED_WORKING_on();
 			break;
+		case Fault_sensed:
+		    fault_sensed_fcn();
+		    break;
 		case Fault:
+			fault_fcn();
 			break;
 		}
 
@@ -256,16 +263,54 @@ void test1(void)
 
 			if (RESET_SW == TRUE)
 			{
-				PCB_LED_FAULT_on();
+				//PCB_LED_FAULT_on();
 				//PCB_relay2_on();
 				//PCB_relay3_on();
 				//PCB_CPLD_MOSFET_MCU_on();
 			}
 			else
 			{
-				PCB_LED_FAULT_off();
+				//PCB_LED_FAULT_off();
 				//PCB_relay2_off();
 				//PCB_relay3_off();
 				//PCB_CPLD_MOSFET_MCU_off();
 			}
+}
+
+void fault_fcn(void)
+{
+    // pobrišem napako, in grem v standby
+    if (RESET_SW == TRUE)
+    {
+        // resetiram MCU - preko WD-ja
+        EALLOW;
+        WdRegs.WDCR.all = 0x0040;
+        EDIS;
+    }
+    // signalizacija
+    PCB_LED_FAULT_on();
+}
+
+void fault_sensed_fcn(void)
+{
+    // izklopim mostic
+    FB_disable();
+    BB_disable();
+
+    // izklopim vse kontaktorjev
+    PCB_relay1_off();
+    PCB_relay2_off();
+    PCB_relay3_off();
+
+    //FLT_int_disable();
+
+    if (fault_flags.fault_registered == FALSE)
+    {
+        fault_flags.fault_registered = TRUE;
+    }
+    // signalizacija
+    PCB_LED_WORKING_off();
+   // PCB_LED_READY_off();
+
+    state = Fault;
 }

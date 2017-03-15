@@ -31,7 +31,7 @@ float   IF = 0.0;
 float   IS_offset = 2048;
 float   IF_offset = 2048;
 
-float   IS_gain = (15.0 / 0.625 ) * (7.5 / 6.2) * (3.3 / 4096);
+float   IS_gain = -(15.0 / 0.625 ) * (7.5 / 6.2) * (3.3 / 4096);
 float   IF_gain = (25.0 / 0.625 ) * (7.5 / 6.2) * (3.3 / 4096);
 
 long    current_offset_counter = 0;
@@ -125,9 +125,12 @@ float   power_out = 0.0;
 // temperatura hladilnika
 float   temperatura = 0.0;
 
+int oc_cnt = 0;
+
 // prototipi funkcij
 void get_electrical(void);
 void input_bridge_control(void);
+void check_limits(void);
 float NTC_temp(void);
 
 
@@ -186,6 +189,12 @@ void interrupt PER_int(void)
 
     // izracun napetosti, tokov in temperature hladilnika
     get_electrical();
+
+    // preverim ali sem znotraj meja
+    check_limits();
+
+    // regulacija DEL_UDC
+    input_bridge_control();
 
     // naracunam temperaturo
     //cpu_temp = GetTemperatureC(ADC_TEMP);
@@ -353,7 +362,7 @@ void get_electrical(void)
     // ocena izhodnega toka z ABF
    // i_cap_abf.u_cap_measured = u_f;
    // ABF_float_calc(&i_cap_abf);
-   // IF_abf = -i_cap_abf.i_cap_estimated + (tok_bb1 + tok_bb2);
+   // IF_abf = -i_cap_abf.i_cap_estimated + (IF + tok_bb2);
 
     // zakasnim IS
     i_grid_delay.in = IS * IS_reg.Out;
@@ -407,12 +416,12 @@ void input_bridge_control(void)
         // tokokroga peljan èez tokovni senzor na izhodu
         if (IF_source == Meas_dc)
         {
-            DEL_UDC_reg.Ff = IF_f.Mean * DEL_UDC_filtered * SQRT2 / u_ac_rms;
+            DEL_UDC_reg.Ff = IF_f.Mean * (24 / 230) * DEL_UDC_filtered * SQRT2 / u_ac_rms;
         }
         // privzeto uporabim ABF za oceno DC toka in posledièno feedforward
         if (I_dc_source == ABF_dc)
         {
-            DEL_UDC_reg.Ff = I_dc_abf * DEL_UDC_filtered * SQRT2 / u_ac_rms;
+            DEL_UDC_reg.Ff = I_dc_abf * (24 / 230) * DEL_UDC_filtered * SQRT2 / u_ac_rms;
         }
         // brez direktne krmilne veje
         if (I_dc_source == None_dc)
@@ -422,7 +431,7 @@ void input_bridge_control(void)
         // ocena preko izhodne moèi
         if (I_dc_source == Power_out)
         {
-            DEL_UDC_reg.Ff = power_out * SQRT2 / u_ac_rms;
+            DEL_UDC_reg.Ff = power_out * (24 / 230) * SQRT2 / u_ac_rms;
         }
 
         PID_FLOAT_CALC(DEL_UDC_reg);
@@ -430,9 +439,9 @@ void input_bridge_control(void)
         // izvedem tokovni regulator
         // tega bi veljalo zamenjati za PR regulator
         // ampak samo v primeru ko se sinhroniziram na omrežje
-        IS_reg.Ref = -DEL_UDC_reg.Out * u_ac_form;
+        IS_reg.Ref = -DEL_UDC_reg.Out * u_ac_form * (24 / 230);
         IS_reg.Fdb = IS;
-        IS_reg.Ff = u_ac/DEL_UDC;
+        IS_reg.Ff = (24 / 230) * u_ac/DEL_UDC;
         PID_FLOAT_CALC(IS_reg);
 
         // posljem vse skupaj na mostic
@@ -447,3 +456,97 @@ void input_bridge_control(void)
     }
 }
 
+#pragma CODE_SECTION(check_limits, "ramfuncs");
+void check_limits(void)
+{
+    // samo èe je kalibracija konènana
+    if (calibration_done == TRUE)
+    {
+        if (u_ac_rms > u_ac_RMS_MAX)
+        {
+            fault_flags.overvoltage_grid = TRUE;
+            state = Fault_sensed;
+            // izklopim mostic
+            FB_disable();
+            BB_disable();
+
+            // izklopim vse kontaktorjev
+            PCB_relay1_off();
+            PCB_relay2_off();
+            PCB_relay3_off();
+        }
+        if (   (u_ac_rms < u_ac_RMS_MIN)
+                && (state != Initialization)
+                && (state != Startup))
+        {
+            fault_flags.undervoltage_grid = TRUE;
+            state = Fault_sensed;
+            // izklopim mostic
+            FB_disable();
+            BB_disable();
+
+            // izklopim vse kontaktorjev
+            PCB_relay1_off();
+            PCB_relay2_off();
+            PCB_relay3_off();
+        }
+        if (DEL_UDC > DEL_UDC_MAX)
+        {
+            fault_flags.overvoltage_dc = TRUE;
+            state = Fault_sensed;
+            // izklopim mostic
+            FB_disable();
+            BB_disable();
+
+            // izklopim vse kontaktorjev
+            PCB_relay1_off();
+            PCB_relay2_off();
+            PCB_relay3_off();
+        }
+        if (   (DEL_UDC < DEL_UDC_MIN)
+                && (state != Initialization)
+                && (state != Startup))
+        {
+            fault_flags.undervoltage_dc = TRUE;
+            state = Fault_sensed;
+            // izklopim mostic
+            FB_disable();
+            BB_disable();
+
+            // izklopim vse kontaktorjev
+            PCB_relay1_off();
+            PCB_relay2_off();
+            PCB_relay3_off();
+        }
+        if ((IS > +IS_LIM) || (IS < -IS_LIM))
+        {
+        	oc_cnt = oc_cnt + 1;
+        	if (oc_cnt > 10)
+			{
+        		fault_flags.overcurrent_grid = TRUE;
+        		state = Fault_sensed;
+        		// izklopim mostic
+        		FB_disable();
+        		BB_disable();
+
+        		// izklopim vse kontaktorjev
+        		PCB_relay1_off();
+        		PCB_relay2_off();
+        		PCB_relay3_off();
+			}
+        }
+        if ((IF > +IF_LIM) || (IF < -IF_LIM))
+        {
+            fault_flags.overcurrent_bb = TRUE;
+            state = Fault_sensed;
+            // izklopim mostic
+            FB_disable();
+            BB_disable();
+
+            // izklopim vse kontaktorjev
+            PCB_relay1_off();
+            PCB_relay2_off();
+            PCB_relay3_off();
+        }
+    }
+}
