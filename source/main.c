@@ -35,7 +35,7 @@ labela:
 
     // inicializiram ADC in PWM modul
     ADC_init();
-    PWM_init();
+//    PWM_init();
     FB_init();
     BB_init();
 
@@ -49,8 +49,34 @@ labela:
     EINT;
     ERTM;
 
+    // pocakam, da se izvede par prekinitev, da zacnem brcati psa cuvaja
+    DELAY_US(1000);
+
+    // resetiram zapahe
+    PCB_CPLD_LATCH_RESET();
+
+    // resetiram vse morebitne napake
+    fault_flags.overcurrent_IF = FALSE;
+    fault_flags.overcurrent_IS = FALSE;
+    fault_flags.undervoltage_DEL_UDC = FALSE;
+    fault_flags.overvoltage_DEL_UDC = FALSE;
+    fault_flags.undervoltage_u_ac = FALSE;
+    fault_flags.overvoltage_u_ac = FALSE;
+    fault_flags.cpu_overrun = FALSE;
+    fault_flags.fault_registered = FALSE;
+    fault_flags.HW_trip = FALSE;
+
     // pozenem casovnik, ki bo prozil ADC in prekinitev
-    PWM_start();
+//    PWM_start();
+
+    // pocakam, da se izvede kalibracija tokovnih sond
+        DELAY_US(10000);
+        start_calibration = TRUE;
+        while(calibration_done == FALSE)
+        {
+            /* DO NOTHING */
+        }
+
 
     /* vklopna procedura */
         state = Startup;

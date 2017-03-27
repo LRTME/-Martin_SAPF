@@ -19,30 +19,24 @@ extern void PCB_WD_KICK_int(void);
 /**************************************************************
 * Funkcije za branje signalov s CPLD
 ***************************************************************
-* Funckija, ki vrne stanje "trip" s CPLD (trip)
+* Funckija, ki vrne stanje strojne zascite s CPLD (trip)
 **************************************************************/
 extern bool PCB_CPLD_trip(void);
 
 /**************************************************************
-* Funckije stanj "over_voltage" z CPLD (over_voltage)
+* Funckija stanja "over_voltage" z CPLD (over_voltage)
 **************************************************************/
-extern void PCB_CPLD_over_voltage_YES(void);
-extern void PCB_CPLD_over_voltage_NO(void);
-extern bool PCB_CPLD_over_voltage_stat(void);
+extern bool PCB_CPLD_over_voltage(void);
 /**************************************************************
-* Funckije stanj "over_current_supply" s CPLD
+* Funckija stanja "over_current_supply" s CPLD
 * (over_current_supply)
 **************************************************************/
-extern void PCB_CPLD_over_current_supply_YES(void);
-extern void PCB_CPLD_over_current_supply_NO(void);
-extern bool PCB_CPLD_over_current_supply_stat(void);
+extern bool PCB_CPLD_over_current_supply(void);
 /**************************************************************
-* Funckije stanj "over_current_filter" s CPLD
+* Funckija stanja "over_current_filter" s CPLD
 * (over_current_filter)
 **************************************************************/
-extern void PCB_CPLD_over_current_filter_YES(void);
-extern void PCB_CPLD_over_current_filter_NO(void);
-extern bool PCB_CPLD_over_current_filter_stat(void);
+extern bool PCB_CPLD_over_current_filter(void);
 /**************************************************************
 * Funkcije izhodov na CPLD
 ***************************************************************
@@ -53,8 +47,7 @@ extern void PCB_CPLD_MOSFET_MCU_off(void);
 /**************************************************************
 * Funckija izhoda LATCH_RESET
 **************************************************************/
-extern void PCB_CPLD_LATCH_RESET_on(void);
-extern void PCB_CPLD_LATCH_RESET_off(void);
+extern void PCB_CPLD_LATCH_RESET(void);
 /**************************************************************
 * Funkcije za vklop/izklop relejev (preko CPLD)
 ***************************************************************

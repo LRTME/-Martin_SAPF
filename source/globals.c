@@ -33,4 +33,4 @@ extern volatile enum TRIGGER trigger = Ref_cnt;
 
 // signaliziram, da je offset kalibriran
 volatile bool calibration_done = FALSE;
-volatile bool start_calibration = TRUE;
+volatile bool start_calibration = FALSE;

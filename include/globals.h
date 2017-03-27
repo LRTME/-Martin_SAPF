@@ -24,13 +24,13 @@ extern volatile enum MODE { Open_loop = 0, Control} mode;
 //struktura z zastavicami napake
 extern struct FAULT_FLAGS
 {
-    bool    overcurrent_bb:1;
-    bool    overcurrent_grid:1;
+    bool    overcurrent_IF:1;
+    bool    overcurrent_IS:1;
     bool    HW_trip:1;
-    bool    undervoltage_dc:1;
-    bool    overvoltage_dc:1;
-    bool    undervoltage_grid:1;
-    bool    overvoltage_grid:1;
+    bool    undervoltage_DEL_UDC:1;
+    bool    overvoltage_DEL_UDC:1;
+    bool    undervoltage_u_ac:1;
+    bool    overvoltage_u_ac:1;
     bool    cpu_overrun:1;
     bool    fault_registered:1;
 } fault_flags;

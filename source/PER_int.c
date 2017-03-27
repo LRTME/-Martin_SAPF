@@ -548,7 +548,7 @@ void check_limits(void)
     {
         /* if (u_ac_rms > u_ac_RMS_MAX)
         {
-            fault_flags.overvoltage_grid = TRUE;
+            fault_flags.overvoltage_u_ac = TRUE;
             state = Fault_sensed;
             // izklopim mostic
             FB_disable();
@@ -563,7 +563,7 @@ void check_limits(void)
                 && (state != Initialization)
                 && (state != Startup))
         {
-            fault_flags.undervoltage_grid = TRUE;
+            fault_flags.undervoltage_u_ac = TRUE;
             state = Fault_sensed;
             // izklopim mostic
             FB_disable();
@@ -576,7 +576,7 @@ void check_limits(void)
         }
        */ if (DEL_UDC > DEL_UDC_MAX)
         {
-            fault_flags.overvoltage_dc = TRUE;
+            fault_flags.overvoltage_DEL_UDC = TRUE;
             state = Fault_sensed;
             // izklopim mostic
             FB_disable();
@@ -591,7 +591,7 @@ void check_limits(void)
                 && (state != Initialization)
                 && (state != Startup))
         {
-            fault_flags.undervoltage_dc = TRUE;
+            fault_flags.undervoltage_DEL_UDC = TRUE;
             state = Fault_sensed;
             // izklopim mostic
             FB_disable();
@@ -604,7 +604,7 @@ void check_limits(void)
         } */
         if ((IS > +IS_LIM) || (IS < -IS_LIM))
         {
-        		fault_flags.overcurrent_grid = TRUE;
+        		fault_flags.overcurrent_IS = TRUE;
         		state = Fault_sensed;
         		// izklopim mostic
         		FB_disable();
@@ -617,7 +617,7 @@ void check_limits(void)
         }
         if ((IF > +IF_LIM) || (IF < -IF_LIM))
         {
-            fault_flags.overcurrent_bb = TRUE;
+            fault_flags.overcurrent_IF = TRUE;
             state = Fault_sensed;
             // izklopim mostic
             FB_disable();

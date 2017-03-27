@@ -244,38 +244,6 @@ void SW_detect(void)
 }
 
 
-void test1(void)
-{
-	// test tipk in LEDic
-
-			if (ENABLE_SW == TRUE)
-			{
-				PCB_LED_WORKING_on();
-				PCB_LED_READY_on();
-				//PCB_relay3_on();
-			}
-			else
-			{
-				PCB_LED_WORKING_off();
-				PCB_LED_READY_off();
-				//PCB_relay3_off();
-			}
-
-			if (RESET_SW == TRUE)
-			{
-				//PCB_LED_FAULT_on();
-				//PCB_relay2_on();
-				//PCB_relay3_on();
-				//PCB_CPLD_MOSFET_MCU_on();
-			}
-			else
-			{
-				//PCB_LED_FAULT_off();
-				//PCB_relay2_off();
-				//PCB_relay3_off();
-				//PCB_CPLD_MOSFET_MCU_off();
-			}
-}
 
 void fault_fcn(void)
 {
@@ -283,6 +251,7 @@ void fault_fcn(void)
     if (RESET_SW == TRUE)
     {
         // resetiram MCU - preko WD-ja
+    	PCB_LED_FAULT_off();
         EALLOW;
         WdRegs.WDCR.all = 0x0040;
         EDIS;
@@ -310,7 +279,7 @@ void fault_sensed_fcn(void)
     }
     // signalizacija
     PCB_LED_WORKING_off();
-   // PCB_LED_READY_off();
+    PCB_LED_READY_off();
 
     state = Fault;
 }
