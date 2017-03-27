@@ -95,7 +95,7 @@ labela:
 
         DINT;
 
-        //FB_enable();
+ //       FB_enable();
         state = Standby;
         // zeljeno vrednost enaccim z trenutno, da se lepo zapeljem po rampi
         DEL_UDC_slew.Out = DEL_UDC;
