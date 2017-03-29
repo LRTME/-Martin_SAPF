@@ -33,9 +33,9 @@ labela:
     // inicializacija komunikacijoe
     COMM_initialization();
 
-    // inicializiram ADC in PWM modul
+    // inicializiram ADC in moènostni modul
     ADC_init();
-//    PWM_init();
+
     FB_init();
     BB_init();
 
@@ -66,8 +66,6 @@ labela:
     fault_flags.fault_registered = FALSE;
     fault_flags.HW_trip = FALSE;
 
-    // pozenem casovnik, ki bo prozil ADC in prekinitev
-//    PWM_start();
 
     // pocakam, da se izvede kalibracija tokovnih sond
         DELAY_US(10000);

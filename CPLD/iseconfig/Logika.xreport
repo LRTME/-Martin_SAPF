@@ -1,11 +1,11 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <report-views version="2.0" >
  <header>
-  <DateModified>2016-07-28T15:33:13</DateModified>
+  <DateModified>2017-03-28T13:07:53</DateModified>
   <ModuleName>Logika</ModuleName>
   <SummaryTimeStamp>2016-03-13T13:20:04</SummaryTimeStamp>
-  <SavedFilePath>D:/Mitja/Projekti/SerijskiFilterEnoF/Programi/CPLD_logika/iseconfig/Logika.xreport</SavedFilePath>
-  <ImplementationReportsDirectory>D:/Mitja/Projekti/SerijskiFilterEnoF/Programi/CPLD_logika\</ImplementationReportsDirectory>
+  <SavedFilePath>D:/Martin_Rozej/Martin_SAPF/CPLD/iseconfig/Logika.xreport</SavedFilePath>
+  <ImplementationReportsDirectory>D:/Martin_Rozej/Martin_SAPF/CPLD\</ImplementationReportsDirectory>
   <DateInitialized>2016-03-10T21:51:25</DateInitialized>
   <EnableMessageFiltering>false</EnableMessageFiltering>
  </header>

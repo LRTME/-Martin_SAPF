@@ -124,13 +124,9 @@
       <status xil_pn:value="ReadyToRun"/>
       <outfile xil_pn:name="Logika.jed"/>
     </transform>
-    <transform xil_pn:end_ts="1459839946" xil_pn:in_ck="3687913779229912" xil_pn:name="TRAN_impactProgrammingTool_CPLD" xil_pn:prop_ck="-3598488201878296819" xil_pn:start_ts="1459839946">
+    <transform xil_pn:end_ts="1490699315" xil_pn:in_ck="3687913779229912" xil_pn:name="TRAN_impactProgrammingTool_CPLD" xil_pn:prop_ck="-3598488201878296819" xil_pn:start_ts="1490699315">
       <status xil_pn:value="SuccessfullyRun"/>
       <status xil_pn:value="ReadyToRun"/>
-      <status xil_pn:value="OutOfDateForInputs"/>
-      <status xil_pn:value="OutOfDateForOutputs"/>
-      <status xil_pn:value="InputChanged"/>
-      <status xil_pn:value="OutputChanged"/>
       <outfile xil_pn:name="_impact.cmd"/>
       <outfile xil_pn:name="_impact.log"/>
     </transform>

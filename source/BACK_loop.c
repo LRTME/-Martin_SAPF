@@ -43,18 +43,6 @@ void BACK_loop(void)
 
         pulse_gen();
         SW_detect();
-		
-		//test1();
-
-        // vsake toliko èasa spremenji stanje luèk
-/*        if (interrupt_cnt == 0)
-        {
-            PCB_LEDcard_toggle();
-            // in pocakam najmanj 50 us - da ne bi slucajno izvedel tega dvakrat
-            DELAY_US(50L);
-			
-        }
-*/
 
 		/*	state machine	*/
 
