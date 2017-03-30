@@ -551,7 +551,7 @@ void input_bridge_control(void)
     {
         DEL_UDC_reg.Ui = 0.0;
         IS_reg.Ui = 0.0;
-        FB_update(0.0);
+        FB1_update(0.0);
     }
 }
 
