@@ -15,13 +15,13 @@
 #define     SWITCH_FREQ     20000L
 
 // veèkratnik preklopne frekvence
-#define     SAMP_PRESCALE   1
+#define     SAMPLE_PRESCALE   1
 
 // razmerje med preklopno in vzorèno frekvenco
 #define     SAMPLING_RATIO  2
 
 // Vzorèna frekvenca (20kHz)
-#define     SAMPLE_FREQ     (SWITCH_FREQ/SAMP_PRESCALE)
+#define     SAMPLE_FREQ     (SWITCH_FREQ/SAMPLE_PRESCALE)
 
 // vzorèna perioda
 #define     SAMPLE_TIME     (1.0/SAMPLE_FREQ)

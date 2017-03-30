@@ -251,8 +251,8 @@ void fault_fcn(void)
 void fault_sensed_fcn(void)
 {
     // izklopim mostic
-    FB_disable();
-    BB_disable();
+    FB1_disable();
+    FB2_disable();
 
     // izklopim vse kontaktorjev
     PCB_relay1_off();

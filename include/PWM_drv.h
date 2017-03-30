@@ -21,10 +21,10 @@
 #define		PWM_TMR_FREQ	(CPU_FREQ/2)
 
 // perioda casovnika (v procesorskih cikilh) 
-#define     PWM_PERIOD      (PWM_TMR_FREQ/(SAMPLE_FREQ * SAMP_PRESCALE))
+#define     PWM_PERIOD      (PWM_TMR_FREQ/(SAMPLE_FREQ * SAMPLE_PRESCALE))
 
 // prescaler za prekinitev
-#define     PWM_INT_PSCL    SAMP_PRESCALE
+#define     PWM_INT_PSCL    SAMPLE_PRESCALE
 
 /**************************************************************
 * Funkcija, poklièe funkciji PWM_PWM_init in PWM_ADC_init; klièemo

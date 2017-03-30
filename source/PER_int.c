@@ -7,6 +7,10 @@
 #include    "PER_int.h"
 #include    "TIC_toc.h"
 
+//spremenljivke za test input bridge
+float tokA = 1.0;
+float zeljen;
+
 // generiranje željene vrednosti
 float ref_counter = 0;
 float ref_counter_freq = 10; // Hz
@@ -187,8 +191,18 @@ void interrupt PER_int(void)
     check_limits();
 
     // regulacija DEL_UDC
-    input_bridge_control();
+    // input_bridge_control();
 
+    // koda za test vhodnega mostièa
+
+    if (   (state == Standby)
+            || (state == Enable)
+            || (state == Working)
+            || (state == Disable))
+    {
+    zeljen = tokA * sin(2 * GRID_FREQ * PI * SAMPLE_TIME * interrupt_cnt);
+    FB1_update(zeljen);
+}
     // spavim vrednosti v buffer za prikaz
     DLOG_GEN_update();
     
@@ -226,7 +240,7 @@ void interrupt PER_int(void)
 void PER_int_setup(void)
 {
     // inicializiram data logger
-    dlog.mode = Single;
+    dlog.mode = Continuous;
     dlog.auto_time = 1;
     dlog.holdoff_time = 1;
 
@@ -239,6 +253,7 @@ void PER_int_setup(void)
     dlog.iptr1 = &u_ac;
     dlog.iptr2 = &IS;
     dlog.iptr3 = &DEL_UDC;
+    dlog.iptr4 = &zeljen;
 //    dlog.iptr4 = &i_cap_dc.i_cap_estimated;
 //    dlog.iptr5 = &tok_dc_abf;
     dlog.iptr6 = &u_out;
@@ -445,8 +460,8 @@ void get_electrical(void)
 
     // ocena izhodnega toka z ABF
    // i_cap_abf.u_cap_measured = u_f;
-   // ABF_float_calc(&i_cap_abf);
-   // IF_abf = -i_cap_abf.i_cap_estimated + (IF + IF2);
+  //  ABF_float_calc(&i_cap_abf);
+  //  IF_abf = -i_cap_abf.i_cap_estimated + (IF + IF2);
 
     // zakasnim IS
     i_grid_delay.in = IS * IS_reg.Out;
@@ -529,7 +544,7 @@ void input_bridge_control(void)
         PID_FLOAT_CALC(IS_reg);
 
         // posljem vse skupaj na mostic
-        FB_update(IS_reg.Out);
+        FB1_update(IS_reg.Out);
     }
     // sicer pa nicim integralna stanja
     else
@@ -551,8 +566,8 @@ void check_limits(void)
             fault_flags.overvoltage_u_ac = TRUE;
             state = Fault_sensed;
             // izklopim mostic
-            FB_disable();
-            BB_disable();
+            FB1_disable();
+            FB2_disable();
 
             // izklopim vse kontaktorjev
             PCB_relay1_off();
@@ -566,8 +581,8 @@ void check_limits(void)
             fault_flags.undervoltage_u_ac = TRUE;
             state = Fault_sensed;
             // izklopim mostic
-            FB_disable();
-            BB_disable();
+            FB1_disable();
+            FB2_disable();
 
             // izklopim vse kontaktorjev
             PCB_relay1_off();
@@ -579,23 +594,23 @@ void check_limits(void)
             fault_flags.overvoltage_DEL_UDC = TRUE;
             state = Fault_sensed;
             // izklopim mostic
-            FB_disable();
-            BB_disable();
+            FB1_disable();
+                        FB2_disable();
 
             // izklopim vse kontaktorjev
             PCB_relay1_off();
             PCB_relay2_off();
             PCB_relay3_off();
-        } /*
-        if (   (DEL_UDC < DEL_UDC_MIN)
+        }
+    /*    if (   (DEL_UDC < DEL_UDC_MIN)
                 && (state != Initialization)
                 && (state != Startup))
         {
             fault_flags.undervoltage_DEL_UDC = TRUE;
             state = Fault_sensed;
             // izklopim mostic
-            FB_disable();
-            BB_disable();
+            FB1_disable();
+            FB2_disable();
 
             // izklopim vse kontaktorjev
             PCB_relay1_off();
@@ -607,8 +622,8 @@ void check_limits(void)
         		fault_flags.overcurrent_IS = TRUE;
         		state = Fault_sensed;
         		// izklopim mostic
-        		FB_disable();
-        		BB_disable();
+        		FB1_disable();
+        		            FB2_disable();
 
         		// izklopim vse kontaktorjev
         		PCB_relay1_off();
@@ -620,8 +635,8 @@ void check_limits(void)
             fault_flags.overcurrent_IF = TRUE;
             state = Fault_sensed;
             // izklopim mostic
-            FB_disable();
-            BB_disable();
+            FB1_disable();
+                        FB2_disable();
 
             // izklopim vse kontaktorjev
             PCB_relay1_off();

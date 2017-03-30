@@ -36,14 +36,15 @@ labela:
     // inicializiram ADC in moènostni modul
     ADC_init();
 
-    FB_init();
-    BB_init();
+    FB1_init();
+    FB2_init();
 
     // inicializiram peridoièno prekinitev za regulacijo
     PER_int_setup();
 
     // zagon PWM enot
-    FB_start();
+    FB1_start();
+    FB2_start();
 
     // omogocim prekinitve
     EINT;
@@ -100,26 +101,26 @@ labela:
 
 
         // pocakam, da napetost na enosmernem tokokrogu naraste
-        while (DEL_UDC < u_ac_rms * SQRT2 * (24 / 230))
+/*        while (DEL_UDC < u_ac_rms * SQRT2 * (24 / 230))
         {
-             /* DO NOTHING */
+              DO NOTHING
         }
-
+*/
         // kratkostièim zagonski upor R1 (100R)
         PCB_relay2_on();
         DELAY_US(1000000);
 
         // in pocakam, da napetost na enosmernem tokokrogu naraste do konca
-        while (DEL_UDC < u_ac_rms * SQRT2 * (24 / 230))
+/*        while (DEL_UDC < u_ac_rms * SQRT2 * (24 / 230))
         {
-           /*  DO NOTHING */
+             DO NOTHING
         }
-
+*/
         //vklopim moènostno stopnjo in povem regulaciji da zaène delati
 
         DINT;
 
- //       FB_enable();
+        FB1_enable();
         state = Standby;
         // zeljeno vrednost enaccim z trenutno, da se lepo zapeljem po rampi
         DEL_UDC_slew.Out = DEL_UDC;
