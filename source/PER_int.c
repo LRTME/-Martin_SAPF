@@ -7,14 +7,12 @@
 #include    "PER_int.h"
 #include    "TIC_toc.h"
 
-//spremenljivke za test input bridge
-float tokA = 1.0;
-float zeljen;
-
 // generiranje željene vrednosti
 float ref_counter = 0;
 float ref_counter_freq = 10; // Hz
 float ref_counter_cmpr = 0.025;
+
+float IS_zeljen = 2.0;
 
 float ref_value = 0;
 float ref_value_high = 0.85;
@@ -35,7 +33,7 @@ float   IF = 0.0;
 float   IS_offset = 2048;
 float   IF_offset = 2048;
 
-float   IS_gain = -(5.0 / 0.625 ) * (7.5 / 6.2) * (3.3 / 4096);
+float   IS_gain = (5.0 / 0.625 ) * (7.5 / 6.2) * (3.3 / 4096);
 float   IF_gain = (25.0 / 0.625 ) * (7.5 / 6.2) * (3.3 / 4096);
 
 long    current_offset_counter = 0;
@@ -105,14 +103,14 @@ ABF_float   i_cap_abf = ABF_FLOAT_DEFAULTS;
 float       IF_abf = 0.0;
 
 // za oceno DC-link toka
-ABF_float   i_cap_dc = ABF_FLOAT_DEFAULTS;
+ABF_float   I_cap_dc = ABF_FLOAT_DEFAULTS;
 float       I_dc_abf = 0.0;
 
 // za zakasnitev omreznega toka
-DELAY_float i_grid_delay = DELAY_FLOAT_DEFAULTS;
+DELAY_float IS_delay = DELAY_FLOAT_DEFAULTS;
 
 // filtriranje izhoda ocene
-DC_float    i_dc_f = DC_FLOAT_DEFAULTS;
+DC_float    I_dc_f = DC_FLOAT_DEFAULTS;
 
 // filtriranje meritve
 DC_float    IF_f = DC_FLOAT_DEFAULTS;
@@ -191,18 +189,8 @@ void interrupt PER_int(void)
     check_limits();
 
     // regulacija DEL_UDC
-    // input_bridge_control();
+    input_bridge_control();
 
-    // koda za test vhodnega mostièa
-
-    if (   (state == Standby)
-            || (state == Enable)
-            || (state == Working)
-            || (state == Disable))
-    {
-    zeljen = tokA * sin(2 * GRID_FREQ * PI * SAMPLE_TIME * interrupt_cnt);
-    FB1_update(zeljen);
-}
     // spavim vrednosti v buffer za prikaz
     DLOG_GEN_update();
     
@@ -252,10 +240,9 @@ void PER_int_setup(void)
 
     dlog.iptr1 = &u_ac;
     dlog.iptr2 = &IS;
-    dlog.iptr3 = &DEL_UDC;
-    dlog.iptr4 = &zeljen;
-//    dlog.iptr4 = &i_cap_dc.i_cap_estimated;
-//    dlog.iptr5 = &tok_dc_abf;
+    dlog.iptr3 = &IS_reg.Ref;
+    dlog.iptr4 = &I_cap_dc.i_cap_estimated;
+    dlog.iptr5 = &I_dc_abf;
     dlog.iptr6 = &u_out;
     dlog.iptr7 = &IF;
     dlog.iptr8 = &IF_abf;
@@ -287,12 +274,14 @@ void PER_int_setup(void)
     DEL_UDC_reg.OutMin = -20; //-15; //-10.0; // -33.0
 
     // inicializiram regulator omreznega toka
+     * */
     IS_reg.Kp = 0.2;          //0.2;
     IS_reg.Ki = 0.008;        //0.008;
     IS_reg.Kff = 1.2;         //0.8;
     IS_reg.OutMax = +0.99;    // zaradi bootstrap driverjev ne gre do 1.0
     IS_reg.OutMin = -0.99;    // zaradi bootstrap driverjev ne gre do 1.0
 
+    /*
     // inicializiram rampo izhodne napetosti
   //  u_out_slew.In = 0;    // kasneje jo doloèa potenciometer
   //  u_out_slew.Slope_up = 10.0 * SAMPLE_TIME;  // 10 V/s
@@ -332,16 +321,16 @@ void PER_int_setup(void)
     i_cap_abf.Beta = 0.098696044;   // 0.394784176; 0.098696044; 0.024674011; 0.00098696;     0.00024674;     0.0000098696
     i_cap_abf.Capacitance = 5 * 0.0022;   // 2200 uF
 
-    i_cap_dc.Alpha = 0.394940272;  // 0.6911845;   0.394940272 ; 0.209807141; 0.043935349;    0.022091045;    0.004437948
-    i_cap_dc.Beta = 0.098696044;   // 0.394784176; 0.098696044; 0.024674011; 0.00098696;     0.00024674;     0.0000098696
-    i_cap_dc.Capacitance = 5 * 0.0022;   // 2200 uF
+    I_cap_dc.Alpha = 0.394940272;  // 0.6911845;   0.394940272 ; 0.209807141; 0.043935349;    0.022091045;    0.004437948
+    I_cap_dc.Beta = 0.098696044;   // 0.394784176; 0.098696044; 0.024674011; 0.00098696;     0.00024674;     0.0000098696
+    I_cap_dc.Capacitance = 5 * 0.0022;   // 2200 uF
 
     // inicializiram delay_linijo
-    DELAY_FLOAT_INIT(i_grid_delay)
-    i_grid_delay.delay = 10;
+    DELAY_FLOAT_INIT(IS_delay)
+    IS_delay.delay = 10;
 */
     // inicializiram filter za oceno toka
-    //DC_FLOAT_MACRO_INIT(i_dc_f);
+    //DC_FLOAT_MACRO_INIT(I_dc_f);
 
     // inicializiram filter za meritev toka
     DC_FLOAT_MACRO_INIT(IF_f);
@@ -459,22 +448,22 @@ void get_electrical(void)
     power_out = u_f * IF;
 
     // ocena izhodnega toka z ABF
-   // i_cap_abf.u_cap_measured = u_f;
-  //  ABF_float_calc(&i_cap_abf);
-  //  IF_abf = -i_cap_abf.i_cap_estimated + (IF + IF2);
+    i_cap_abf.u_cap_measured = u_f;
+    ABF_float_calc(&i_cap_abf);
+    IF_abf = -i_cap_abf.i_cap_estimated + IF;
 
     // zakasnim IS
-    i_grid_delay.in = IS * IS_reg.Out;
-    DELAY_FLOAT_CALC(i_grid_delay);
+    IS_delay.in = IS * IS_reg.Out;
+    DELAY_FLOAT_CALC(IS_delay);
 
     // ocena dc toka z ABF
-    i_cap_dc.u_cap_measured = DEL_UDC;
-    ABF_float_calc(&i_cap_dc);
+    I_cap_dc.u_cap_measured = DEL_UDC;
+    ABF_float_calc(&I_cap_dc);
 
     // se filtriram
-    i_dc_f.In = -i_cap_dc.i_cap_estimated - i_grid_delay.out;
-    DC_FLOAT_MACRO(i_dc_f);
-    I_dc_abf = i_dc_f.Mean;
+    I_dc_f.In = -I_cap_dc.i_cap_estimated - IS_delay.out;
+    DC_FLOAT_MACRO(I_dc_f);
+    I_dc_abf = I_dc_f.Mean;
 
     // filtriram tudi meritev toka
     IF_f.In = IF;
@@ -538,7 +527,9 @@ void input_bridge_control(void)
         // izvedem tokovni regulator
         // tega bi veljalo zamenjati za PR regulator
         // ampak samo v primeru ko se sinhroniziram na omrežje
-        IS_reg.Ref = -DEL_UDC_reg.Out * u_ac_form * (24 / 230);
+        // IS_reg.Ref = -DEL_UDC_reg.Out * u_ac_form * (24 / 230);
+
+        IS_reg.Ref = IS_zeljen * sin(2 * 2 * PI * GRID_FREQ * SAMPLE_TIME * interrupt_cnt);
         IS_reg.Fdb = IS;
         IS_reg.Ff = (24 / 230) * u_ac/DEL_UDC;
         PID_FLOAT_CALC(IS_reg);
@@ -623,7 +614,7 @@ void check_limits(void)
         		state = Fault_sensed;
         		// izklopim mostic
         		FB1_disable();
-        		            FB2_disable();
+        		FB2_disable();
 
         		// izklopim vse kontaktorjev
         		PCB_relay1_off();
@@ -636,7 +627,7 @@ void check_limits(void)
             state = Fault_sensed;
             // izklopim mostic
             FB1_disable();
-                        FB2_disable();
+            FB2_disable();
 
             // izklopim vse kontaktorjev
             PCB_relay1_off();

@@ -25,9 +25,11 @@ bool pulse_10ms = FALSE;
 
 void SW_detect(void);
 void pulse_gen(void);
-void test1(void);
+
+void standby_fcn(void);
 void fault_sensed_fcn(void);
 void fault_fcn(void);
+
 
 /**************************************************************
 * Funkcija, ki se izvaja v ozadju med obratovanjem
@@ -49,7 +51,7 @@ void BACK_loop(void)
 		switch(state)
 		{
 		case Standby:
-			PCB_LED_READY_on();
+			standby_fcn();
 			break;
 		case Working:
 			PCB_LED_WORKING_on();
@@ -209,7 +211,7 @@ void SW_detect(void)
             ENABLE_SW = !ENABLE_SW;
         }
 
-        // ali smo pritisnili na tipko 2
+        // ali smo pritisnili na tipko RESET
         // ce je tipka pritisnjena, stopaj koliko casa je prisitsnjena
         if (RESET_SW_new == TRUE)
         {
@@ -231,7 +233,10 @@ void SW_detect(void)
 
 }
 
-
+void standby_fcn(void)
+{
+	PCB_LED_READY_on();
+}
 
 void fault_fcn(void)
 {
