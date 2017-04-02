@@ -15,7 +15,7 @@ bool send_ch5 = FALSE;
 bool send_ch6 = FALSE;
 bool send_ch7 = FALSE;
 bool send_ch8 = FALSE;
-int points_to_send = DLOG_GEN_SIZE;
+int points_to_send = 200;
 
 bool dlog_buffers_sent = TRUE;
 
@@ -40,6 +40,14 @@ void UART_dlog_points(int *data);
 void UART_dlog_send_parameters(int *data);
 void UART_dlog_trigger(int *data);
 
+void UART_ref_gen_amp(int *data);
+void UART_ref_gen_offset(int *data);
+void UART_ref_gen_freq(int *data);
+void UART_ref_gen_duty(int *data);
+void UART_ref_gen_slew(int *data);
+void UART_ref_gen_type(int *data);
+void UART_ref_send_parameters(int *data);
+
 // tx handlerji
 inline void send_dlog_ch1(void);
 #if DLOG_GEN_NR > 1
@@ -63,8 +71,10 @@ inline void send_dlog_ch7(void);
 #if DLOG_GEN_NR > 7
 inline void send_dlog_ch8(void);
 #endif
-inline void send_dlog_params(void);
+void send_dlog_params(void);
+void send_ref_params(void);
 
+extern float napetost;
 
 void COMM_initialization(void)
 {
@@ -75,20 +85,32 @@ void COMM_initialization(void)
     LRTME_init();
 
     // registriram funkcijo
-    LRTME_receive_register(0x0100, &UART_ch_1);
-    LRTME_receive_register(0x0200, &UART_ch_2);
-    LRTME_receive_register(0x0300, &UART_ch_3);
-    LRTME_receive_register(0x0400, &UART_ch_4);
-    LRTME_receive_register(0x0500, &UART_ch_5);
-    LRTME_receive_register(0x0600, &UART_ch_6);
-    LRTME_receive_register(0x0700, &UART_ch_7);
-    LRTME_receive_register(0x0800, &UART_ch_8);
+    LRTME_receive_register(0x0911, &UART_ch_1);
+    LRTME_receive_register(0x0912, &UART_ch_2);
+    LRTME_receive_register(0x0913, &UART_ch_3);
+    LRTME_receive_register(0x0914, &UART_ch_4);
+    LRTME_receive_register(0x0915, &UART_ch_5);
+    LRTME_receive_register(0x0916, &UART_ch_6);
+    LRTME_receive_register(0x0917, &UART_ch_7);
+    LRTME_receive_register(0x0918, &UART_ch_8);
 
-    LRTME_receive_register(0x0900, &UART_dlog_prescalar);
-    LRTME_receive_register(0x0901, &UART_dlog_points);
-    LRTME_receive_register(0x0902, &UART_dlog_trigger);
+    LRTME_receive_register(0x0920, &UART_dlog_prescalar);
+    LRTME_receive_register(0x0921, &UART_dlog_points);
+    LRTME_receive_register(0x0922, &UART_dlog_trigger);
+    LRTME_receive_register(0x092A, &UART_dlog_send_parameters);
 
-    LRTME_receive_register(0x0A00, &UART_dlog_send_parameters);
+    LRTME_receive_register(0x0B10, &UART_ref_gen_amp);
+    LRTME_receive_register(0x0B11, &UART_ref_gen_offset);
+    LRTME_receive_register(0x0B12, &UART_ref_gen_freq);
+    LRTME_receive_register(0x0B13, &UART_ref_gen_duty);
+    LRTME_receive_register(0x0B14, &UART_ref_gen_slew);
+    LRTME_receive_register(0x0B15, &UART_ref_gen_type);
+
+    LRTME_receive_register(0x0B1A, &UART_ref_send_parameters);
+
+    // pred zagonom pošljem nastavitve, èe GUI sluèajno že teèe
+    send_dlog_params();
+    send_ref_params();
 }
 
 #pragma CODE_SECTION(COMM_runtime, "ramfuncs");
@@ -100,10 +122,10 @@ void COMM_runtime(void)
     packets_in_waiting = LRTME_tx_queue_poll();
 
     if (   (dlog.mode == Stop)
-    	&& (dlog_buffers_sent == TRUE)
-		&& (packets_in_waiting < 2))
+        && (dlog_buffers_sent == TRUE)
+        && (packets_in_waiting < 2))
     {
-    	dlog_buffers_sent = FALSE;
+        dlog_buffers_sent = FALSE;
         if (send_ch1 == TRUE)
         {
             send_dlog_ch1();
@@ -150,6 +172,12 @@ void COMM_runtime(void)
             send_dlog_ch8();
         }
         #endif
+        // da pripravim na posiljanje, ce so vsi kanali izklopljeni in se potem ponovno vklopijo
+        if ( (send_ch1 == FALSE) && (send_ch2 == FALSE) && (send_ch3 == FALSE) && (send_ch4 == FALSE) &&
+             (send_ch5 == FALSE) && (send_ch6 == FALSE) && (send_ch7 == FALSE) && (send_ch8 == FALSE))
+        {
+            dlog_sent();
+        }
     }
 
     // klièem handler za komunikacijo
@@ -179,9 +207,22 @@ void send_dlog_params(void)
     {
         status[10] = 1;
     }
-    LRTME_send(0x000A, status, 2 * sizeof(status), NULL);
+    LRTME_send(0x090A, status, 2 * sizeof(status), NULL);
 }
 
+void send_ref_params(void)
+{
+    static int status[11];
+
+    int_from_float(ref_gen.amp, &status[0]);
+    int_from_float(ref_gen.offset, &status[2]);
+    int_from_float(ref_gen.freq, &status[4]);
+    int_from_float(ref_gen.duty, &status[6]);
+    int_from_float(ref_gen.slew, &status[8]);
+    status[10] = ref_gen.type, &status[0];
+
+    LRTME_send(0x0B0A, status, 2 * sizeof(status), NULL);
+}
 
 #pragma CODE_SECTION(UART_ch_1, "ramfuncs");
 void UART_ch_1(int *data)
@@ -316,11 +357,11 @@ inline void send_dlog_ch1()
         &&(send_ch7 == FALSE)
         &&(send_ch8 == FALSE))
     {
-        LRTME_send(0x0100, int_ptr, points_to_send*2L*2L, &dlog_sent);
+        LRTME_send(0x0901, int_ptr, points_to_send*2L*2L, &dlog_sent);
     }
     else
     {
-        LRTME_send(0x0100, int_ptr, points_to_send*2L*2L, NULL);
+        LRTME_send(0x0901, int_ptr, points_to_send*2L*2L, NULL);
     }
 }
 
@@ -337,11 +378,11 @@ inline void send_dlog_ch2()
         &&(send_ch7 == FALSE)
         &&(send_ch8 == FALSE))
     {
-        LRTME_send(0x0200, int_ptr, points_to_send*2L*2L, &dlog_sent);
+        LRTME_send(0x0902, int_ptr, points_to_send*2L*2L, &dlog_sent);
     }
     else
     {
-        LRTME_send(0x0200, int_ptr, points_to_send*2L*2L, NULL);
+        LRTME_send(0x0902, int_ptr, points_to_send*2L*2L, NULL);
     }
 }
 #endif
@@ -358,11 +399,11 @@ inline void send_dlog_ch3()
         &&(send_ch7 == FALSE)
         &&(send_ch8 == FALSE))
     {
-        LRTME_send(0x0300, int_ptr, points_to_send*2L*2L, &dlog_sent);
+        LRTME_send(0x0903, int_ptr, points_to_send*2L*2L, &dlog_sent);
     }
     else
     {
-        LRTME_send(0x0300, int_ptr, points_to_send*2L*2L, NULL);
+        LRTME_send(0x0903, int_ptr, points_to_send*2L*2L, NULL);
     }
 }
 #endif
@@ -378,11 +419,11 @@ inline void send_dlog_ch4()
         &&(send_ch7 == FALSE)
         &&(send_ch8 == FALSE))
     {
-        LRTME_send(0x0400, int_ptr, points_to_send*2L*2L, &dlog_sent);
+        LRTME_send(0x0904, int_ptr, points_to_send*2L*2L, &dlog_sent);
     }
     else
     {
-        LRTME_send(0x0400, int_ptr, points_to_send*2L*2L, NULL);
+        LRTME_send(0x0904, int_ptr, points_to_send*2L*2L, NULL);
     }
 }
 #endif
@@ -397,11 +438,11 @@ inline void send_dlog_ch5()
         &&(send_ch7 == FALSE)
         &&(send_ch8 == FALSE))
     {
-        LRTME_send(0x0500, int_ptr, points_to_send*2L*2L, &dlog_sent);
+        LRTME_send(0x0905, int_ptr, points_to_send*2L*2L, &dlog_sent);
     }
     else
     {
-        LRTME_send(0x0500, int_ptr, points_to_send*2L*2L, NULL);
+        LRTME_send(0x0905, int_ptr, points_to_send*2L*2L, NULL);
     }
 }
 #endif
@@ -415,11 +456,11 @@ inline void send_dlog_ch6()
     if (  (send_ch7 == FALSE)
         &&(send_ch8 == FALSE))
     {
-        LRTME_send(0x0600, int_ptr, points_to_send*2L*2L, &dlog_sent);
+        LRTME_send(0x0906, int_ptr, points_to_send*2L*2L, &dlog_sent);
     }
     else
     {
-        LRTME_send(0x0600, int_ptr, points_to_send*2L*2L, NULL);
+        LRTME_send(0x0906, int_ptr, points_to_send*2L*2L, NULL);
     }
 }
 #endif
@@ -432,11 +473,11 @@ inline void send_dlog_ch7()
     int_ptr = (void *) DLOG_b_7;
     if (  (send_ch8 == FALSE))
     {
-        LRTME_send(0x0700, int_ptr, points_to_send*2L*2L, &dlog_sent);
+        LRTME_send(0x0907, int_ptr, points_to_send*2L*2L, &dlog_sent);
     }
     else
     {
-        LRTME_send(0x0700, int_ptr, points_to_send*2L*2L, NULL);
+        LRTME_send(0x0907, int_ptr, points_to_send*2L*2L, NULL);
     }
 }
 #endif
@@ -447,7 +488,7 @@ inline void send_dlog_ch8()
     int *int_ptr;
 
     int_ptr = (void *) DLOG_b_8;
-    LRTME_send(0x0800, int_ptr, points_to_send*2L*2L, &dlog_sent);
+    LRTME_send(0x0908, int_ptr, points_to_send*2L*2L, &dlog_sent);
 }
 #endif
 
@@ -493,6 +534,17 @@ void UART_dlog_send_parameters(int *data)
 }
 #pragma diag_pop
 
+// v tej funkciji ne uporabim podatkov, ker juh tudi COM handler ne posreduje
+#pragma diag_push
+#pragma diag_suppress 880
+void UART_ref_send_parameters(int *data)
+{
+    // PC je zahteval status
+    send_ref_params();
+}
+#pragma diag_pop
+
+
 // spremenim trigger
 void UART_dlog_trigger(int *data)
 {
@@ -501,11 +553,95 @@ void UART_dlog_trigger(int *data)
     if (podatki == 0)
     {
         trigger = Ref_cnt;
+        dlog.trig = &ref_gen.kot;
     }
     else
     {
         trigger = Napetost;
+        dlog.trig = &napetost;
     }
+    send_dlog_params();
+}
+
+void UART_ref_gen_amp(int *data)
+{
+    float   temp;
+    temp = get_float_from_int(data);
+
+    // okej sedaj imam v "temp" vrednost amplitude
+    if (temp >= 0)
+    {
+        ref_gen.amp = temp;
+    }
+}
+
+void UART_ref_gen_offset(int *data)
+{
+    float   temp;
+    temp = get_float_from_int(data);
+
+    // okej sedaj imam v "temp" vrednost offseta
+    ref_gen.offset = temp;
+}
+
+void UART_ref_gen_freq(int *data)
+{
+    float   temp;
+    temp = get_float_from_int(data);
+    // okej sedaj imam v "temp" vrednost frekvence
+    if (temp >= 0)
+    {
+        ref_gen.freq = temp;
+    }
+    send_ref_params();
+}
+
+void UART_ref_gen_duty(int *data)
+{
+    float   temp;
+    temp = get_float_from_int(data);
+    // okej sedaj imam v "temp" vrednost vklopnega razmerja
+    // ki mora biti znotraj meja
+    if ((temp >= 0) && (temp <= 1.0))
+    {
+        ref_gen.duty = temp;
+    }
+}
+
+void UART_ref_gen_slew(int *data)
+{
+    float   temp;
+    temp = get_float_from_int(data);
+    // okej sedaj imam v "temp" vrednost naklona
+    // ki mora biti znotraj meja
+    if (temp >= 0)
+    {
+        ref_gen.slew = temp;
+    }
+    send_ref_params();
+}
+
+void UART_ref_gen_type(int *data)
+{
+    int podatki = *data;
+
+    if (podatki == 0)
+    {
+        ref_gen.type = REF_Konst;
+    }
+    if (podatki == 1)
+    {
+        ref_gen.type = REF_Step;
+    }
+    if (podatki == 2)
+    {
+        ref_gen.type = REF_Slew;
+    }
+    if (podatki == 3)
+    {
+        ref_gen.type = REF_Sine;
+    }
+    send_ref_params();
 }
 
 #pragma diag_push

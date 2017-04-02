@@ -228,15 +228,15 @@ void interrupt PER_int(void)
 void PER_int_setup(void)
 {
     // inicializiram data logger
-    dlog.mode = Continuous;
+    dlog.mode = Single;
     dlog.auto_time = 1;
     dlog.holdoff_time = 1;
 
     dlog.prescalar = 10;
 
-    dlog.slope = Positive;
+    dlog.slope = Negative;
     dlog.trig = &ref_gen.kot;
-    dlog.trig_value = 0.98;
+    dlog.trig_value = 0.5;
 
     dlog.iptr1 = &u_ac;
     dlog.iptr2 = &IS;
@@ -247,13 +247,14 @@ void PER_int_setup(void)
     dlog.iptr7 = &IF;
     dlog.iptr8 = &IF_abf;
 
-    // inicializitam generator referenènega signala
-    ref_gen.amp = 2;
-    ref_gen.offset = DEL_UDC_REF;
-    ref_gen.type = Step;
-    ref_gen.duty = 0.1;
-    ref_gen.frequency = 0.2;
-    ref_gen.sampling_period = SAMPLE_TIME;
+    // inicializiram generator signalov
+    ref_gen.type = REF_Step;
+    ref_gen.amp = 1.0;
+    ref_gen.offset = 0.0;
+    ref_gen.freq = 10.0;
+    ref_gen.duty = 0.5;
+    ref_gen.slew = 100;
+    ref_gen.samp_period = SAMPLE_TIME;
 
     // inicializiram DC filter
     DC_FLOAT_MACRO_INIT(DEL_UDC_f);

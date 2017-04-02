@@ -13,12 +13,13 @@
 #include    "globals.h"
 
 #include    "DLOG_gen.h"
+#include    "REF_gen.h"
 
 #include    "LRTME_stack.h"
 
 #include    "PCB_util.h"
 
-#define     COMM_BAUDRATE       (2*50000L)
+#define     COMM_BAUDRATE       (1000000L)
 
 extern void COMM_initialization(void);
 
