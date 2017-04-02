@@ -18,8 +18,8 @@
  */
 
 // status ali delujemo ali ne
-enum FB1_STATE fb1_status = FB1_DIS;
-enum FB2_STATE fb2_status = FB2_DIS;
+enum FB_STATE fb1_status = FB_DIS;
+enum FB_STATE fb2_status = FB_DIS;
 
 /**************************************************************
 * nastavi mrtvi cas  
@@ -67,7 +67,7 @@ void FB1_bootstrap(void)
     FB1_MODUL2.AQCSFRC.bit.CSFA = 1;
     FB1_MODUL2.AQCSFRC.bit.CSFB = 1;
 
-    fb1_status = FB1_BOOTSTRAP;
+    fb1_status = FB_BOOTSTRAP;
 }
 
 void FB2_bootstrap(void)
@@ -78,7 +78,7 @@ void FB2_bootstrap(void)
     FB2_MODUL2.AQCSFRC.bit.CSFA = 1;
     FB2_MODUL2.AQCSFRC.bit.CSFB = 1;
 
-    fb2_status = FB2_BOOTSTRAP;
+    fb2_status = FB_BOOTSTRAP;
 }
 
 /**************************************************************
@@ -90,7 +90,7 @@ void FB1_trip(void)
     FB1_MODUL1.TZFRC.bit.OST = 1;
     FB1_MODUL2.TZFRC.bit.OST = 1;
 
-    fb1_status = FB1_TRIP;
+    fb1_status = FB_TRIP;
 }
 
 void FB2_trip(void)
@@ -98,7 +98,7 @@ void FB2_trip(void)
     FB2_MODUL1.TZFRC.bit.OST = 1;
     FB2_MODUL2.TZFRC.bit.OST = 1;
 
-    fb2_status = FB2_TRIP;
+    fb2_status = FB_TRIP;
 }
 
 /**************************************************************
@@ -113,7 +113,7 @@ void FB1_disable(void)
     FB1_MODUL2.AQCSFRC.bit.CSFA = 1;
     FB1_MODUL2.AQCSFRC.bit.CSFB = 2;
 
-    fb1_status = FB1_DIS;
+    fb1_status = FB_DIS;
 }
 
 void FB2_disable(void)
@@ -124,7 +124,7 @@ void FB2_disable(void)
     FB2_MODUL2.AQCSFRC.bit.CSFA = 1;
     FB2_MODUL2.AQCSFRC.bit.CSFB = 2;
 
-    fb2_status = FB2_DIS;
+    fb2_status = FB_DIS;
 }
 
 /**************************************************************
@@ -139,7 +139,7 @@ void FB1_enable(void)
     FB1_MODUL2.AQCSFRC.bit.CSFA = 0;
     FB1_MODUL2.AQCSFRC.bit.CSFB = 0;
 
-    fb1_status = FB1_EN;
+    fb1_status = FB_EN;
 }
 
 void FB2_enable(void)
@@ -150,7 +150,7 @@ void FB2_enable(void)
     FB2_MODUL2.AQCSFRC.bit.CSFA = 0;
     FB2_MODUL2.AQCSFRC.bit.CSFB = 0;
 
-    fb2_status = FB2_EN;
+    fb2_status = FB_EN;
 }
 
 /**************************************************************

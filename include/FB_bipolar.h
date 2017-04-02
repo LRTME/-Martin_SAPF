@@ -40,8 +40,7 @@
 #define     FB_DEAD_TIME    (40)
 
 // definicije za status mostica
-enum FB1_STATE { FB1_DIS=0, FB1_EN, FB1_BOOTSTRAP, FB1_TRIP};
-enum FB2_STATE { FB2_DIS=0, FB2_EN, FB2_BOOTSTRAP, FB2_TRIP};
+enum FB_STATE { FB_DIS=0, FB_EN, FB_BOOTSTRAP, FB_TRIP};
 
 /**************************************************************
 * nastavi mrtvi cas
