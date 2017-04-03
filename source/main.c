@@ -30,9 +30,6 @@ labela:
     // basic vector table
     InitPieVectTable();
 
-    // inicializacija komunikacijoe
-    COMM_initialization();
-
     // inicializiram ADC in moènostni modul
     ADC_init();
 
@@ -41,6 +38,9 @@ labela:
 
     // inicializiram peridoièno prekinitev za regulacijo
     PER_int_setup();
+
+    // inicializacija komunikacijoe
+    COMM_initialization();
 
     // zagon PWM enot
     FB1_start();
@@ -99,37 +99,38 @@ labela:
 			*/
         }
 
-
         // pocakam, da napetost na enosmernem tokokrogu naraste
-/*        while (DEL_UDC < u_ac_rms * SQRT2 * (24 / 230))
+        while (DEL_UDC < u_ac_rms * SQRT2 * (24 / 230))
         {
-              DO NOTHING
+             /* DO NOTHING */
         }
-*/
-        // kratkostièim zagonski upor R1 (100R)
+
+        // kratkostièim zagonski upor R1 (470R)
         PCB_relay2_on();
         DELAY_US(1000000);
 
         // in pocakam, da napetost na enosmernem tokokrogu naraste do konca
-/*        while (DEL_UDC < u_ac_rms * SQRT2 * (24 / 230))
+        while (DEL_UDC < u_ac_rms * SQRT2 * (24 / 230))
         {
-             DO NOTHING
+           /* DO NOTHING */
         }
-*/
+
         //vklopim moènostno stopnjo in povem regulaciji da zaène delati
 
         DINT;
 
-        FB1_enable();
+        //FB1_enable();
         state = Standby;
         // zeljeno vrednost enaccim z trenutno, da se lepo zapeljem po rampi
         DEL_UDC_slew.Out = DEL_UDC;
         EINT;
+
+        FB1_enable();
         // pocakam da se napetost enosmernega kroga zapelje na nastavljeno vrednost
-        while(fabs(DEL_UDC_reg.Fdb - DEL_UDC_reg.Ref) > 0.1)
+/*        while(fabs(DEL_UDC_reg.Fdb - DEL_UDC_reg.Ref) > 0.1)
         {
-           /* DO NOTHING */
-        }
+            DO NOTHING
+        } */
 
         // grem v neskoncno zanko, ki se izvaja v ozadju
         BACK_loop();

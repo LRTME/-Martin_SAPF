@@ -8,14 +8,14 @@
 
 struct REF_GEN ref_gen =
 {
-        0.0,            //float   ref_amp;
+        1.0,            //float   ref_amp;
         1.0,            //float   ref_freq;
-        0.0,             //float   kot;
+        0.0,            //float   kot;
         0.5,            //float   ref_duty;
         0.0,            //float   ref_offset;
         1.0,            //float   ref_slew;
         SAMPLE_TIME,    //float   ref_samp_period;
-        0.0,
+        0.0,			//float	  ref_gen.out
         REF_Konst
 };
 

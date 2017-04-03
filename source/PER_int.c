@@ -7,17 +7,6 @@
 #include    "PER_int.h"
 #include    "TIC_toc.h"
 
-// generiranje željene vrednosti
-float ref_counter = 0;
-float ref_counter_freq = 10; // Hz
-float ref_counter_cmpr = 0.025;
-
-float IS_zeljen = 2.0;
-
-float ref_value = 0;
-float ref_value_high = 0.85;
-float ref_value_low = 0.05;
-
 // za oceno obremenjenosti CPU-ja
 float   cpu_load  = 0.0;
 long    interrupt_cycles = 0;
@@ -30,6 +19,8 @@ float	napetost = 0.0;
 float   IS = 0.0;
 float   IF = 0.0;
 
+float   IS_zeljen = 0.0;
+
 float   IS_offset = 2048;
 float   IF_offset = 2048;
 
@@ -40,7 +31,6 @@ long    current_offset_counter = 0;
 
 // napetosti
 float   u_ac = 0.0;
-
 float   DEL_UDC = 0.0;
 float   u_f = 0.0;
 float   u_out = 0.0;
@@ -165,22 +155,8 @@ void interrupt PER_int(void)
         interrupt_cnt = 0;
     }
 
-    // generiram spreenjljivo želeno vrednost
-    ref_counter = ref_counter + ref_counter_freq/SWITCH_FREQ;
-    if (ref_counter >= 1.0)
-    {
-        ref_counter = 0;
-    }
-
-    // stopnicasta zeljena vrednost
-    if (ref_counter > ref_counter_cmpr)
-    {
-        ref_value = ref_value_low;
-    }
-    else
-    {
-        ref_value = ref_value_high;
-    }
+    // generiram željeno vrednost
+    REF_GEN_update();
 
     // izracun napetosti, tokov in temperature hladilnika
     get_electrical();
@@ -232,7 +208,7 @@ void PER_int_setup(void)
     dlog.auto_time = 1;
     dlog.holdoff_time = 1;
 
-    dlog.prescalar = 10;
+    dlog.prescalar = 2;
 
     dlog.slope = Negative;
     dlog.trig = &ref_gen.kot;
@@ -362,10 +338,6 @@ void get_electrical(void)
 {
     static float   IS_offset_calib = 0;
     static float   IF_offset_calib = 0.0;
-    static float   u_ac_offset_calib = 0.0;
-    static float   DEL_UDC_offset_calib = 0.0;
-    static float   u_f_offset_calib = 0.0;
-    static float   u_out_offset_calib = 0.0;
 
     // pocakam da ADC konca s pretvorbo
     ADC_wait();
@@ -378,10 +350,6 @@ void get_electrical(void)
         // akumuliram offset
         IS_offset_calib = IS_offset_calib + IS_adc;
         IF_offset_calib = IF_offset_calib + IF_adc;
-        u_ac_offset_calib = u_ac_offset_calib + u_ac_adc;
-        DEL_UDC_offset_calib = DEL_UDC_offset_calib + DEL_UDC_adc;
-        u_f_offset_calib = u_f_offset_calib + u_f_adc;
-        u_out_offset_calib = u_out_offset_calib + u_out_adc;
 
         // ko potece dovolj casa, sporocim da lahko grem naprej
         // in izracunam povprecni offset
@@ -392,10 +360,7 @@ void get_electrical(void)
             start_calibration = FALSE;
             IS_offset = IS_offset_calib / (SAMPLE_FREQ*1L);
             IF_offset = IF_offset_calib / (SAMPLE_FREQ*1L);
-            u_ac_offset = u_ac_offset_calib / (SAMPLE_FREQ*1L);
-            DEL_UDC_offset = DEL_UDC_offset_calib / (SAMPLE_FREQ*1L);
-            u_f_offset = u_f_offset_calib / (SAMPLE_FREQ*1L);
-            u_out_offset = u_out_offset_calib / (SAMPLE_FREQ*1L);
+
         }
 
         IS = 0.0;
@@ -497,7 +462,7 @@ void input_bridge_control(void)
         // najprej zapeljem zeleno vrednost po rampi
         SLEW_FLOAT_CALC(DEL_UDC_slew)
 
-        // izvedem napetostni regulator
+/*        // izvedem napetostni regulator
         DEL_UDC_reg.Ref = DEL_UDC_slew.Out;
         DEL_UDC_reg.Fdb = DEL_UDC_filtered;
         // izberem vir direktne krmilne veje
@@ -524,13 +489,12 @@ void input_bridge_control(void)
         }
 
         PID_FLOAT_CALC(DEL_UDC_reg);
-
+*/
         // izvedem tokovni regulator
         // tega bi veljalo zamenjati za PR regulator
         // ampak samo v primeru ko se sinhroniziram na omrežje
-        // IS_reg.Ref = -DEL_UDC_reg.Out * u_ac_form * (24 / 230);
+        IS_reg.Ref = IS_zeljen * u_ac_form;
 
-        IS_reg.Ref = IS_zeljen * sin(2 * 2 * PI * GRID_FREQ * SAMPLE_TIME * interrupt_cnt);
         IS_reg.Fdb = IS;
         IS_reg.Ff = (24 / 230) * u_ac/DEL_UDC;
         PID_FLOAT_CALC(IS_reg);
@@ -553,7 +517,7 @@ void check_limits(void)
     // samo èe je kalibracija konènana
     if (calibration_done == TRUE)
     {
-        /* if (u_ac_rms > u_ac_RMS_MAX)
+         if (u_ac_rms > u_ac_RMS_MAX)
         {
             fault_flags.overvoltage_u_ac = TRUE;
             state = Fault_sensed;
@@ -581,20 +545,20 @@ void check_limits(void)
             PCB_relay2_off();
             PCB_relay3_off();
         }
-       */ if (DEL_UDC > DEL_UDC_MAX)
+        if (DEL_UDC > DEL_UDC_MAX)
         {
             fault_flags.overvoltage_DEL_UDC = TRUE;
             state = Fault_sensed;
             // izklopim mostic
             FB1_disable();
-                        FB2_disable();
+            FB2_disable();
 
             // izklopim vse kontaktorjev
             PCB_relay1_off();
             PCB_relay2_off();
             PCB_relay3_off();
         }
-    /*    if (   (DEL_UDC < DEL_UDC_MIN)
+        if (   (DEL_UDC < DEL_UDC_MIN)
                 && (state != Initialization)
                 && (state != Startup))
         {
@@ -608,19 +572,19 @@ void check_limits(void)
             PCB_relay1_off();
             PCB_relay2_off();
             PCB_relay3_off();
-        } */
+        }
         if ((IS > +IS_LIM) || (IS < -IS_LIM))
         {
-        		fault_flags.overcurrent_IS = TRUE;
-        		state = Fault_sensed;
-        		// izklopim mostic
-        		FB1_disable();
-        		FB2_disable();
+        	fault_flags.overcurrent_IS = TRUE;
+        	state = Fault_sensed;
+        	// izklopim mostic
+        	FB1_disable();
+        	FB2_disable();
 
-        		// izklopim vse kontaktorjev
-        		PCB_relay1_off();
-        		PCB_relay2_off();
-        		PCB_relay3_off();
+       		// izklopim vse kontaktorjev
+       		PCB_relay1_off();
+       		PCB_relay2_off();
+       		PCB_relay3_off();
         }
         if ((IF > +IF_LIM) || (IF < -IF_LIM))
         {
