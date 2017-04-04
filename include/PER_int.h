@@ -31,7 +31,7 @@
 
 // korekcijski faktorji (meritev osciloskop)
 #define		U_AC_CORR_F		0.963752665
-#define		DEL_UDC_CORR_F	1.0
+#define		DEL_UDC_CORR_F	1.020895522
 #define		U_OUT_CORR_F	0.967880085
 
 /**************************************************************

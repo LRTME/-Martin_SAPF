@@ -41,7 +41,7 @@ float   u_f_offset = 2048.0;
 float   u_out_offset = 2048.0;
 
 float   u_ac_gain = ((1000 + 0.47) / (5 * 0.47)) * U_AC_CORR_F * (3.3 / 4096);
-float   DEL_UDC_gain = ((200 + 1.8) / (5 * 1.8)) * DEL_UDC_CORR_F * (3.3 / 4096);
+float   DEL_UDC_gain = ((330 + 1.8) / (5 * 1.8)) * DEL_UDC_CORR_F * (3.3 / 4096);
 float   u_f_gain = ((200 + 1.8) / (5 * 1.8)) * (3.3 / 4096);
 float   u_out_gain = ((1000 + 0.47) / (5 * 0.47)) * U_OUT_CORR_F * (3.3 / 4096);
 
@@ -110,6 +110,10 @@ volatile enum   {Meas_out = 0, ABF_out, KF_out, None_out } IF_source = Meas_out;
 
 // izbira ocene dc toka
 volatile enum   {Meas_dc = 0, ABF_dc, KF_dc, None_dc, Power_out } I_dc_source = ABF_dc;
+
+// vhodna moc
+float	power_in = 0.0;
+float	PWR_IN = 0.0;
 
 // izhodna moc
 float   power_out = 0.0;
@@ -220,7 +224,7 @@ void PER_int_setup(void)
     dlog.iptr4 = &I_cap_dc.i_cap_estimated;
     dlog.iptr5 = &I_dc_abf;
     dlog.iptr6 = &u_out;
-    dlog.iptr7 = &IF;
+    dlog.iptr7 = &IS_reg.Err;
     dlog.iptr8 = &IF_abf;
 
     // inicializiram generator signalov
@@ -253,8 +257,8 @@ void PER_int_setup(void)
     // inicializiram regulator omreznega toka
      * */
     IS_reg.Kp = 0.2;          //0.2;
-    IS_reg.Ki = 0.008;        //0.008;
-    IS_reg.Kff = 1.2;         //0.8;
+    IS_reg.Ki = 0.0;        //0.008;
+    IS_reg.Kff = 0.8;         //0.8;
     IS_reg.OutMax = +0.99;    // zaradi bootstrap driverjev ne gre do 1.0
     IS_reg.OutMin = -0.99;    // zaradi bootstrap driverjev ne gre do 1.0
 
@@ -268,8 +272,8 @@ void PER_int_setup(void)
     u_out_reg.Kp = 10.0;
     u_out_reg.Ki = 0.1; // 0.1
     u_out_reg.Kff = 0.8;
-    u_out_reg.OutMax = +0.0;   // kasneje to doloèa potenciometer
-    u_out_reg.OutMin = -0.0;   // kasneje to doloèa potenciometer
+    u_out_reg.OutMax = +0.0;
+    u_out_reg.OutMin = -0.0;
 
     // inicializiram ramp bb toka
     IF_slew.In = 0;
@@ -413,6 +417,15 @@ void get_electrical(void)
     // izracunam kaksna moc je na izhodu filtra
     power_out = u_f * IF;
 
+    power_in = (24.0 / 230.0) * u_ac * IS;
+
+    if (interrupt_cnt == 0)
+    {
+    	PWR_IN = 0;
+    }
+
+    PWR_IN = PWR_IN + power_in * SAMPLE_TIME;
+
     // ocena izhodnega toka z ABF
     i_cap_abf.u_cap_measured = u_f;
     ABF_float_calc(&i_cap_abf);
@@ -494,9 +507,8 @@ void input_bridge_control(void)
         // tega bi veljalo zamenjati za PR regulator
         // ampak samo v primeru ko se sinhroniziram na omrežje
         IS_reg.Ref = IS_zeljen * u_ac_form;
-
         IS_reg.Fdb = IS;
-        IS_reg.Ff = (24 / 230) * u_ac/DEL_UDC;
+        IS_reg.Ff = (24.0 / 230.0) * u_ac/DEL_UDC;
         PID_FLOAT_CALC(IS_reg);
 
         // posljem vse skupaj na mostic

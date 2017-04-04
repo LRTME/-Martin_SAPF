@@ -27,6 +27,7 @@ void SW_detect(void);
 void pulse_gen(void);
 
 void standby_fcn(void);
+void working_fcn(void);
 void fault_sensed_fcn(void);
 void fault_fcn(void);
 
@@ -54,7 +55,7 @@ void BACK_loop(void)
 			standby_fcn();
 			break;
 		case Working:
-			PCB_LED_WORKING_on();
+			working_fcn();
 			break;
 		case Fault_sensed:
 		    fault_sensed_fcn();
@@ -236,6 +237,18 @@ void SW_detect(void)
 void standby_fcn(void)
 {
 	PCB_LED_READY_on();
+
+	if(ENABLE_SW == TRUE)
+	{
+		state = Working;
+	}
+}
+
+void working_fcn(void)
+{
+	PCB_LED_WORKING_on();
+	FB1_enable();
+
 }
 
 void fault_fcn(void)

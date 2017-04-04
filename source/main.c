@@ -119,13 +119,13 @@ labela:
 
         DINT;
 
-        //FB1_enable();
+        //
         state = Standby;
         // zeljeno vrednost enaccim z trenutno, da se lepo zapeljem po rampi
         DEL_UDC_slew.Out = DEL_UDC;
         EINT;
 
-        FB1_enable();
+
         // pocakam da se napetost enosmernega kroga zapelje na nastavljeno vrednost
 /*        while(fabs(DEL_UDC_reg.Fdb - DEL_UDC_reg.Ref) > 0.1)
         {
