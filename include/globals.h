@@ -27,8 +27,8 @@ extern struct FAULT_FLAGS
     bool    overcurrent_IF:1;
     bool    overcurrent_IS:1;
     bool    HW_trip:1;
-    bool    undervoltage_DEL_UDC:1;
-    bool    overvoltage_DEL_UDC:1;
+    bool    undervoltage_u_dc:1;
+    bool    overvoltage_u_dc:1;
     bool    undervoltage_u_ac:1;
     bool    overvoltage_u_ac:1;
     bool    cpu_overrun:1;
@@ -44,13 +44,13 @@ extern volatile bool start_calibration;
 
 
 // za zagon in delovanje
-extern SLEW_float   DEL_UDC_slew;
+extern SLEW_float   u_dc_slew;
 extern SLEW_float   u_out_slew;
 extern PID_float    u_out_reg;
-extern PID_float    DEL_UDC_reg;
+extern PID_float    u_dc_reg;
 
 
-extern float DEL_UDC;
+extern float u_dc;
 extern float u_ac_rms;
 extern float u_out;
 extern float u_f;

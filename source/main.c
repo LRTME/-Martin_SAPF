@@ -59,8 +59,8 @@ labela:
     // resetiram vse morebitne napake
     fault_flags.overcurrent_IF = FALSE;
     fault_flags.overcurrent_IS = FALSE;
-    fault_flags.undervoltage_DEL_UDC = FALSE;
-    fault_flags.overvoltage_DEL_UDC = FALSE;
+    fault_flags.undervoltage_u_dc = FALSE;
+    fault_flags.overvoltage_u_dc = FALSE;
     fault_flags.undervoltage_u_ac = FALSE;
     fault_flags.overvoltage_u_ac = FALSE;
     fault_flags.cpu_overrun = FALSE;
@@ -90,19 +90,12 @@ labela:
             asm(" ESTOP0");
             DINT;
             goto labela;
-
-            /*
-            asm(" ESTOP0");
-            EALLOW;
-            SysCtrlRegs.WDCR = 0x0040;
-            EDIS;
-			*/
         }
 
         // pocakam, da napetost na enosmernem tokokrogu naraste
-        while (DEL_UDC < u_ac_rms * SQRT2 * (24 / 230))
+        while (u_dc < u_ac_rms * SQRT2 * (24 / 230))
         {
-             /* DO NOTHING */
+             // DO NOTHING
         }
 
         // kratkostièim zagonski upor R1 (470R)
@@ -110,9 +103,9 @@ labela:
         DELAY_US(1000000);
 
         // in pocakam, da napetost na enosmernem tokokrogu naraste do konca
-        while (DEL_UDC < u_ac_rms * SQRT2 * (24 / 230))
+        while (u_dc < u_ac_rms * SQRT2 * (24 / 230))
         {
-           /* DO NOTHING */
+           // DO NOTHING //
         }
 
         //vklopim moènostno stopnjo in povem regulaciji da zaène delati
@@ -122,14 +115,14 @@ labela:
         //
         state = Standby;
         // zeljeno vrednost enaccim z trenutno, da se lepo zapeljem po rampi
-        DEL_UDC_slew.Out = DEL_UDC;
+        u_dc_slew.Out = u_dc;
         EINT;
 
 
         // pocakam da se napetost enosmernega kroga zapelje na nastavljeno vrednost
-/*        while(fabs(DEL_UDC_reg.Fdb - DEL_UDC_reg.Ref) > 0.1)
+/*        while(fabs(u_dc_reg.Fdb - u_dc_reg.Ref) > 0.1)
         {
-            DO NOTHING
+            // DO NOTHING
         } */
 
         // grem v neskoncno zanko, ki se izvaja v ozadju

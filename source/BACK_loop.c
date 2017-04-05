@@ -241,13 +241,22 @@ void standby_fcn(void)
 	if(ENABLE_SW == TRUE)
 	{
 		state = Working;
+		FB1_enable();
+		ENABLE_SW = FALSE;
 	}
 }
 
 void working_fcn(void)
 {
 	PCB_LED_WORKING_on();
-	FB1_enable();
+
+	if(ENABLE_SW == TRUE)
+	{
+		state = Standby;
+		FB1_disable();
+		PCB_LED_WORKING_off();
+		ENABLE_SW = FALSE;
+	}
 
 }
 
@@ -256,11 +265,13 @@ void fault_fcn(void)
     // pobrišem napako, in grem v standby
     if (RESET_SW == TRUE)
     {
-        // resetiram MCU - preko WD-ja
+    	RESET_SW = FALSE;
     	PCB_LED_FAULT_off();
-        EALLOW;
-        WdRegs.WDCR.all = 0x0040;
-        EDIS;
+    	EALLOW;
+    	WdRegs.WDCR.all = 0x0040;
+    	EDIS;
+
+
     }
     // signalizacija
     PCB_LED_FAULT_on();
