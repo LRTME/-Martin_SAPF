@@ -252,16 +252,16 @@ void PER_int_setup(void)
     u_dc_slew.Slope_down = u_dc_slew.Slope_up;
 
     // inicializiram regulator DC_link napetosti
-    u_dc_reg.Kp = 5.0; //4.0;
-    u_dc_reg.Ki = 0.0; //0.0002;
+    u_dc_reg.Kp = 2.2;
+    u_dc_reg.Ki = 0.0002;
     u_dc_reg.Kff = 0.0;
-    u_dc_reg.OutMax = +5; //+15; //+10.0; // +33.0
-    u_dc_reg.OutMin = -5; //-15; //-10.0; // -33.0
+    u_dc_reg.OutMax = 4.9;
+    u_dc_reg.OutMin = -4.9;
 
-    // inicializiram regulator omreznega toka
-    IS_reg.Kp = 0.2;          //0.2;
-    IS_reg.Ki = 0.001;        //0.008;
-    IS_reg.Kff = 0.8;         //0.8;
+    // inicializiram regulator omreznega toka (Optimum iznosa)
+    IS_reg.Kp = 0.1885;
+    IS_reg.Ki = 0.004642;
+    IS_reg.Kff = 1.0;
     IS_reg.OutMax = +0.99;    // zaradi bootstrap driverjev ne gre do 1.0
     IS_reg.OutMin = -0.99;    // zaradi bootstrap driverjev ne gre do 1.0
 

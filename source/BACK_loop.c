@@ -241,7 +241,7 @@ void standby_fcn(void)
 	if(ENABLE_SW == TRUE)
 	{
 		state = Working;
-		FB1_enable();
+		//FB1_enable();
 		ENABLE_SW = FALSE;
 	}
 }
@@ -253,7 +253,7 @@ void working_fcn(void)
 	if(ENABLE_SW == TRUE)
 	{
 		state = Standby;
-		FB1_disable();
+		//FB1_disable();
 		PCB_LED_WORKING_off();
 		ENABLE_SW = FALSE;
 	}

@@ -111,19 +111,19 @@ labela:
         //vklopim moènostno stopnjo in povem regulaciji da zaène delati
 
         DINT;
-
+        FB1_enable();
         //
         state = Standby;
-        // zeljeno vrednost enaccim z trenutno, da se lepo zapeljem po rampi
+        // zeljeno vrednost enaccim s trenutno, da se lepo zapeljem po rampi
         u_dc_slew.Out = u_dc;
         EINT;
 
 
         // pocakam da se napetost enosmernega kroga zapelje na nastavljeno vrednost
-/*        while(fabs(u_dc_reg.Fdb - u_dc_reg.Ref) > 0.1)
+        while(fabs(u_dc_reg.Fdb - u_dc_reg.Ref) > 0.1)
         {
             // DO NOTHING
-        } */
+        }
 
         // grem v neskoncno zanko, ki se izvaja v ozadju
         BACK_loop();
