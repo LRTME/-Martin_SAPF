@@ -255,6 +255,7 @@ void standby_fcn(void)
 
 void enable_fcn(void)
 {
+	FB2_enable();
 	state = Working;
 }
 
@@ -273,6 +274,7 @@ void working_fcn(void)
 void disable_fcn(void)
 {
 	PCB_LED_WORKING_off();
+	FB2_disable();
 	state = Standby;
 }
 
@@ -303,7 +305,7 @@ void fault_sensed_fcn(void)
     PCB_relay2_off();
     PCB_relay3_off();
 
-    //FLT_int_disable();
+    FLT_int_disable();
 
     if (fault_flags.fault_registered == FALSE)
     {

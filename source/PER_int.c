@@ -480,6 +480,42 @@ void input_bridge_control(void)
     }
 }
 
+#pragma CODE_SECTION(output_bridge_control, "ramfuncs");
+void output_bridge_control(void)
+{
+    // regulacija deluje samo v teh primerih
+    if (	(state == Enable)
+        || 	(state == Working)
+        || 	(state == Disable))
+    {
+        // najprej zapeljem zeljeno vrednost po rampi
+        SLEW_FLOAT_CALC(u_dc_slew)
+
+        // napetostni PI regulator
+        u_dc_reg.Ref = u_dc_slew.Out;
+        u_dc_reg.Fdb = u_dc_filtered;
+        u_dc_reg.Ff = I_dc_abf * (230 / 24) * u_dc_filtered * SQRT2 / u_ac_rms;
+
+        PID_FLOAT_CALC(u_dc_reg);
+
+        // tokovni PI regulator s feed forward
+        IS_reg.Ref = -u_dc_reg.Out * u_ac_form;
+        IS_reg.Fdb = IS;
+        IS_reg.Ff = (24.0 / 230.0) * u_ac/u_dc;
+        PID_FLOAT_CALC(IS_reg);
+
+        // posljem vse skupaj na mostic
+        FB1_update(IS_reg.Out);
+    }
+    // sicer pa nicim integralna stanja
+    else
+    {
+        u_dc_reg.Ui = 0.0;
+        IS_reg.Ui = 0.0;
+        FB2_update(0.0);
+    }
+}
+
 #pragma CODE_SECTION(check_limits, "ramfuncs");
 void check_limits(void)
 {

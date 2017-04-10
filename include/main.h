@@ -13,6 +13,7 @@
 #include    "globals.h"
 
 #include    "PER_int.h"
+#include	"FLT_int.h"
 #include    "BACK_loop.h"
 
 #include    "PWM_drv.h"
