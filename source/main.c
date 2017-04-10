@@ -77,9 +77,9 @@ labela:
         }
 
 
-    /* vklopna procedura */
+    // vklopna procedura
         state = Startup;
-        // najprej se priklopin na omrežje in poèasi napolnim DC-link
+        // najprej se priklopim na omrezje preko zagonskega upora R1 in pocasi napolnim DC-link
         PCB_relay1_on();
         DELAY_US(1000000);
 
@@ -105,7 +105,7 @@ labela:
         // in pocakam, da napetost na enosmernem tokokrogu naraste do konca
         while (u_dc < u_ac_rms * SQRT2 * (24 / 230))
         {
-           // DO NOTHING //
+           // DO NOTHING
         }
 
         //vklopim moènostno stopnjo in povem regulaciji da zaène delati
@@ -114,12 +114,12 @@ labela:
         FB1_enable();
         //
         state = Standby;
-        // zeljeno vrednost enaccim s trenutno, da se lepo zapeljem po rampi
+        // zeljeno vrednost enacim s trenutno u_dc, da se lepo zapeljem po rampi
         u_dc_slew.Out = u_dc;
         EINT;
 
 
-        // pocakam da se napetost enosmernega kroga zapelje na nastavljeno vrednost
+        // pocakam da se napetost enosmernega kroga zapelje na nastavljeno vrednost (DEL_UDC_REF)
         while(fabs(u_dc_reg.Fdb - u_dc_reg.Ref) > 0.1)
         {
             // DO NOTHING

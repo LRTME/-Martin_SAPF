@@ -27,7 +27,9 @@ void SW_detect(void);
 void pulse_gen(void);
 
 void standby_fcn(void);
+void enable_fcn(void);
 void working_fcn(void);
+void disable_fcn(void);
 void fault_sensed_fcn(void);
 void fault_fcn(void);
 
@@ -54,8 +56,14 @@ void BACK_loop(void)
 		case Standby:
 			standby_fcn();
 			break;
+		case Enable:
+			enable_fcn();
+			break;
 		case Working:
 			working_fcn();
+			break;
+		case Disable:
+			disable_fcn();
 			break;
 		case Fault_sensed:
 		    fault_sensed_fcn();
@@ -240,10 +248,14 @@ void standby_fcn(void)
 
 	if(ENABLE_SW == TRUE)
 	{
-		state = Working;
-		//FB1_enable();
+		state = Enable;
 		ENABLE_SW = FALSE;
 	}
+}
+
+void enable_fcn(void)
+{
+	state = Working;
 }
 
 void working_fcn(void)
@@ -252,12 +264,16 @@ void working_fcn(void)
 
 	if(ENABLE_SW == TRUE)
 	{
-		state = Standby;
-		//FB1_disable();
-		PCB_LED_WORKING_off();
+		state = Disable;
 		ENABLE_SW = FALSE;
 	}
 
+}
+
+void disable_fcn(void)
+{
+	PCB_LED_WORKING_off();
+	state = Standby;
 }
 
 void fault_fcn(void)
@@ -270,7 +286,6 @@ void fault_fcn(void)
     	EALLOW;
     	WdRegs.WDCR.all = 0x0040;
     	EDIS;
-
 
     }
     // signalizacija
