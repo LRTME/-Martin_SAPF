@@ -489,7 +489,7 @@ void output_bridge_control(void)
     if 	(state == Working)
     {
 
-    	FB2_update(IF_zeljen * u_ac_form);
+    	FB2_update(0.0);
 
       /*
     	sem pride regulacija izhodne napetosti

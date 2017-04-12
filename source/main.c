@@ -68,7 +68,7 @@ void main(void)
     // inicializiram zašèitno prekinitev,
     // in sicer po tem ko resetiram latch
     // saj bi se mi v nasprotnem primeru izvedla zašèitna prekinitev
-    	FLT_int_setup();
+    //	FLT_int_setup();
 
     // pocakam, da se izvede kalibracija tokovnih sond
         DELAY_US(10000);
@@ -92,10 +92,10 @@ void main(void)
             asm(" ESTOP0");
 
             // èe pa teèem bez debuggerja, pa se tukaj zaustavim
-            while(1)
+           /* while(1)
             {
             	// DO NOTHING
-            }
+            } */
         }
 
         // pocakam, da napetost na enosmernem tokokrogu naraste

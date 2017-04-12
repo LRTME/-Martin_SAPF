@@ -19,7 +19,7 @@ void interrupt FLT_int_TZ1(void)
     EDIS;
 
     // in onemogocim prekinitve, da ne padem zopet notri
-    // ta prekinitev je ponovno omogocena, ko se ponovno zazene SVM enota
+    // ta prekinitev je ponovno omogocena, ko se ponovno zazene enota
     EALLOW;
     EPwm1Regs.TZEINT.bit.OST = 0;
     EDIS;
@@ -62,14 +62,14 @@ void FLT_int_disable(void)
 void FLT_int_setup(void)
 {
     // input pin setup (TZ1)
-    InputXbarRegs.INPUT1SELECT = 19;
+	InputXbarRegs.INPUT1SELECT = 19;
 
     // registriram prekinitveno rutino
     EALLOW;
     PieVectTable.EPWM1_TZ_INT = &FLT_int_TZ1;
 
     // spustim zastavice
-   // EPwm1Regs.TZSEL.bit.OSHT1 = 1;
+ //   EPwm1Regs.TZSEL.bit.OSHT1 = 1;
     EPwm1Regs.TZCLR.bit.OST = 1;
     EPwm1Regs.TZCLR.bit.INT = 1;
 
