@@ -61,12 +61,15 @@ void FLT_int_disable(void)
 **************************************************************/
 void FLT_int_setup(void)
 {
+    // input pin setup (TZ1)
+    InputXbarRegs.INPUT1SELECT = 19;
+
     // registriram prekinitveno rutino
     EALLOW;
     PieVectTable.EPWM1_TZ_INT = &FLT_int_TZ1;
 
     // spustim zastavice
-    EALLOW;
+   // EPwm1Regs.TZSEL.bit.OSHT1 = 1;
     EPwm1Regs.TZCLR.bit.OST = 1;
     EPwm1Regs.TZCLR.bit.INT = 1;
 

@@ -17,7 +17,6 @@ void main(void)
     	ClkCfgRegs.LOSPCP.bit.LSPCLKDIV = 0;
     	EDIS;
 
-labela:
     // GPIO - najprej
     	InitGpio();
 
@@ -91,8 +90,12 @@ labela:
         {
             // zato kar resetiram MCU, da se zaženemo še enkrat
             asm(" ESTOP0");
-            DINT;
-            goto labela;
+
+            // èe pa teèem bez debuggerja, pa se tukaj zaustavim
+            while(1)
+            {
+            	// DO NOTHING
+            }
         }
 
         // pocakam, da napetost na enosmernem tokokrogu naraste

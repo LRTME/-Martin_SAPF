@@ -19,6 +19,8 @@ float	napetost = 0.0;
 float   IS = 0.0;
 float   IF = 0.0;
 
+float	IF_zeljen = 0.0;
+
 float   IS_offset = 2048;
 float   IF_offset = 2048;
 
@@ -462,7 +464,7 @@ void input_bridge_control(void)
 
         PID_FLOAT_CALC(u_dc_reg);
 
-        // tokovni PI regulator s feed forward
+        // tokovni PI regulator s feed forward za IS
         IS_reg.Ref = -u_dc_reg.Out * u_ac_form;
         IS_reg.Fdb = IS;
         IS_reg.Ff = (24.0 / 230.0) * u_ac/u_dc;
@@ -483,10 +485,11 @@ void input_bridge_control(void)
 #pragma CODE_SECTION(output_bridge_control, "ramfuncs");
 void output_bridge_control(void)
 {
-    // regulacija deluje samo v teh primerih
+    // regulacija deluje samo v tem primeru
     if 	(state == Working)
     {
-    	FB2_update(0.0);
+
+    	FB2_update(IF_zeljen * u_ac_form);
 
       /*
     	sem pride regulacija izhodne napetosti
@@ -593,18 +596,5 @@ void check_limits(void)
             PCB_relay3_off();
         }
 
-        if (PCB_CPLD_trip() == FALSE)
-        {
-        	fault_flags.HW_trip = TRUE;
-        	state = Fault_sensed;
-        	// izklopim mostic
-        	FB1_disable();
-        	FB2_disable();
-
-        	// izklopim vse kontaktorjev
-        	PCB_relay1_off();
-        	PCB_relay2_off();
-        	PCB_relay3_off();
-        }
     }
 }
