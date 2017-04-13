@@ -92,10 +92,10 @@ void main(void)
             asm(" ESTOP0");
 
             // èe pa teèem bez debuggerja, pa se tukaj zaustavim
-           /* while(1)
+            while(1)
             {
             	// DO NOTHING
-            } */
+            }
         }
 
         // pocakam, da napetost na enosmernem tokokrogu naraste

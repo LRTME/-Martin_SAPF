@@ -28,6 +28,7 @@
 #include    "STAT_float.h"
 #include    "ABF_float.h"
 #include    "DELAY_float.h"
+#include	"RES_float.h"
 
 // korekcijski faktorji (meritev osciloskop)
 #define		U_AC_CORR_F		0.963752665

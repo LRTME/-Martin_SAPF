@@ -74,6 +74,9 @@ SLEW_float  u_dc_slew = SLEW_FLOAT_DEFAULTS;
 // regulacija omreznega toka
 PID_float   IS_reg = PID_FLOAT_DEFAULTS;
 
+// regulacija izhodne napetosti
+RES_float	u_out_reg = RES_FLOAT_DEFAULTS;
+
 // sinhronizacija na omrežje
 float       sync_base_freq = SWITCH_FREQ;
 PID_float   sync_reg    = PID_FLOAT_DEFAULTS;
@@ -356,7 +359,7 @@ void get_electrical(void)
     // temperatura hladilnika
     temperatura = NTC_temp();
 
-    // porcunam DFT napetosti
+    // poracunam DFT napetosti
     // vhodna omrežna napetost - u_ac
     u_ac_dft.In = u_ac;
     DFT_FLOAT_MACRO(u_ac_dft);

@@ -12,6 +12,7 @@
 #include    "define.h"
 #include    "SLEW_float.h"
 #include    "PID_float.h"
+#include	"RES_float.h"
 
 // stevec prekinitev
 extern volatile float    interrupt_cnt;
@@ -46,8 +47,8 @@ extern volatile bool start_calibration;
 // za zagon in delovanje
 extern SLEW_float   u_dc_slew;
 extern SLEW_float   u_out_slew;
-extern PID_float    u_out_reg;
 extern PID_float    u_dc_reg;
+extern RES_float	u_out_reg;
 
 
 extern float u_dc;
