@@ -68,7 +68,7 @@ void main(void)
     // inicializiram zašèitno prekinitev,
     // in sicer po tem ko resetiram latch
     // saj bi se mi v nasprotnem primeru izvedla zašèitna prekinitev
-    //	FLT_int_setup();
+        FLT_int_setup();
 
     // pocakam, da se izvede kalibracija tokovnih sond
         DELAY_US(10000);
@@ -82,7 +82,7 @@ void main(void)
     // vklopna procedura
         state = Startup;
         // najprej se priklopim na omrezje preko zagonskega upora R1 in pocasi napolnim DC-link
-        PCB_relay1_on();
+     //   PCB_relay1_on();
         DELAY_US(1000000);
 
         // èe se je vklopila strojna zašèita se je zelo verjetno vklopila zaradi prevelikega toka
@@ -99,25 +99,25 @@ void main(void)
         }
 
         // pocakam, da napetost na enosmernem tokokrogu naraste
-        while (u_dc < u_ac_rms * SQRT2 * (24 / 230))
+ /*       while (u_dc < u_ac_rms * SQRT2 * (24 / 230))
         {
              // DO NOTHING
-        }
+        } */
 
         // kratkostièim zagonski upor R1 (470R)
-        PCB_relay2_on();
+    //    PCB_relay2_on();
         DELAY_US(1000000);
 
         // in pocakam, da napetost na enosmernem tokokrogu naraste do konca
-        while (u_dc < u_ac_rms * SQRT2 * (24 / 230))
+  /*      while (u_dc < u_ac_rms * SQRT2 * (24 / 230))
         {
            // DO NOTHING
-        }
+        } */
 
         //vklopim moènostno stopnjo in povem regulaciji da zaène delati
 
         DINT;
-        FB1_enable();
+       // FB1_enable();
         //
         state = Standby;
         // zeljeno vrednost enacim s trenutno u_dc, da se lepo zapeljem po rampi
@@ -126,10 +126,10 @@ void main(void)
 
 
         // pocakam da se napetost enosmernega kroga zapelje na nastavljeno vrednost (DEL_UDC_REF)
-        while(fabs(u_dc_reg.Fdb - u_dc_reg.Ref) > 0.1)
+  /*      while(fabs(u_dc_reg.Fdb - u_dc_reg.Ref) > 0.1)
         {
             // DO NOTHING
-        }
+        } */
 
         // grem v neskoncno zanko, ki se izvaja v ozadju
         BACK_loop();

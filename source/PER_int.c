@@ -7,6 +7,10 @@
 #include    "PER_int.h"
 #include    "TIC_toc.h"
 
+int WD_flag = 1;
+
+enum OUT_STATE out_reg = REP;
+
 // za oceno obremenjenosti CPU-ja
 float   cpu_load  = 0.0;
 long    interrupt_cycles = 0;
@@ -199,7 +203,11 @@ void interrupt PER_int(void)
     
     // stopam
     TIC_stop();
+
+    if (WD_flag == 1)
+    {
 	PCB_WD_KICK_int();
+    }
 
 }   // end of PWM_int
 
@@ -525,7 +533,7 @@ void check_limits(void)
             PCB_relay3_off();
         }
 
-        if (   (u_ac_rms < u_ac_RMS_MIN)
+   /*     if (   (u_ac_rms < u_ac_RMS_MIN)
                 && (state != Initialization)
                 && (state != Startup))
         {
@@ -539,7 +547,7 @@ void check_limits(void)
             PCB_relay1_off();
             PCB_relay2_off();
             PCB_relay3_off();
-        }
+        } */
 
         if (u_dc > DEL_UDC_MAX)
         {
@@ -555,7 +563,7 @@ void check_limits(void)
             PCB_relay3_off();
         }
 
-        if (   (u_dc < DEL_UDC_MIN)
+    /*    if (   (u_dc < DEL_UDC_MIN)
                 && (state != Initialization)
                 && (state != Startup))
         {
@@ -569,7 +577,7 @@ void check_limits(void)
             PCB_relay1_off();
             PCB_relay2_off();
             PCB_relay3_off();
-        }
+        } */
 
         if ((IS > +IS_LIM) || (IS < -IS_LIM))
         {

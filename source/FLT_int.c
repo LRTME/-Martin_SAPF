@@ -5,6 +5,7 @@
 *
 ****************************************************************/
 #include <FLT_int.h>
+#include "globals.h"
 
 /**************************************************************
 * Prekinitev, ki se izvede, ko prime zascita ob napaki
@@ -27,6 +28,14 @@ void interrupt FLT_int_TZ1(void)
     // ter javim, da je prišlo do HW zašèite
     fault_flags.HW_trip = TRUE;
     state = Fault_sensed;
+    // izklopim mostic
+    FB1_disable();
+    FB2_disable();
+
+    // izklopim vse kontaktorjev
+    PCB_relay1_off();
+    PCB_relay2_off();
+    PCB_relay3_off();
 
     // Spustimo INT zastavico v PIE enoti
     PieCtrlRegs.PIEACK.all = PIEACK_GROUP2;
@@ -61,18 +70,17 @@ void FLT_int_disable(void)
 **************************************************************/
 void FLT_int_setup(void)
 {
+	// registriram prekinitveno rutino
+	EALLOW;
+
     // input pin setup (TZ1)
 	InputXbarRegs.INPUT1SELECT = 19;
 
-    // registriram prekinitveno rutino
-    EALLOW;
-    PieVectTable.EPWM1_TZ_INT = &FLT_int_TZ1;
-
     // spustim zastavice
- //   EPwm1Regs.TZSEL.bit.OSHT1 = 1;
     EPwm1Regs.TZCLR.bit.OST = 1;
     EPwm1Regs.TZCLR.bit.INT = 1;
 
+    PieVectTable.EPWM1_TZ_INT = &FLT_int_TZ1;
     // omogocim prekinitev
     EPwm1Regs.TZEINT.bit.OST = 1;
     EDIS;

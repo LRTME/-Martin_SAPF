@@ -378,6 +378,9 @@ void fault_fcn(void)
     	RESET_SW = FALSE;
     	PCB_LED_FAULT_off();
     	EALLOW;
+    	// first enable watchdog with maximum prescaler
+    	WdRegs.WDCR.all = 0x002F;
+    	// then force a WD reset
     	WdRegs.WDCR.all = 0x0040;
     	EDIS;
 
