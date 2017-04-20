@@ -30,9 +30,6 @@ labela:
     // basic vector table
     InitPieVectTable();
 
-    // inicializacija komunikacijoe
-    COMM_initialization();
-
     // inicializiram ADC in moènostni modul
     ADC_init();
 
@@ -41,6 +38,9 @@ labela:
 
     // inicializiram peridoièno prekinitev za regulacijo
     PER_int_setup();
+
+    // inicializacija komunikacijoe
+    COMM_initialization();
 
     // zagon PWM enot
     FB1_start();
