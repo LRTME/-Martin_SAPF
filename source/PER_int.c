@@ -258,11 +258,11 @@ void PER_int_setup(void)
     u_dc_slew.Slope_down = u_dc_slew.Slope_up;
 
     // inicializiram regulator DC_link napetosti (empiricno doloceni parametri)
-    u_dc_reg.Kp = 2.2;
+    u_dc_reg.Kp = 6.0;
     u_dc_reg.Ki = 0.0002;
     u_dc_reg.Kff = 0.8;
-    u_dc_reg.OutMax = 4.9;		// IS_max 5.0 A
-    u_dc_reg.OutMin = -4.9;		// IS_min -5.0 A
+    u_dc_reg.OutMax = 15.0;			// IS_max 5.0 A
+    u_dc_reg.OutMin = -15.0;		// IS_min -5.0 A
 
     // inicializiram regulator omreznega toka IS (Optimum iznosa)
     IS_reg.Kp = 0.1885;
@@ -471,6 +471,7 @@ void input_bridge_control(void)
         // napetostni PI regulator
         u_dc_reg.Ref = u_dc_slew.Out;
         u_dc_reg.Fdb = u_dc_filtered;
+        // uporabim ABF za oceno DC toka in posledièno feedforward
         u_dc_reg.Ff = I_dc_abf * (230 / 24) * u_dc_filtered * SQRT2 / u_ac_rms;
 
         PID_FLOAT_CALC(u_dc_reg);
