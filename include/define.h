@@ -48,13 +48,13 @@
 // maksimalna izhodna napetost
 #define     U_MAX           35
 // nastavljena napetost enosmernega tokokroga
-#define     DEL_UDC_REF        33.0
+#define     DEL_UDC_REF        	40.0
 
 #define     IS_LIM				6.0
 #define     IF_LIM				25.0
 #define     u_ac_RMS_MIN		196.0
 #define     u_ac_RMS_MAX		253.0
-#define     DEL_UDC_MAX			35.0
+#define     DEL_UDC_MAX			45.0
 #define     DEL_UDC_MIN			-0.5
 
 // deklaracije za logicne operacije

@@ -7,16 +7,9 @@
 #include    "PER_int.h"
 #include    "TIC_toc.h"
 
-// generiranje željene vrednosti
-float ref_counter = 0;
-float ref_counter_freq = 10; // Hz
-float ref_counter_cmpr = 0.025;
+int WD_flag = 1;
 
-float IS_zeljen = 2.0;
-
-float ref_value = 0;
-float ref_value_high = 0.85;
-float ref_value_low = 0.05;
+enum OUT_STATE out_reg = REP;
 
 // za oceno obremenjenosti CPU-ja
 float   cpu_load  = 0.0;
@@ -30,6 +23,8 @@ float	napetost = 0.0;
 float   IS = 0.0;
 float   IF = 0.0;
 
+float	IF_zeljen = 0.0;
+
 float   IS_offset = 2048;
 float   IF_offset = 2048;
 
@@ -40,18 +35,17 @@ long    current_offset_counter = 0;
 
 // napetosti
 float   u_ac = 0.0;
-
-float   DEL_UDC = 0.0;
+float   u_dc = 0.0;
 float   u_f = 0.0;
 float   u_out = 0.0;
 
 float   u_ac_offset = 2048.0;
-float   DEL_UDC_offset = 2048.0;
+float   u_dc_offset = 2048.0;
 float   u_f_offset = 2048.0;
 float   u_out_offset = 2048.0;
 
 float   u_ac_gain = ((1000 + 0.47) / (5 * 0.47)) * U_AC_CORR_F * (3.3 / 4096);
-float   DEL_UDC_gain = ((200 + 1.8) / (5 * 1.8)) * DEL_UDC_CORR_F * (3.3 / 4096);
+float   u_dc_gain = ((330 + 1.8) / (5 * 1.8)) * DEL_UDC_CORR_F * (3.3 / 4096);
 float   u_f_gain = ((200 + 1.8) / (5 * 1.8)) * (3.3 / 4096);
 float   u_out_gain = ((1000 + 0.47) / (5 * 0.47)) * U_OUT_CORR_F * (3.3 / 4096);
 
@@ -64,8 +58,8 @@ float R_NTC = 0.0;
 float T_NTC = 0.0;
 
 // filtrirana napetost DC linka
-DC_float    DEL_UDC_f = DC_FLOAT_DEFAULTS;
-float   DEL_UDC_filtered = 0.0;
+DC_float    u_dc_f = DC_FLOAT_DEFAULTS;
+float   u_dc_filtered = 0.0;
 
 // prvi harmonik in RMS vhodne omrežne napetosti (u_ac)
 DFT_float   u_ac_dft = DFT_FLOAT_DEFAULTS;
@@ -78,15 +72,14 @@ float   u_out_rms = 0.0;
 float   u_out_form = 0.0;
 
 // regulacija napetosti enosmernega tokokroga
-PID_float   DEL_UDC_reg = PID_FLOAT_DEFAULTS;
-SLEW_float  DEL_UDC_slew = SLEW_FLOAT_DEFAULTS;
+PID_float   u_dc_reg = PID_FLOAT_DEFAULTS;
+SLEW_float  u_dc_slew = SLEW_FLOAT_DEFAULTS;
 
 // regulacija omreznega toka
 PID_float   IS_reg = PID_FLOAT_DEFAULTS;
 
 // regulacija izhodne napetosti
-PID_float   u_out_reg = PID_FLOAT_DEFAULTS;
-SLEW_float  u_out_slew = SLEW_FLOAT_DEFAULTS;
+RES_float	u_out_reg = RES_FLOAT_DEFAULTS;
 
 // sinhronizacija na omrežje
 float       sync_base_freq = SWITCH_FREQ;
@@ -97,10 +90,6 @@ bool        sync_use = TRUE;
 
 // samo za statistiko meritev
 STAT_float  statistika = STAT_FLOAT_DEFAULTS;
-
-// za oceno bremenskega toka
-ABF_float   i_cap_abf = ABF_FLOAT_DEFAULTS;
-float       IF_abf = 0.0;
 
 // za oceno DC-link toka
 ABF_float   I_cap_dc = ABF_FLOAT_DEFAULTS;
@@ -114,12 +103,10 @@ DC_float    I_dc_f = DC_FLOAT_DEFAULTS;
 
 // filtriranje meritve
 DC_float    IF_f = DC_FLOAT_DEFAULTS;
+DC_float	IS_f = DC_FLOAT_DEFAULTS;
 
-// izbira ocene izhodnega toka
-volatile enum   {Meas_out = 0, ABF_out, KF_out, None_out } IF_source = Meas_out;
-
-// izbira ocene dc toka
-volatile enum   {Meas_dc = 0, ABF_dc, KF_dc, None_dc, Power_out } I_dc_source = ABF_dc;
+// vhodna moc
+float	power_in = 0.0;
 
 // izhodna moc
 float   power_out = 0.0;
@@ -129,6 +116,7 @@ float   temperatura = 0.0;
 
 // prototipi funkcij
 void get_electrical(void);
+void sync(void);
 void input_bridge_control(void);
 void check_limits(void);
 float NTC_temp(void);
@@ -151,7 +139,7 @@ void interrupt PER_int(void)
     // Spustimo INT zastavico v PIE enoti
     PieCtrlRegs.PIEACK.all = PIEACK_GROUP3;
     
-    // pozenem stoprico
+    // pozenem stoparico
     interrupt_cycles = TIC_time;
     TIC_start();
 
@@ -165,22 +153,8 @@ void interrupt PER_int(void)
         interrupt_cnt = 0;
     }
 
-    // generiram spreenjljivo želeno vrednost
-    ref_counter = ref_counter + ref_counter_freq/SWITCH_FREQ;
-    if (ref_counter >= 1.0)
-    {
-        ref_counter = 0;
-    }
-
-    // stopnicasta zeljena vrednost
-    if (ref_counter > ref_counter_cmpr)
-    {
-        ref_value = ref_value_low;
-    }
-    else
-    {
-        ref_value = ref_value_high;
-    }
+    // generiram zeljeno vrednost
+    REF_GEN_update();
 
     // izracun napetosti, tokov in temperature hladilnika
     get_electrical();
@@ -188,10 +162,13 @@ void interrupt PER_int(void)
     // preverim ali sem znotraj meja
     check_limits();
 
-    // regulacija DEL_UDC
+    // sinhronizacija na omrezje
+    sync();
+
+    // regulacija u_dc
     input_bridge_control();
 
-    // spavim vrednosti v buffer za prikaz
+    // spravim vrednosti v buffer za prikaz
     DLOG_GEN_update();
     
     /* preverim, èe me sluèajno èaka nova prekinitev.
@@ -211,13 +188,26 @@ void interrupt PER_int(void)
         // beri:ugasni moènostno stopnjo, ...
         if (interrupt_overflow_counter >= 10)
         {
+        	// izklopim mostic
+        	FB1_disable();
+        	FB2_disable();
+
+        	// izklopim vse kontaktorjev
+        	PCB_relay1_off();
+        	PCB_relay2_off();
+        	PCB_relay3_off();
+
             asm(" ESTOP0");
         }
     }
     
     // stopam
     TIC_stop();
+
+    if (WD_flag == 1)
+    {
 	PCB_WD_KICK_int();
+    }
 
 }   // end of PWM_int
 
@@ -232,7 +222,7 @@ void PER_int_setup(void)
     dlog.auto_time = 1;
     dlog.holdoff_time = 1;
 
-    dlog.prescalar = 10;
+    dlog.prescalar = 2;
 
     dlog.slope = Negative;
     dlog.trig = &ref_gen.kot;
@@ -241,11 +231,11 @@ void PER_int_setup(void)
     dlog.iptr1 = &u_ac;
     dlog.iptr2 = &IS;
     dlog.iptr3 = &IS_reg.Ref;
-    dlog.iptr4 = &I_cap_dc.i_cap_estimated;
-    dlog.iptr5 = &I_dc_abf;
+    dlog.iptr4 = &u_dc_filtered;
+    dlog.iptr5 = &u_dc_reg.Ref;
     dlog.iptr6 = &u_out;
-    dlog.iptr7 = &IF;
-    dlog.iptr8 = &IF_abf;
+    dlog.iptr7 = &IS_reg.Err;
+    dlog.iptr8 = &I_dc_abf;
 
     // inicializiram generator signalov
     ref_gen.type = REF_Step;
@@ -257,81 +247,51 @@ void PER_int_setup(void)
     ref_gen.samp_period = SAMPLE_TIME;
 
     // inicializiram DC filter
-    DC_FLOAT_MACRO_INIT(DEL_UDC_f);
+    DC_FLOAT_MACRO_INIT(u_dc_f);
 
     // inicilaliziram DFT
     DFT_FLOAT_MACRO_INIT(u_ac_dft);
 
-    // inicializiram DEL_UDC_slew
-    DEL_UDC_slew.In = DEL_UDC_REF;
-    DEL_UDC_slew.Slope_up = 10.0 * SAMPLE_TIME;  // 10 V/s
-    DEL_UDC_slew.Slope_down = DEL_UDC_slew.Slope_up;
-/*
-    // inicializiram regulator DC_link napetosti
-    DEL_UDC_reg.Kp = 2.0; //4.0;
-    DEL_UDC_reg.Ki = 0.0001; //0.0002;
-    DEL_UDC_reg.Kff = 0.9;
-    DEL_UDC_reg.OutMax = +20; //+15; //+10.0; // +33.0
-    DEL_UDC_reg.OutMin = -20; //-15; //-10.0; // -33.0
+    // inicializiram u_dc_slew
+    u_dc_slew.In = DEL_UDC_REF;					// referenca u_dc = 40 V
+    u_dc_slew.Slope_up = 10.0 * SAMPLE_TIME;	// 10 V/s
+    u_dc_slew.Slope_down = u_dc_slew.Slope_up;
 
-    // inicializiram regulator omreznega toka
-     * */
-    IS_reg.Kp = 0.2;          //0.2;
-    IS_reg.Ki = 0.008;        //0.008;
-    IS_reg.Kff = 1.2;         //0.8;
+    // inicializiram regulator DC_link napetosti (empiricno doloceni parametri)
+    u_dc_reg.Kp = 6.0;
+    u_dc_reg.Ki = 0.0002;
+    u_dc_reg.Kff = 0.8;
+    u_dc_reg.OutMax = 15.0;			// IS_max 5.0 A
+    u_dc_reg.OutMin = -15.0;		// IS_min -5.0 A
+
+    // inicializiram regulator omreznega toka IS (Optimum iznosa)
+    IS_reg.Kp = 0.1885;
+    IS_reg.Ki = 0.004642;
+    IS_reg.Kff = 1.0;
     IS_reg.OutMax = +0.99;    // zaradi bootstrap driverjev ne gre do 1.0
     IS_reg.OutMin = -0.99;    // zaradi bootstrap driverjev ne gre do 1.0
-
-    /*
-    // inicializiram rampo izhodne napetosti
-  //  u_out_slew.In = 0;    // kasneje jo doloèa potenciometer
-  //  u_out_slew.Slope_up = 10.0 * SAMPLE_TIME;  // 10 V/s
-  //  u_out_slew.Slope_down = u_out_slew.Slope_up;
-
-    // inicializiram regulator izhodne napetosti
-    u_out_reg.Kp = 10.0;
-    u_out_reg.Ki = 0.1; // 0.1
-    u_out_reg.Kff = 0.8;
-    u_out_reg.OutMax = +0.0;   // kasneje to doloèa potenciometer
-    u_out_reg.OutMin = -0.0;   // kasneje to doloèa potenciometer
-
-    // inicializiram ramp bb toka
-    IF_slew.In = 0;
-    IF_slew.Slope_up = 10.0 * SAMPLE_TIME;  // 10 A/s
-    IF_slew.Slope_down = IF_slew.Slope_up;
-
-    // inicializiram tokovna regulatorja
-    IF_reg.Kp = 0.1;
-    IF_reg.Ki = 0.001;
-    IF_reg.Kff = 0.8;
-    IF_reg.OutMax = +0.99; // zaradi bootstrap driverjev ne gre do 1.0
-    IF_reg.OutMin = -0.99; // zaradi bootstrap driverjev ne gre do 1.0
 
     // regulator frekvence
     sync_reg.Kp = 1000;
     sync_reg.Ki = 0.01;
     sync_reg.OutMax = +SWITCH_FREQ/10;
     sync_reg.OutMin = -SWITCH_FREQ/10;
-*/
+
     // inicializiram statistiko
     STAT_FLOAT_MACRO_INIT(statistika);
 
     // inicializiram ABF
                                     // 2000 Hz;     1000 Hz;     500 Hz,      100 Hz          50 Hz           10 Hz
-  /*  i_cap_abf.Alpha = 0.394940272;  // 0.6911845;   0.394940272 ; 0.209807141; 0.043935349;    0.022091045;    0.004437948
-    i_cap_abf.Beta = 0.098696044;   // 0.394784176; 0.098696044; 0.024674011; 0.00098696;     0.00024674;     0.0000098696
-    i_cap_abf.Capacitance = 5 * 0.0022;   // 2200 uF
-
-    I_cap_dc.Alpha = 0.394940272;  // 0.6911845;   0.394940272 ; 0.209807141; 0.043935349;    0.022091045;    0.004437948
-    I_cap_dc.Beta = 0.098696044;   // 0.394784176; 0.098696044; 0.024674011; 0.00098696;     0.00024674;     0.0000098696
-    I_cap_dc.Capacitance = 5 * 0.0022;   // 2200 uF
+    I_cap_dc.Alpha = 0.043935349;  	// 0.6911845;   0.394940272 ; 0.209807141; 0.043935349;    0.022091045;    0.004437948
+    I_cap_dc.Beta = 0.00098696;   	// 0.394784176; 0.098696044; 0.024674011; 0.00098696;     0.00024674;     0.0000098696
+    I_cap_dc.Capacitance = 5 * 0.0022;   	// 5 * 2200 uF
 
     // inicializiram delay_linijo
     DELAY_FLOAT_INIT(IS_delay)
     IS_delay.delay = 10;
-*/
+
     // inicializiram filter za oceno toka
-    //DC_FLOAT_MACRO_INIT(I_dc_f);
+    DC_FLOAT_MACRO_INIT(I_dc_f);
 
     // inicializiram filter za meritev toka
     DC_FLOAT_MACRO_INIT(IF_f);
@@ -362,10 +322,6 @@ void get_electrical(void)
 {
     static float   IS_offset_calib = 0;
     static float   IF_offset_calib = 0.0;
-    static float   u_ac_offset_calib = 0.0;
-    static float   DEL_UDC_offset_calib = 0.0;
-    static float   u_f_offset_calib = 0.0;
-    static float   u_out_offset_calib = 0.0;
 
     // pocakam da ADC konca s pretvorbo
     ADC_wait();
@@ -378,10 +334,6 @@ void get_electrical(void)
         // akumuliram offset
         IS_offset_calib = IS_offset_calib + IS_adc;
         IF_offset_calib = IF_offset_calib + IF_adc;
-        u_ac_offset_calib = u_ac_offset_calib + u_ac_adc;
-        DEL_UDC_offset_calib = DEL_UDC_offset_calib + DEL_UDC_adc;
-        u_f_offset_calib = u_f_offset_calib + u_f_adc;
-        u_out_offset_calib = u_out_offset_calib + u_out_adc;
 
         // ko potece dovolj casa, sporocim da lahko grem naprej
         // in izracunam povprecni offset
@@ -392,16 +344,13 @@ void get_electrical(void)
             start_calibration = FALSE;
             IS_offset = IS_offset_calib / (SAMPLE_FREQ*1L);
             IF_offset = IF_offset_calib / (SAMPLE_FREQ*1L);
-            u_ac_offset = u_ac_offset_calib / (SAMPLE_FREQ*1L);
-            DEL_UDC_offset = DEL_UDC_offset_calib / (SAMPLE_FREQ*1L);
-            u_f_offset = u_f_offset_calib / (SAMPLE_FREQ*1L);
-            u_out_offset = u_out_offset_calib / (SAMPLE_FREQ*1L);
+
         }
 
         IS = 0.0;
         IF = 0.0;
         u_ac = 0.0;
-        DEL_UDC = 0.0;
+        u_dc = 0.0;
         u_f = 0.0;
         u_out = 0.0;
     }
@@ -410,7 +359,7 @@ void get_electrical(void)
         IS = IS_gain * (IS_adc - IS_offset);
         IF = IF_gain * (IF_adc - IF_offset);
         u_ac = u_ac_gain * (u_ac_adc - u_ac_offset);
-        DEL_UDC = DEL_UDC_gain * (DEL_UDC_adc - DEL_UDC_offset);
+        u_dc = u_dc_gain * (DEL_UDC_adc - u_dc_offset);
         u_f = u_f_gain * (u_f_adc - u_f_offset);
         u_out = u_out_gain * (u_out_adc - u_out_offset);
     }
@@ -418,7 +367,7 @@ void get_electrical(void)
     // temperatura hladilnika
     temperatura = NTC_temp();
 
-    // porcunam DFT napetosti
+    // poracunam DFT napetosti
     // vhodna omrežna napetost - u_ac
     u_ac_dft.In = u_ac;
     DFT_FLOAT_MACRO(u_ac_dft);
@@ -441,24 +390,21 @@ void get_electrical(void)
 
 
     // filtriram DC link napetost
-    DEL_UDC_f.In = DEL_UDC;
-    DC_FLOAT_MACRO(DEL_UDC_f);
-    DEL_UDC_filtered = DEL_UDC_f.Mean;
+    u_dc_f.In = u_dc;
+    DC_FLOAT_MACRO(u_dc_f);
+    u_dc_filtered = u_dc_f.Mean;
 
-    // izracunam kaksna moc je na izhodu filtra
+    // izracunam kaksna moc je na izhodu in vhodu filtra
     power_out = u_f * IF;
 
-    // ocena izhodnega toka z ABF
-    i_cap_abf.u_cap_measured = u_f;
-    ABF_float_calc(&i_cap_abf);
-    IF_abf = -i_cap_abf.i_cap_estimated + IF;
+    power_in = (24.0 / 230.0) * u_ac * IS;
 
     // zakasnim IS
     IS_delay.in = IS * IS_reg.Out;
     DELAY_FLOAT_CALC(IS_delay);
 
     // ocena dc toka z ABF
-    I_cap_dc.u_cap_measured = DEL_UDC;
+    I_cap_dc.u_cap_measured = u_dc;
     ABF_float_calc(&I_cap_dc);
 
     // se filtriram
@@ -470,8 +416,9 @@ void get_electrical(void)
     IF_f.In = IF;
     DC_FLOAT_MACRO(IF_f);
 
+
     // statistika
-    statistika.In = DEL_UDC;
+    statistika.In = u_dc;
     STAT_FLOAT_MACRO(statistika);
 }
 
@@ -485,6 +432,30 @@ float NTC_temp(void)
 	return T_NTC;
 }
 
+#pragma CODE_SECTION(sync, "ramfuncs");
+void sync(void)
+{
+	// sinhronizacija na omrezje
+    sync_reg.Ref = 0;
+    sync_reg.Fdb = u_ac_dft.SumA/u_ac_rms;
+    PID_FLOAT_CALC(sync_reg);
+
+    sync_switch_freq = sync_base_freq + sync_reg.Out;
+
+    sync_grid_freq = ((sync_switch_freq/SAMPLING_RATIO)/SAMPLE_POINTS);
+
+    if (sync_use == TRUE)
+    {
+        FB1_frequency(sync_switch_freq);
+        FB2_frequency(sync_switch_freq);
+    }
+    else
+    {
+        FB1_frequency(sync_base_freq);
+        FB2_frequency(sync_base_freq);
+    }
+}
+
 #pragma CODE_SECTION(input_bridge_control, "ramfuncs");
 void input_bridge_control(void)
 {
@@ -494,45 +465,21 @@ void input_bridge_control(void)
         || (state == Working)
         || (state == Disable))
     {
-        // najprej zapeljem zeleno vrednost po rampi
-        SLEW_FLOAT_CALC(DEL_UDC_slew)
+        // najprej zapeljem zeljeno vrednost po rampi
+        SLEW_FLOAT_CALC(u_dc_slew)
 
-        // izvedem napetostni regulator
-        DEL_UDC_reg.Ref = DEL_UDC_slew.Out;
-        DEL_UDC_reg.Fdb = DEL_UDC_filtered;
-        // izberem vir direktne krmilne veje
-        // samo v primeru testiranja vhodnega pretvornika, ko je tok enosmernega
-        // tokokroga peljan èez tokovni senzor na izhodu
-        if (IF_source == Meas_dc)
-        {
-            DEL_UDC_reg.Ff = IF_f.Mean * (24 / 230) * DEL_UDC_filtered * SQRT2 / u_ac_rms;
-        }
-        // privzeto uporabim ABF za oceno DC toka in posledièno feedforward
-        if (I_dc_source == ABF_dc)
-        {
-            DEL_UDC_reg.Ff = I_dc_abf * (24 / 230) * DEL_UDC_filtered * SQRT2 / u_ac_rms;
-        }
-        // brez direktne krmilne veje
-        if (I_dc_source == None_dc)
-        {
-            u_out_reg.Ff = 0.0;
-        }
-        // ocena preko izhodne moèi
-        if (I_dc_source == Power_out)
-        {
-            DEL_UDC_reg.Ff = power_out * (24 / 230) * SQRT2 / u_ac_rms;
-        }
+        // napetostni PI regulator
+        u_dc_reg.Ref = u_dc_slew.Out;
+        u_dc_reg.Fdb = u_dc_filtered;
+        // uporabim ABF za oceno DC toka in posledièno feedforward
+        u_dc_reg.Ff = I_dc_abf * (230 / 24) * u_dc_filtered * SQRT2 / u_ac_rms;
 
-        PID_FLOAT_CALC(DEL_UDC_reg);
+        PID_FLOAT_CALC(u_dc_reg);
 
-        // izvedem tokovni regulator
-        // tega bi veljalo zamenjati za PR regulator
-        // ampak samo v primeru ko se sinhroniziram na omrežje
-        // IS_reg.Ref = -DEL_UDC_reg.Out * u_ac_form * (24 / 230);
-
-        IS_reg.Ref = IS_zeljen * sin(2 * 2 * PI * GRID_FREQ * SAMPLE_TIME * interrupt_cnt);
+        // tokovni PI regulator s feed forward za IS
+        IS_reg.Ref = -u_dc_reg.Out * u_ac_form;
         IS_reg.Fdb = IS;
-        IS_reg.Ff = (24 / 230) * u_ac/DEL_UDC;
+        IS_reg.Ff = (24.0 / 230.0) * u_ac/u_dc;
         PID_FLOAT_CALC(IS_reg);
 
         // posljem vse skupaj na mostic
@@ -541,9 +488,29 @@ void input_bridge_control(void)
     // sicer pa nicim integralna stanja
     else
     {
-        DEL_UDC_reg.Ui = 0.0;
+        u_dc_reg.Ui = 0.0;
         IS_reg.Ui = 0.0;
         FB1_update(0.0);
+    }
+}
+
+#pragma CODE_SECTION(output_bridge_control, "ramfuncs");
+void output_bridge_control(void)
+{
+    // regulacija deluje samo v tem primeru
+    if 	(state == Working)
+    {
+
+    	FB2_update(0.0);
+
+      /*
+    	sem pride regulacija izhodne napetosti
+        */
+    }
+    // sicer pa nicim integralna stanja
+    else
+    {
+        FB2_update(0.0);
     }
 }
 
@@ -553,7 +520,7 @@ void check_limits(void)
     // samo èe je kalibracija konènana
     if (calibration_done == TRUE)
     {
-        /* if (u_ac_rms > u_ac_RMS_MAX)
+         if (u_ac_rms > u_ac_RMS_MAX)
         {
             fault_flags.overvoltage_u_ac = TRUE;
             state = Fault_sensed;
@@ -566,6 +533,7 @@ void check_limits(void)
             PCB_relay2_off();
             PCB_relay3_off();
         }
+
         if (   (u_ac_rms < u_ac_RMS_MIN)
                 && (state != Initialization)
                 && (state != Startup))
@@ -581,24 +549,10 @@ void check_limits(void)
             PCB_relay2_off();
             PCB_relay3_off();
         }
-       */ if (DEL_UDC > DEL_UDC_MAX)
-        {
-            fault_flags.overvoltage_DEL_UDC = TRUE;
-            state = Fault_sensed;
-            // izklopim mostic
-            FB1_disable();
-                        FB2_disable();
 
-            // izklopim vse kontaktorjev
-            PCB_relay1_off();
-            PCB_relay2_off();
-            PCB_relay3_off();
-        }
-    /*    if (   (DEL_UDC < DEL_UDC_MIN)
-                && (state != Initialization)
-                && (state != Startup))
+        if (u_dc > DEL_UDC_MAX)
         {
-            fault_flags.undervoltage_DEL_UDC = TRUE;
+            fault_flags.overvoltage_u_dc = TRUE;
             state = Fault_sensed;
             // izklopim mostic
             FB1_disable();
@@ -608,20 +562,38 @@ void check_limits(void)
             PCB_relay1_off();
             PCB_relay2_off();
             PCB_relay3_off();
-        } */
+        }
+
+        if (   (u_dc < DEL_UDC_MIN)
+                && (state != Initialization)
+                && (state != Startup))
+        {
+            fault_flags.undervoltage_u_dc = TRUE;
+            state = Fault_sensed;
+            // izklopim mostic
+            FB1_disable();
+            FB2_disable();
+
+            // izklopim vse kontaktorjev
+            PCB_relay1_off();
+            PCB_relay2_off();
+            PCB_relay3_off();
+        }
+
         if ((IS > +IS_LIM) || (IS < -IS_LIM))
         {
-        		fault_flags.overcurrent_IS = TRUE;
-        		state = Fault_sensed;
-        		// izklopim mostic
-        		FB1_disable();
-        		FB2_disable();
+        	fault_flags.overcurrent_IS = TRUE;
+        	state = Fault_sensed;
+        	// izklopim mostic
+        	FB1_disable();
+        	FB2_disable();
 
-        		// izklopim vse kontaktorjev
-        		PCB_relay1_off();
-        		PCB_relay2_off();
-        		PCB_relay3_off();
+       		// izklopim vse kontaktorjev
+       		PCB_relay1_off();
+       		PCB_relay2_off();
+       		PCB_relay3_off();
         }
+
         if ((IF > +IF_LIM) || (IF < -IF_LIM))
         {
             fault_flags.overcurrent_IF = TRUE;
@@ -635,5 +607,6 @@ void check_limits(void)
             PCB_relay2_off();
             PCB_relay3_off();
         }
+
     }
 }

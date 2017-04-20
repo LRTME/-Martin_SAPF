@@ -39,7 +39,7 @@
 // dead time (v procesorskih cikilh)
 #define     FB_DEAD_TIME    (40)
 
-// definicije za status mostica
+// definicije za status mosticev
 enum FB_STATE { FB_DIS=0, FB_EN, FB_BOOTSTRAP, FB_TRIP};
 
 /**************************************************************

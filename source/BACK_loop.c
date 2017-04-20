@@ -12,6 +12,10 @@
 bool ENABLE_SW = FALSE;  			// pulz, ko pritisnemo na tipko ENABLE
 bool RESET_SW = FALSE;  			// pulz, ko pritisnemo na tipko RESET
 
+bool FB2_enable_flag = FALSE;
+bool MOSFET_flag = FALSE;
+bool relay3_flag = FALSE;
+
 bool pulse_1000ms = FALSE;
 bool pulse_500ms = FALSE;
 bool pulse_100ms = FALSE;
@@ -20,6 +24,8 @@ bool pulse_10ms = FALSE;
 
 // deklaracije zunanjih spremenljivk
 
+int pulse_10ms_cnt = 0;
+int pulse_10ms_cnt_previous = 0;
 
 // pototipi funkcij
 
@@ -27,6 +33,9 @@ void SW_detect(void);
 void pulse_gen(void);
 
 void standby_fcn(void);
+void enable_fcn(void);
+void working_fcn(void);
+void disable_fcn(void);
 void fault_sensed_fcn(void);
 void fault_fcn(void);
 
@@ -53,8 +62,14 @@ void BACK_loop(void)
 		case Standby:
 			standby_fcn();
 			break;
+		case Enable:
+			enable_fcn();
+			break;
 		case Working:
-			PCB_LED_WORKING_on();
+			working_fcn();
+			break;
+		case Disable:
+			disable_fcn();
 			break;
 		case Fault_sensed:
 		    fault_sensed_fcn();
@@ -153,6 +168,18 @@ void pulse_gen(void)
         pulse_500ms = FALSE;
     }
 
+    // stejem pulze po 10ms
+        if (pulse_10ms == TRUE)
+        {
+            pulse_10ms_cnt = pulse_10ms_cnt + 1;
+
+            // resetiram stevec po 1000ms
+            if (pulse_10ms_cnt == 100)
+            {
+            	pulse_10ms_cnt = 0;
+            }
+        }
+
     // stejem pulze po 100ms, da dobimo pulz 1s
     if (pulse_100ms == TRUE)
     {
@@ -236,6 +263,111 @@ void SW_detect(void)
 void standby_fcn(void)
 {
 	PCB_LED_READY_on();
+
+	if(ENABLE_SW == TRUE)
+	{
+		state = Enable;
+		ENABLE_SW = FALSE;
+	}
+}
+
+void enable_fcn(void)
+{
+	// vkljucim kratkosticna MOSFET-a
+	if (MOSFET_flag == FALSE)
+	{
+		PCB_CPLD_MOSFET_MCU_on();
+		MOSFET_flag = TRUE;
+	}
+
+	// vklopim izhodno mocnostno stopnjo
+	if (FB2_enable_flag == FALSE)
+	{
+		FB2_enable();
+		FB2_enable_flag = TRUE;
+	}
+
+	// rele3 prekine direktno povezavo med omrezjem in izhodom
+	// izhodna stopnja je zaporedno vezana med omrezjem in izhodom
+	if (relay3_flag == FALSE)
+	{
+		PCB_relay3_on();
+		relay3_flag = TRUE;
+		pulse_10ms_cnt_previous = pulse_10ms_cnt;
+	}
+
+	// po 20ms, ko rele odklopi ugasnemo kratkosticna MOSFET-a
+	if (	(pulse_10ms_cnt - pulse_10ms_cnt_previous == 2)
+		||	(MOSFET_flag == TRUE))
+	{
+		PCB_CPLD_MOSFET_MCU_off();
+		MOSFET_flag = FALSE;
+		pulse_10ms_cnt_previous = pulse_10ms_cnt;
+	}
+
+	// po nadaljnih 10ms (po tem, ko rele odklopi direktno povezavo z omrezjem
+	// in ko sta MOSFET-a ponovno zaprta) preidemo v stanje regulacije
+	if (	(pulse_10ms_cnt - pulse_10ms_cnt_previous == 1)
+		||	(MOSFET_flag == FALSE)
+		||	(relay3_flag == TRUE))
+	{
+		PCB_LED_WORKING_on();
+		pulse_10ms_cnt_previous = 0;
+		state = Working;
+	}
+
+}
+
+void working_fcn(void)
+{
+
+	if(ENABLE_SW == TRUE)
+	{
+		state = Disable;
+		ENABLE_SW = FALSE;
+	}
+
+}
+
+void disable_fcn(void)
+{
+	static int pulse_10ms_cnt_previous;
+
+		// vkljucim kratkosticna MOSFET-a
+		if (MOSFET_flag == FALSE)
+		{
+			PCB_CPLD_MOSFET_MCU_on();
+			MOSFET_flag = TRUE;
+		}
+
+		// izklopim izhodno mocnostno stopnjo
+		if (FB2_enable_flag == TRUE)
+		{
+			FB2_disable();
+			FB2_enable_flag = FALSE;
+		}
+
+		// rele3 vzpostavi direktno povezavo med omrezjem in izhodom
+		// izhodna stopnja je premoscena
+		if (relay3_flag == TRUE)
+		{
+			PCB_relay3_off();
+			relay3_flag = FALSE;
+			pulse_10ms_cnt_previous = pulse_10ms_cnt;
+		}
+
+		// po 20ms, ko rele preklopi ugasnemo kratkosticna MOSFET-a
+		if (	(pulse_10ms_cnt - pulse_10ms_cnt_previous == 2)
+			||	(MOSFET_flag == TRUE))
+		{
+			PCB_CPLD_MOSFET_MCU_off();
+			MOSFET_flag = FALSE;
+			PCB_LED_WORKING_off();
+			pulse_10ms_cnt_previous = 0;
+			state = Standby;
+		}
+
+
 }
 
 void fault_fcn(void)
@@ -243,11 +375,15 @@ void fault_fcn(void)
     // pobrišem napako, in grem v standby
     if (RESET_SW == TRUE)
     {
-        // resetiram MCU - preko WD-ja
+    	RESET_SW = FALSE;
     	PCB_LED_FAULT_off();
-        EALLOW;
-        WdRegs.WDCR.all = 0x0040;
-        EDIS;
+    	EALLOW;
+    	// first enable watchdog with maximum prescaler
+    	WdRegs.WDCR.all = 0x002F;
+    	// then force a WD reset
+    	WdRegs.WDCR.all = 0x0040;
+    	EDIS;
+
     }
     // signalizacija
     PCB_LED_FAULT_on();
@@ -264,7 +400,7 @@ void fault_sensed_fcn(void)
     PCB_relay2_off();
     PCB_relay3_off();
 
-    //FLT_int_disable();
+    FLT_int_disable();
 
     if (fault_flags.fault_registered == FALSE)
     {

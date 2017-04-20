@@ -18,6 +18,7 @@
 #include    "globals.h"
 #include    "FB_bipolar.h"
 
+#include	"main.h"
 #include 	"PCB_util.h"
 
 #include	"COMM_handlers.h"

@@ -251,16 +251,18 @@ void FB1_init(void)
     FB1_MODUL2.DBRED.bit.DBRED = FB_DEAD_TIME;
 
     // trip zone functionality
-/*    FB1_MODUL1.TZSEL.bit.OSHT1 = 0;      // select which input triggers tripzone
+    EALLOW;
+    FB1_MODUL1.TZSEL.bit.OSHT1 = 1;      // select which input triggers tripzone (TZ1)
     FB1_MODUL1.TZCTL.bit.TZA = 2;        // force low
     FB1_MODUL1.TZCTL.bit.TZB = 2;        // force low
     FB1_MODUL1.TZCLR.bit.OST = 1;        // clear any pending flags
 
-    FB1_MODUL2.TZSEL.bit.OSHT1 = 0;      // select which input triggers tripzone
+    FB1_MODUL2.TZSEL.bit.OSHT1 = 1;      // select which input triggers tripzone (TZ1)
     FB1_MODUL2.TZCTL.bit.TZA = 2;        // force low
     FB1_MODUL2.TZCTL.bit.TZB = 2;        // force low
     FB1_MODUL2.TZCLR.bit.OST = 1;        // clear any pending flags
-*/
+    EDIS;
+
     // disable outputs by default
     FB1_disable();
 
@@ -274,6 +276,7 @@ void FB1_init(void)
     
     // trip zone input pin setup
     EALLOW;
+
     //GpioCtrlRegs.GPAMUX1.bit.GPIO19 = 1;
     EDIS;
 
@@ -356,16 +359,18 @@ void FB2_init(void)
     FB2_MODUL2.DBRED.bit.DBRED = FB_DEAD_TIME;
 
     // trip zone functionality
-/*    FB2_MODUL1.TZSEL.bit.OSHT1 = 0;      // select which input triggers tripzone
+    EALLOW;
+    FB2_MODUL1.TZSEL.bit.OSHT1 = 1;      // select which input triggers tripzone
     FB2_MODUL1.TZCTL.bit.TZA = 2;        // force low
     FB2_MODUL1.TZCTL.bit.TZB = 2;        // force low
     FB2_MODUL1.TZCLR.bit.OST = 1;        // clear any pending flags
 
-    FB2_MODUL2.TZSEL.bit.OSHT1 = 0;      // select which input triggers tripzone
+    FB2_MODUL2.TZSEL.bit.OSHT1 = 1;      // select which input triggers tripzone
     FB2_MODUL2.TZCTL.bit.TZA = 2;        // force low
     FB2_MODUL2.TZCTL.bit.TZB = 2;        // force low
     FB2_MODUL2.TZCLR.bit.OST = 1;        // clear any pending flags
-*/
+    EDIS;
+
     // disable outputs by default
     FB2_disable();
 
@@ -379,6 +384,7 @@ void FB2_init(void)
 
     // trip zone input pin setup
     EALLOW;
+
     //GpioCtrlRegs.GPAMUX1.bit.GPIO19 = 1;
     EDIS;
 
