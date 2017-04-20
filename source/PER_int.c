@@ -533,7 +533,7 @@ void check_limits(void)
             PCB_relay3_off();
         }
 
-   /*     if (   (u_ac_rms < u_ac_RMS_MIN)
+        if (   (u_ac_rms < u_ac_RMS_MIN)
                 && (state != Initialization)
                 && (state != Startup))
         {
@@ -547,7 +547,7 @@ void check_limits(void)
             PCB_relay1_off();
             PCB_relay2_off();
             PCB_relay3_off();
-        } */
+        }
 
         if (u_dc > DEL_UDC_MAX)
         {
@@ -563,7 +563,7 @@ void check_limits(void)
             PCB_relay3_off();
         }
 
-    /*    if (   (u_dc < DEL_UDC_MIN)
+        if (   (u_dc < DEL_UDC_MIN)
                 && (state != Initialization)
                 && (state != Startup))
         {
@@ -577,7 +577,7 @@ void check_limits(void)
             PCB_relay1_off();
             PCB_relay2_off();
             PCB_relay3_off();
-        } */
+        }
 
         if ((IS > +IS_LIM) || (IS < -IS_LIM))
         {
