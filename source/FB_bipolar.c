@@ -274,12 +274,6 @@ void FB1_init(void)
     GpioCtrlRegs.GPAMUX1.bit.GPIO3 = 1;		// ePWM2B
     EDIS;
     
-    // trip zone input pin setup
-    EALLOW;
-
-    //GpioCtrlRegs.GPAMUX1.bit.GPIO19 = 1;
-    EDIS;
-
 }
 void FB2_init(void)
 {
@@ -380,12 +374,6 @@ void FB2_init(void)
     GpioCtrlRegs.GPAMUX1.bit.GPIO5 = 1;		// ePWM3B
     GpioCtrlRegs.GPAMUX1.bit.GPIO6 = 1;		// ePWM4A
     GpioCtrlRegs.GPAMUX1.bit.GPIO7 = 1;		// ePWM4B
-    EDIS;
-
-    // trip zone input pin setup
-    EALLOW;
-
-    //GpioCtrlRegs.GPAMUX1.bit.GPIO19 = 1;
     EDIS;
 
 }

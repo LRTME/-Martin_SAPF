@@ -61,6 +61,7 @@ void main(void)
     	fault_flags.overvoltage_u_dc = FALSE;
     	fault_flags.undervoltage_u_ac = FALSE;
     	fault_flags.overvoltage_u_ac = FALSE;
+    	fault_flags.overvoltage_u_f = FALSE;
     	fault_flags.cpu_overrun = FALSE;
     	fault_flags.fault_registered = FALSE;
     	fault_flags.HW_trip = FALSE;

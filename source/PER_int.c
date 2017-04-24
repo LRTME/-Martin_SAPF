@@ -258,11 +258,11 @@ void PER_int_setup(void)
     u_dc_slew.Slope_down = u_dc_slew.Slope_up;
 
     // inicializiram regulator DC_link napetosti (empiricno doloceni parametri)
-    u_dc_reg.Kp = 6.0;
+    u_dc_reg.Kp = 2.2;
     u_dc_reg.Ki = 0.0002;
     u_dc_reg.Kff = 0.8;
-    u_dc_reg.OutMax = 15.0;			// IS_max 5.0 A
-    u_dc_reg.OutMin = -15.0;		// IS_min -5.0 A
+    u_dc_reg.OutMax = 5.0;			// IS_max 5.0 A
+    u_dc_reg.OutMin = -5.0;		// IS_min -5.0 A
 
     // inicializiram regulator omreznega toka IS (Optimum iznosa)
     IS_reg.Kp = 0.1885;
@@ -501,7 +501,7 @@ void output_bridge_control(void)
     if 	(state == Working)
     {
 
-    	FB2_update(0.0);
+    	FB2_update(IF_zeljen * u_ac_form);
 
       /*
     	sem pride regulacija izhodne napetosti

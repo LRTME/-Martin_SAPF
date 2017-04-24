@@ -113,7 +113,7 @@ bool PCB_CPLD_over_current_supply(void)
 * Funckija, ki vrne stanje "over_current_filter" zapaha s CPLD-ja
 * (over_current_filter) - GPIO15
 **************************************************************/
-bool PCB_CPLD_over_current_filter_stat(void)
+bool PCB_CPLD_over_current_filter(void)
 {
 	if(GpioDataRegs.GPADAT.bit.GPIO15 == 1)
 	{

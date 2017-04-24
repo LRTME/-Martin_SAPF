@@ -32,6 +32,7 @@ extern struct FAULT_FLAGS
     bool    overvoltage_u_dc:1;
     bool    undervoltage_u_ac:1;
     bool    overvoltage_u_ac:1;
+    bool	overvoltage_u_f:1;
     bool    cpu_overrun:1;
     bool    fault_registered:1;
 } fault_flags;
