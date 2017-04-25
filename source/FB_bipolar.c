@@ -118,7 +118,7 @@ void FB1_disable(void)
 
 void FB2_disable(void)
 {
-    FB2_MODUL1.AQCSFRC.bit.CSFA = 1;
+	FB2_MODUL1.AQCSFRC.bit.CSFA = 1;
     FB2_MODUL1.AQCSFRC.bit.CSFB = 2;
 
     FB2_MODUL2.AQCSFRC.bit.CSFA = 1;
@@ -133,6 +133,12 @@ void FB2_disable(void)
 **************************************************************/
 void FB1_enable(void)
 {
+	// ce je bil Trip aktiviran, ga resetiram
+	EALLOW;
+	FB1_MODUL1.TZCLR.bit.OST = 1;
+	FB1_MODUL2.TZCLR.bit.OST = 1;
+	EDIS;
+
     FB1_MODUL1.AQCSFRC.bit.CSFA = 0;
     FB1_MODUL1.AQCSFRC.bit.CSFB = 0;
 
@@ -144,12 +150,20 @@ void FB1_enable(void)
 
 void FB2_enable(void)
 {
-    FB2_MODUL1.AQCSFRC.bit.CSFA = 0;
+	// ce je bil Trip aktiviran, ga resetiram
+	EALLOW;
+	FB2_MODUL1.TZCLR.bit.OST = 1;
+	FB2_MODUL2.TZCLR.bit.OST = 1;
+	EDIS;
+
+	// potem pa nastavim AQ
+	FB2_MODUL1.AQCSFRC.bit.CSFA = 0;
     FB2_MODUL1.AQCSFRC.bit.CSFB = 0;
 
     FB2_MODUL2.AQCSFRC.bit.CSFA = 0;
     FB2_MODUL2.AQCSFRC.bit.CSFB = 0;
 
+    // in signaliziram stanje
     fb2_status = FB_EN;
 }
 

@@ -12,7 +12,6 @@
 bool ENABLE_SW = FALSE;  			// pulz, ko pritisnemo na tipko ENABLE
 bool RESET_SW = FALSE;  			// pulz, ko pritisnemo na tipko RESET
 
-bool FB2_enable_flag = FALSE;
 bool MOSFET_flag = FALSE;
 bool relay3_flag = FALSE;
 
@@ -281,10 +280,9 @@ void enable_fcn(void)
 	}
 
 	// vklopim izhodno mocnostno stopnjo
-	if (FB2_enable_flag == FALSE)
+	if (FB2_status() == FB_DIS)
 	{
 		FB2_enable();
-		FB2_enable_flag = TRUE;
 	}
 
 	// rele3 prekine direktno povezavo med omrezjem in izhodom
@@ -341,10 +339,9 @@ void disable_fcn(void)
 		}
 
 		// izklopim izhodno mocnostno stopnjo
-		if (FB2_enable_flag == TRUE)
+		if (FB2_status() == FB_EN)
 		{
 			FB2_disable();
-			FB2_enable_flag = FALSE;
 		}
 
 		// rele3 vzpostavi direktno povezavo med omrezjem in izhodom

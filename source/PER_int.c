@@ -232,9 +232,9 @@ void PER_int_setup(void)
     dlog.iptr2 = &IS;
     dlog.iptr3 = &IS_reg.Ref;
     dlog.iptr4 = &u_dc_filtered;
-    dlog.iptr5 = &u_dc_reg.Ref;
+    dlog.iptr5 = &u_ac_form;
     dlog.iptr6 = &u_out;
-    dlog.iptr7 = &IS_reg.Err;
+    dlog.iptr7 = &u_f;
     dlog.iptr8 = &I_dc_abf;
 
     // inicializiram generator signalov
@@ -500,12 +500,26 @@ void output_bridge_control(void)
     // regulacija deluje samo v tem primeru
     if 	(state == Working)
     {
+    	// izbira vrste regulacije izhodne napetosti
+    	switch (out_reg)
+    	{
+		case REP:
+			// repetitivni regulator
+			break;
 
-    	FB2_update(IF_zeljen * u_ac_form);
+		case DFTF:
+			// DFT filter
+			break;
 
-      /*
-    	sem pride regulacija izhodne napetosti
-        */
+		case RES:
+			// resonanèni regulator
+			break;
+
+		case NONE:
+			// krmiljenje (brez regulacije)
+			FB2_update(IF_zeljen * u_ac_form);
+			break;
+    	}
     }
     // sicer pa nicim integralna stanja
     else

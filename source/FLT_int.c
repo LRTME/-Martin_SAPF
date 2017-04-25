@@ -13,16 +13,15 @@
 #pragma CODE_SECTION(FLT_int_TZ1, "ramfuncs");
 void interrupt FLT_int_TZ1(void)
 {
-
-    // Spustimo INT zastavico v TZ enoti
-    EALLOW;
-    EPwm1Regs.TZCLR.bit.INT = 1;
-    EDIS;
-
-    // in onemogocim prekinitve, da ne padem zopet notri
+    // onemogocim prekinitve, da ne padem zopet notri
     // ta prekinitev je ponovno omogocena, ko se ponovno zazene enota
     EALLOW;
     EPwm1Regs.TZEINT.bit.OST = 0;
+    EDIS;
+
+    // in Spustimo INT zastavico v TZ enoti
+    EALLOW;
+    EPwm1Regs.TZCLR.bit.INT = 1;
     EDIS;
 
     // ter javim, da je prišlo do HW zašèite
