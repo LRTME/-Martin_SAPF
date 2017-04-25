@@ -44,9 +44,9 @@
 // maksimalna izhodna moc v wattih
 #define     P_MAX           100
 // maksimalni bremenski tok v amperih
-#define     I_MAX           4
+#define     I_MAX           5.0
 // maksimalna izhodna napetost
-#define     U_MAX           35
+#define     U_MAX           40.0
 // nastavljena napetost enosmernega tokokroga
 #define     DEL_UDC_REF        	40.0
 
@@ -54,7 +54,7 @@
 #define     IF_LIM				25.0
 #define     u_ac_RMS_MIN		196.0
 #define     u_ac_RMS_MAX		253.0
-#define     DEL_UDC_MAX			45.0
+#define     DEL_UDC_MAX			49.0
 #define     DEL_UDC_MIN			-0.5
 
 // deklaracije za logicne operacije

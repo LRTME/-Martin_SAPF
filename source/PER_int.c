@@ -9,7 +9,7 @@
 
 int WD_flag = 1;
 
-enum OUT_STATE out_reg = REP;
+enum OUT_STATE out_control = REP;
 
 // za oceno obremenjenosti CPU-ja
 float   cpu_load  = 0.0;
@@ -500,25 +500,29 @@ void output_bridge_control(void)
     // regulacija deluje samo v tem primeru
     if 	(state == Working)
     {
-    	// izbira vrste regulacije izhodne napetosti
-    	switch (out_reg)
+    	// detekcija, ce delujemo v rezimu regulacije
+    	if (mode == Control)
     	{
-		case REP:
-			// repetitivni regulator
-			break;
+    		// izbira vrste regulacije izhodne napetosti
+    		switch (out_control)
+    		{
+    		case REP:
+    			// repetitivni regulator
+    			break;
 
-		case DFTF:
-			// DFT filter
-			break;
+    		case DFTF:
+    			// DFT filter
+    			break;
 
-		case RES:
-			// resonanèni regulator
-			break;
-
-		case NONE:
-			// krmiljenje (brez regulacije)
-			FB2_update(IF_zeljen * u_ac_form);
-			break;
+    		case RES:
+    			// resonanèni regulator
+    			break;
+    		}
+    	}
+    	else
+    	{
+    		// krmiljenje (brez regulacije)
+    		FB2_update(IF_zeljen * u_ac_form);
     	}
     }
     // sicer pa nicim integralna stanja
