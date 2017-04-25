@@ -46,7 +46,7 @@ float   u_out_offset = 2048.0;
 
 float   u_ac_gain = ((1000 + 0.47) / (5 * 0.47)) * U_AC_CORR_F * (3.3 / 4096);
 float   u_dc_gain = ((330 + 1.8) / (5 * 1.8)) * DEL_UDC_CORR_F * (3.3 / 4096);
-float   u_f_gain = ((200 + 1.8) / (5 * 1.8)) * (3.3 / 4096);
+float   u_f_gain = ((330 + 1.8) / (5 * 1.8)) * (3.3 / 4096);
 float   u_out_gain = ((1000 + 0.47) / (5 * 0.47)) * U_OUT_CORR_F * (3.3 / 4096);
 
 // NTC
@@ -167,6 +167,9 @@ void interrupt PER_int(void)
 
     // regulacija u_dc
     input_bridge_control();
+
+    // regulacija u_out
+    output_bridge_control();
 
     // spravim vrednosti v buffer za prikaz
     DLOG_GEN_update();
@@ -546,7 +549,7 @@ void check_limits(void)
             FB1_disable();
             FB2_disable();
 
-            // izklopim vse kontaktorjev
+            // izklopim vse kontaktorje
             PCB_relay1_off();
             PCB_relay2_off();
             PCB_relay3_off();
@@ -562,10 +565,24 @@ void check_limits(void)
             FB1_disable();
             FB2_disable();
 
-            // izklopim vse kontaktorjev
+            // izklopim vse kontaktorje
             PCB_relay1_off();
             PCB_relay2_off();
             PCB_relay3_off();
+        }
+
+        if (u_f > U_MAX)
+        {
+        	fault_flags.overvoltage_u_f = TRUE;
+        	state = Fault_sensed;
+        	// izklopim mostic
+        	FB1_disable();
+        	FB2_disable();
+
+        	// izklopim vse kontaktorje
+        	PCB_relay1_off();
+        	PCB_relay2_off();
+        	PCB_relay3_off();
         }
 
         if (u_dc > DEL_UDC_MAX)
@@ -576,7 +593,7 @@ void check_limits(void)
             FB1_disable();
             FB2_disable();
 
-            // izklopim vse kontaktorjev
+            // izklopim vse kontaktorje
             PCB_relay1_off();
             PCB_relay2_off();
             PCB_relay3_off();
@@ -592,7 +609,7 @@ void check_limits(void)
             FB1_disable();
             FB2_disable();
 
-            // izklopim vse kontaktorjev
+            // izklopim vse kontaktorje
             PCB_relay1_off();
             PCB_relay2_off();
             PCB_relay3_off();
@@ -606,7 +623,7 @@ void check_limits(void)
         	FB1_disable();
         	FB2_disable();
 
-       		// izklopim vse kontaktorjev
+       		// izklopim vse kontaktorje
        		PCB_relay1_off();
        		PCB_relay2_off();
        		PCB_relay3_off();
@@ -620,7 +637,7 @@ void check_limits(void)
             FB1_disable();
             FB2_disable();
 
-            // izklopim vse kontaktorjev
+            // izklopim vse kontaktorje
             PCB_relay1_off();
             PCB_relay2_off();
             PCB_relay3_off();
