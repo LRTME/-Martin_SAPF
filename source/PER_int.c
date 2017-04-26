@@ -79,7 +79,8 @@ SLEW_float  u_dc_slew = SLEW_FLOAT_DEFAULTS;
 PID_float   IS_reg = PID_FLOAT_DEFAULTS;
 
 // regulacija izhodne napetosti
-RES_float	u_out_reg = RES_FLOAT_DEFAULTS;
+PID_float	u_out_reg = PID_FLOAT_DEFAULTS;
+SLEW_float	u_out_slew = SLEW_FLOAT_DEFAULTS;
 
 // sinhronizacija na omrežje
 float       sync_base_freq = SWITCH_FREQ;
@@ -118,6 +119,7 @@ float   temperatura = 0.0;
 void get_electrical(void);
 void sync(void);
 void input_bridge_control(void);
+void output_bridge_control(void);
 void check_limits(void);
 float NTC_temp(void);
 
@@ -279,6 +281,13 @@ void PER_int_setup(void)
     sync_reg.Ki = 0.01;
     sync_reg.OutMax = +SWITCH_FREQ/10;
     sync_reg.OutMin = -SWITCH_FREQ/10;
+
+    // PI regulator u_out
+    u_out_reg.Kp = 0.1;
+    u_out_reg.Ki = 0.0;
+    u_out_reg.Kff = 0.0;
+    u_out_reg.OutMax = 40.0;		// U_dc_max 40.0 V
+    u_out_reg.OutMin = -40.0;		// U_dc_min -40.0 V
 
     // inicializiram statistiko
     STAT_FLOAT_MACRO_INIT(statistika);
@@ -510,7 +519,21 @@ void output_bridge_control(void)
     		switch (out_control)
     		{
     		case REP:
-    			// repetitivni regulator
+    			// inicializiram u_out_slew
+    			u_out_slew.In = -u_ac_dft.Out;				// referenca u_ac_dft.Out - 1. harmonik
+    			u_out_slew.Slope_up = 20000.0 * SAMPLE_TIME;	// 400 V / 20 ms
+    			u_out_slew.Slope_down = u_out_slew.Slope_up;
+
+    			// najprej zapeljem zeljeno vrednost po rampi
+    			SLEW_FLOAT_CALC(u_out_slew)
+    			// u_out PI regulator
+    			u_out_reg.Ref = u_out_slew.Out;
+    			u_out_reg.Fdb = u_out;
+    			u_out_reg.Ff = 0.0;
+    			PID_FLOAT_CALC(u_out_reg);
+
+    			// posljem vse skupaj na mostic
+    			FB2_update(u_out_reg.Out);
     			break;
 
     		case DFTF:

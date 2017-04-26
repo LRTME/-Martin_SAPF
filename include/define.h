@@ -46,7 +46,7 @@
 // maksimalni bremenski tok v amperih
 #define     I_MAX           5.0
 // maksimalna izhodna napetost
-#define     U_MAX           40.0
+#define     U_MAX           50.0
 // nastavljena napetost enosmernega tokokroga
 #define     DEL_UDC_REF        	40.0
 

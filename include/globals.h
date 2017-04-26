@@ -49,7 +49,7 @@ extern volatile bool start_calibration;
 extern SLEW_float   u_dc_slew;
 extern SLEW_float   u_out_slew;
 extern PID_float    u_dc_reg;
-extern RES_float	u_out_reg;
+extern PID_float	u_out_reg;
 
 
 extern float u_dc;
