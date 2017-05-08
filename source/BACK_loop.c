@@ -164,7 +164,7 @@ void pulse_gen(void)
     }
     else
     {
-        pulse_500ms = FALSE;
+          pulse_500ms = FALSE;
     }
 
     // stejem pulze po 10ms
@@ -273,42 +273,36 @@ void standby_fcn(void)
 void enable_fcn(void)
 {
 	// vkljucim kratkosticna MOSFET-a
-	if (MOSFET_flag == FALSE)
+	if (	(MOSFET_flag == FALSE)
+		||	(relay3_flag == FALSE)	)
 	{
 		PCB_CPLD_MOSFET_MCU_on();
 		MOSFET_flag = TRUE;
+		pulse_10ms_cnt_previous = pulse_10ms_cnt;
 	}
 
-	// vklopim izhodno mocnostno stopnjo
-	if (FB2_status() == FB_DIS)
-	{
-		FB2_enable();
-	}
-
-	// rele3 prekine direktno povezavo med omrezjem in izhodom
-	// izhodna stopnja je zaporedno vezana med omrezjem in izhodom
-	if (relay3_flag == FALSE)
+	// po 10 ms rele3 prekine direktno povezavo med omrezjem in izhodom
+	// povezavo držita aktivno MOSFET-a
+	if (	(pulse_10ms_cnt - pulse_10ms_cnt_previous == 1)
+		||	(relay3_flag == FALSE)
+		||	(MOSFET_flag == TRUE)	)
 	{
 		PCB_relay3_on();
 		relay3_flag = TRUE;
 		pulse_10ms_cnt_previous = pulse_10ms_cnt;
 	}
 
-	// po 30ms, ko rele odklopi ugasnemo kratkosticna MOSFET-a
-	if (	(pulse_10ms_cnt - pulse_10ms_cnt_previous == 3)
-		||	(MOSFET_flag == TRUE))
+	// po 50ms, ko rele odklopi ugasnemo kratkosticna MOSFET-a in zazenemo FB2
+	if (	(pulse_10ms_cnt - pulse_10ms_cnt_previous == 5)
+		||	(MOSFET_flag == TRUE)
+		||	(relay3_flag == TRUE)
+		||	(FB2_status() == FB_DIS)	)
 	{
 		PCB_CPLD_MOSFET_MCU_off();
 		MOSFET_flag = FALSE;
-		pulse_10ms_cnt_previous = pulse_10ms_cnt;
-	}
 
-	// po nadaljnih 20ms (po tem, ko rele odklopi direktno povezavo z omrezjem
-	// in ko sta MOSFET-a ponovno zaprta) preidemo v stanje regulacije
-	if (	(pulse_10ms_cnt - pulse_10ms_cnt_previous == 2)
-		||	(MOSFET_flag == FALSE)
-		||	(relay3_flag == TRUE))
-	{
+		FB2_enable();
+
 		PCB_LED_WORKING_on();
 		pulse_10ms_cnt_previous = 0;
 		state = Working;

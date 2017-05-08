@@ -32,9 +32,7 @@
 #include	"REP_float.h"
 
 // korekcijski faktorji (meritev osciloskop)
-#define		U_AC_CORR_F		0.963752665
 #define		DEL_UDC_CORR_F	1.020895522
-#define		U_OUT_CORR_F	0.967880085
 
 // definicije za status regulacije izhoda
 enum OUT_STATE { REP=0, DFTF, RES};

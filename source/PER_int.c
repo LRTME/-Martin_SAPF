@@ -39,15 +39,17 @@ float   u_dc = 0.0;
 float   u_f = 0.0;
 float   u_out = 0.0;
 
-float   u_ac_offset = 2048.0;
+// empiricno dolocena
+float   u_ac_offset = 2034.0;
+float   u_out_offset = 2036.0;
+
 float   u_dc_offset = 2048.0;
 float   u_f_offset = 2048.0;
-float   u_out_offset = 2048.0;
 
-float   u_ac_gain = ((1000 + 0.47) / (5 * 0.47)) * U_AC_CORR_F * (3.3 / 4096);
+float   u_ac_gain = -((1000 + 0.47) / (5 * 0.47)) * (3.3 / 4096);
 float   u_dc_gain = ((330 + 1.8) / (5 * 1.8)) * DEL_UDC_CORR_F * (3.3 / 4096);
 float   u_f_gain = ((330 + 1.8) / (5 * 1.8)) * (3.3 / 4096);
-float   u_out_gain = ((1000 + 0.47) / (5 * 0.47)) * U_OUT_CORR_F * (3.3 / 4096);
+float   u_out_gain = ((1000 + 0.47) / (5 * 0.47)) * (3.3 / 4096);
 
 // NTC
 float beta_NTC = 3988;
@@ -79,14 +81,14 @@ SLEW_float  u_dc_slew = SLEW_FLOAT_DEFAULTS;
 PID_float   IS_reg = PID_FLOAT_DEFAULTS;
 
 // regulacija izhodne napetosti
-PID_float	u_out_reg = PID_FLOAT_DEFAULTS;
-SLEW_float	u_out_slew = SLEW_FLOAT_DEFAULTS;
+PID_float	u_out_PIreg = PID_FLOAT_DEFAULTS;
+REP_float	u_out_RepReg = REP_FLOAT_DEFAULTS;
 
 // sinhronizacija na omrežje
 float       sync_base_freq = SWITCH_FREQ;
 PID_float   sync_reg    = PID_FLOAT_DEFAULTS;
 float       sync_switch_freq = SWITCH_FREQ;
-float       sync_grid_freq = ((SWITCH_FREQ/SAMPLING_RATIO)/SAMPLE_POINTS);
+float       sync_grid_freq = (SWITCH_FREQ/SAMPLE_POINTS);
 bool        sync_use = TRUE;
 
 // samo za statistiko meritev
@@ -234,8 +236,8 @@ void PER_int_setup(void)
     dlog.trig_value = 0.5;
 
     dlog.iptr1 = &u_ac;
-    dlog.iptr2 = &IS;
-    dlog.iptr3 = &IS_reg.Ref;
+    dlog.iptr2 = &u_out_PIreg.Ref;
+    dlog.iptr3 = &u_ac_dft.Out;
     dlog.iptr4 = &u_dc_filtered;
     dlog.iptr5 = &u_ac_form;
     dlog.iptr6 = &u_out;
@@ -283,11 +285,20 @@ void PER_int_setup(void)
     sync_reg.OutMin = -SWITCH_FREQ/10;
 
     // PI regulator u_out
-    u_out_reg.Kp = 0.1;
-    u_out_reg.Ki = 0.0;
-    u_out_reg.Kff = 0.0;
-    u_out_reg.OutMax = 40.0;		// U_dc_max 40.0 V
-    u_out_reg.OutMin = -40.0;		// U_dc_min -40.0 V
+    u_out_PIreg.Kp = 0.0;
+    u_out_PIreg.Ki = 0.0;
+    u_out_PIreg.Kff = 0.0;
+    u_out_PIreg.OutMax = +0.99;		// U_dc_max 40.0 V
+    u_out_PIreg.OutMin = -0.99;		// U_dc_min -40.0 V
+
+    // repetitivni regulator u_out
+    u_out_RepReg.gain = 0.8;
+    u_out_RepReg.w0 = 0.0;
+    u_out_RepReg.w1 = 0.0;
+    u_out_RepReg.w2 = 0.0;
+    u_out_RepReg.OutMax = 40.0;
+    u_out_RepReg.OutMin = -40.0;
+    REP_float_init(&u_out_RepReg);
 
     // inicializiram statistiko
     STAT_FLOAT_MACRO_INIT(statistika);
@@ -332,7 +343,7 @@ void PER_int_setup(void)
 #pragma CODE_SECTION(get_electrical, "ramfuncs");
 void get_electrical(void)
 {
-    static float   IS_offset_calib = 0;
+    static float   IS_offset_calib = 0.0;
     static float   IF_offset_calib = 0.0;
 
     // pocakam da ADC konca s pretvorbo
@@ -454,7 +465,7 @@ void sync(void)
 
     sync_switch_freq = sync_base_freq + sync_reg.Out;
 
-    sync_grid_freq = ((sync_switch_freq/SAMPLING_RATIO)/SAMPLE_POINTS);
+    sync_grid_freq = sync_switch_freq/SAMPLE_POINTS;
 
     if (sync_use == TRUE)
     {
@@ -489,9 +500,9 @@ void input_bridge_control(void)
         PID_FLOAT_CALC(u_dc_reg);
 
         // tokovni PI regulator s feed forward za IS
-        IS_reg.Ref = -u_dc_reg.Out * u_ac_form;
+        IS_reg.Ref = u_dc_reg.Out * u_ac_form;
         IS_reg.Fdb = IS;
-        IS_reg.Ff = (24.0 / 230.0) * u_ac/u_dc;
+        IS_reg.Ff = -(24.0 / 230.0) * u_ac/u_dc;
         PID_FLOAT_CALC(IS_reg);
 
         // posljem vse skupaj na mostic
@@ -509,7 +520,11 @@ void input_bridge_control(void)
 #pragma CODE_SECTION(output_bridge_control, "ramfuncs");
 void output_bridge_control(void)
 {
-    // regulacija deluje samo v tem primeru
+    // regulacija deluje samo v teh primerih
+	if (state == Enable)
+	{
+		FB2_update(0.0);
+	}
     if 	(state == Working)
     {
     	// detekcija, ce delujemo v rezimu regulacije
@@ -519,29 +534,36 @@ void output_bridge_control(void)
     		switch (out_control)
     		{
     		case REP:
-    			// inicializiram u_out_slew
-    			u_out_slew.In = -u_ac_dft.Out;				// referenca u_ac_dft.Out - 1. harmonik
-    			u_out_slew.Slope_up = 20000.0 * SAMPLE_TIME;	// 400 V / 20 ms
-    			u_out_slew.Slope_down = u_out_slew.Slope_up;
+    			// repetitivni regulator
+    			u_out_RepReg.in = u_ac_dft.Out - u_out;
+    			REP_float_calc(&u_out_RepReg);
 
-    			// najprej zapeljem zeljeno vrednost po rampi
-    			SLEW_FLOAT_CALC(u_out_slew)
-    			// u_out PI regulator
-    			u_out_reg.Ref = u_out_slew.Out;
-    			u_out_reg.Fdb = u_out;
-    			u_out_reg.Ff = 0.0;
-    			PID_FLOAT_CALC(u_out_reg);
-
+    			u_out_PIreg.Ref = u_ac_dft.Out + 0.9 * u_out_RepReg.out;
+    			u_out_PIreg.Fdb = u_out;
+    			u_out_PIreg.Ff = 0.0;
+    			PID_FLOAT_CALC(u_out_PIreg);
     			// posljem vse skupaj na mostic
-    			FB2_update(u_out_reg.Out);
+    			FB2_update(u_out_PIreg.Out);
     			break;
 
     		case DFTF:
     			// DFT filter
+    			u_out_PIreg.Ref = u_ac_dft.Out;
+    			u_out_PIreg.Fdb = u_out;
+    			u_out_PIreg.Ff = 0.0;
+    			PID_FLOAT_CALC(u_out_PIreg);
+    			// posljem vse skupaj na mostic
+    			FB2_update(u_out_PIreg.Out);
     			break;
 
     		case RES:
     			// resonanèni regulator
+    			u_out_PIreg.Ref = u_ac_dft.Out;
+    			u_out_PIreg.Fdb = u_out;
+    			u_out_PIreg.Ff = 0.0;
+    			PID_FLOAT_CALC(u_out_PIreg);
+    			// posljem vse skupaj na mostic
+    			FB2_update(u_out_PIreg.Out);
     			break;
     		}
     	}
@@ -594,7 +616,7 @@ void check_limits(void)
             PCB_relay3_off();
         }
 
-        if (u_f > U_MAX)
+        if (u_f > u_f_LIM)
         {
         	fault_flags.overvoltage_u_f = TRUE;
         	state = Fault_sensed;
