@@ -139,54 +139,68 @@ void PCB_CPLD_MOSFET_MCU_off(void)
 	GpioDataRegs.GPACLEAR.bit.GPIO25 = 1;
 }
 
+bool PCB_CPLD_MOSFET_MCU_status(void)
+{
+	if(GpioDataRegs.GPADAT.bit.GPIO25 == 1)
+	{
+		return (TRUE);
+	}
+	else
+	{
+		return (FALSE);
+	}
+}
 /**************************************************************
 * Funkcije za vklop/izklop relejev (preko CPLD)
 ***************************************************************
-* Funckija, ki vklopi Rele1 (Supply_main_relay) - GPIO29
+* Funckije za Rele1 (Supply_main_relay) - GPIO29
 **************************************************************/
 void PCB_relay1_on(void)
 {
 	GpioDataRegs.GPASET.bit.GPIO29 = 1;
 }
 
-/**************************************************************
-* Funckija, ki izklopi Rele1 (Supply_main_relay)
-**************************************************************/
 void PCB_relay1_off(void)
 {
 	GpioDataRegs.GPACLEAR.bit.GPIO29 = 1;
 }
 
 /**************************************************************
-* Funckija, ki vklopi Rele2 (Supply_resistor_relay) - GPIO23
+* Funckije za Rele2 (Supply_resistor_relay) - GPIO23
 **************************************************************/
 void PCB_relay2_on(void)
 {
 	GpioDataRegs.GPASET.bit.GPIO23 = 1;
 }
 
-/**************************************************************
-* Funckija, ki izklopi Rele2 (Supply_resistor_relay)
-**************************************************************/
 void PCB_relay2_off(void)
 {
 	GpioDataRegs.GPACLEAR.bit.GPIO23 = 1;
 }
 
 /**************************************************************
-* Funckija, ki vklopi Rele3 (Filter_main_relay) - GPIO72
+* Funckije za Rele3 (Filter_main_relay) - GPIO72
 **************************************************************/
 void PCB_relay3_on(void)
 {
 	GpioDataRegs.GPCSET.bit.GPIO72 = 1;
 }
 
-/**************************************************************
-* Funckija, ki izklopi Rele3 (Filter_main_relay)
-**************************************************************/
 void PCB_relay3_off(void)
 {
 	GpioDataRegs.GPCCLEAR.bit.GPIO72 = 1;
+}
+
+bool PCB_relay3_status(void)
+{
+	if(GpioDataRegs.GPCDAT.bit.GPIO72 == 1)
+	{
+		return (TRUE);
+	}
+	else
+	{
+		return (FALSE);
+	}
 }
 /*************************************************************/
 
@@ -313,7 +327,7 @@ void PCB_init(void)
     /* IZHODI */
     	// TODO
 
-        //Releji
+        // CPLD
         // GPIO29 - Supply_main_relay (Relay 1)
         GPIO_SetupPinMux(29, GPIO_MUX_CPU1, 0);
         GPIO_SetupPinOptions(29, GPIO_OUTPUT, GPIO_PUSHPULL);
@@ -326,7 +340,31 @@ void PCB_init(void)
         GPIO_SetupPinMux(72, GPIO_MUX_CPU1, 0);
         GPIO_SetupPinOptions(72, GPIO_OUTPUT, GPIO_PUSHPULL);
 
-    	//LEDice
+        // GPIO25 - MOSFET_MCU
+        GPIO_SetupPinMux(25, GPIO_MUX_CPU1, 0);
+        GPIO_SetupPinOptions(25, GPIO_OUTPUT, GPIO_PUSHPULL);
+
+        // GPIO27 - LATCH_RESET
+        GPIO_SetupPinMux(27, GPIO_MUX_CPU1, 0);
+        GPIO_SetupPinOptions(27, GPIO_OUTPUT, GPIO_PUSHPULL);
+
+        // GPIO33 - WD kick
+        GPIO_SetupPinMux(33, GPIO_MUX_CPU1, 0);
+        GPIO_SetupPinOptions(33, GPIO_OUTPUT, GPIO_PUSHPULL);
+
+		// GPIO17 - over_voltage
+		GPIO_SetupPinMux(17, GPIO_MUX_CPU1, 0);
+        GPIO_SetupPinOptions(17, GPIO_OUTPUT, GPIO_PUSHPULL);
+		
+		// GPIO11 - over_current_supply
+		GPIO_SetupPinMux(11, GPIO_MUX_CPU1, 0);
+        GPIO_SetupPinOptions(11, GPIO_OUTPUT, GPIO_PUSHPULL);
+		
+		// GPIO15 - over_current_filter
+		GPIO_SetupPinMux(15, GPIO_MUX_CPU1, 0);
+        GPIO_SetupPinOptions(15, GPIO_OUTPUT, GPIO_PUSHPULL);
+
+        //LEDice
         // GPIO12 - LED_FAULT
         GPIO_SetupPinMux(12, GPIO_MUX_CPU1, 0);
         GPIO_SetupPinOptions(12, GPIO_OUTPUT, GPIO_PUSHPULL);
@@ -342,32 +380,6 @@ void PCB_init(void)
         // LED na card-u
         GPIO_SetupPinMux(83, GPIO_MUX_CPU1, 0);
         GPIO_SetupPinOptions(83, GPIO_OUTPUT, GPIO_PUSHPULL);
-
-        //WD kick
-        // GPIO33 - WD kick
-        GPIO_SetupPinMux(33, GPIO_MUX_CPU1, 0);
-        GPIO_SetupPinOptions(33, GPIO_OUTPUT, GPIO_PUSHPULL);
-
-        //CPLD
-        // GPIO25 - MOSFET_MCU
-        GPIO_SetupPinMux(25, GPIO_MUX_CPU1, 0);
-        GPIO_SetupPinOptions(25, GPIO_OUTPUT, GPIO_PUSHPULL);
-
-        // GPIO27 - LATCH_RESET
-        GPIO_SetupPinMux(27, GPIO_MUX_CPU1, 0);
-        GPIO_SetupPinOptions(27, GPIO_OUTPUT, GPIO_PUSHPULL);
-		
-		// GPIO17 - over_voltage
-		GPIO_SetupPinMux(17, GPIO_MUX_CPU1, 0);
-        GPIO_SetupPinOptions(17, GPIO_OUTPUT, GPIO_PUSHPULL);
-		
-		// GPIO11 - over_current_supply
-		GPIO_SetupPinMux(11, GPIO_MUX_CPU1, 0);
-        GPIO_SetupPinOptions(11, GPIO_OUTPUT, GPIO_PUSHPULL);
-		
-		// GPIO15 - over_current_filter
-		GPIO_SetupPinMux(15, GPIO_MUX_CPU1, 0);
-        GPIO_SetupPinOptions(15, GPIO_OUTPUT, GPIO_PUSHPULL);
 
 /***************************************************************/
 
@@ -403,6 +415,7 @@ void PCB_init(void)
         PCB_relay1_off();
         PCB_relay2_off();
         PCB_relay3_off();
+        PCB_CPLD_MOSFET_MCU_off();
 
         PCB_LED_FAULT_off();
 		PCB_LED_READY_off();

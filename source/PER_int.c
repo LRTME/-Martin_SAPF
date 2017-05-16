@@ -7,8 +7,6 @@
 #include    "PER_int.h"
 #include    "TIC_toc.h"
 
-int WD_flag = 1;
-
 enum OUT_STATE out_control = REP;
 
 // za oceno obremenjenosti CPU-ja
@@ -22,8 +20,6 @@ float	napetost = 0.0;
 // tokovi
 float   IS = 0.0;
 float   IF = 0.0;
-
-float	IF_zeljen = 0.0;
 
 float   IS_offset = 2048;
 float   IF_offset = 2048;
@@ -83,6 +79,8 @@ PID_float   IS_reg = PID_FLOAT_DEFAULTS;
 // regulacija izhodne napetosti
 PID_float	u_out_PIreg = PID_FLOAT_DEFAULTS;
 REP_float	u_out_RepReg = REP_FLOAT_DEFAULTS;
+float		u_out_RepReg_k_out = 0.9;
+float		u_out_RepReg_k_in = 1.0;
 
 // sinhronizacija na omrežje
 float       sync_base_freq = SWITCH_FREQ;
@@ -211,10 +209,7 @@ void interrupt PER_int(void)
     // stopam
     TIC_stop();
 
-    if (WD_flag == 1)
-    {
 	PCB_WD_KICK_int();
-    }
 
 }   // end of PWM_int
 
@@ -238,7 +233,7 @@ void PER_int_setup(void)
     dlog.iptr1 = &u_ac;
     dlog.iptr2 = &u_out_PIreg.Ref;
     dlog.iptr3 = &u_ac_dft.Out;
-    dlog.iptr4 = &u_dc_filtered;
+    dlog.iptr4 = &u_out_PIreg.Err;
     dlog.iptr5 = &u_ac_form;
     dlog.iptr6 = &u_out;
     dlog.iptr7 = &u_f;
@@ -264,14 +259,14 @@ void PER_int_setup(void)
     u_dc_slew.Slope_up = 10.0 * SAMPLE_TIME;	// 10 V/s
     u_dc_slew.Slope_down = u_dc_slew.Slope_up;
 
-    // inicializiram regulator DC_link napetosti (empiricno doloceni parametri)
+    // inicializacija PI regulator DC_link napetosti (empiricno doloceni parametri)
     u_dc_reg.Kp = 2.2;
     u_dc_reg.Ki = 0.0002;
     u_dc_reg.Kff = 0.8;
     u_dc_reg.OutMax = 5.0;			// IS_max 5.0 A
     u_dc_reg.OutMin = -5.0;		// IS_min -5.0 A
 
-    // inicializiram regulator omreznega toka IS (Optimum iznosa)
+    // inicializacija PI regulator omreznega toka IS (Optimum iznosa)
     IS_reg.Kp = 0.1885;
     IS_reg.Ki = 0.004642;
     IS_reg.Kff = 1.0;
@@ -284,20 +279,23 @@ void PER_int_setup(void)
     sync_reg.OutMax = +SWITCH_FREQ/10;
     sync_reg.OutMin = -SWITCH_FREQ/10;
 
-    // PI regulator u_out
+    // inicializacija PI regulator u_out
     u_out_PIreg.Kp = 0.0;
     u_out_PIreg.Ki = 0.0;
     u_out_PIreg.Kff = 0.0;
-    u_out_PIreg.OutMax = +0.99;		// U_dc_max 40.0 V
-    u_out_PIreg.OutMin = -0.99;		// U_dc_min -40.0 V
+    u_out_PIreg.OutMax = +0.99;		// zaradi bootstrap driverjev ne gre do 1.0
+    u_out_PIreg.OutMin = -0.99;		// zaradi bootstrap driverjev ne gre do 1.0
 
-    // repetitivni regulator u_out
-    u_out_RepReg.gain = 0.8;
-    u_out_RepReg.w0 = 0.0;
+    // inicializacija repetitivni regulator u_out
+    u_out_RepReg.gain = 1;
+    u_out_RepReg.w0 = 0.95;
     u_out_RepReg.w1 = 0.0;
     u_out_RepReg.w2 = 0.0;
-    u_out_RepReg.OutMax = 40.0;
-    u_out_RepReg.OutMin = -40.0;
+    u_out_RepReg.OutMax = 40.0;		// limita DC linka
+    u_out_RepReg.OutMin = -40.0;	// limita Dc linka
+    u_out_RepReg.delay_komp = 0;
+
+    // inicializiram buffer za rep. reg.
     REP_float_init(&u_out_RepReg);
 
     // inicializiram statistiko
@@ -521,10 +519,6 @@ void input_bridge_control(void)
 void output_bridge_control(void)
 {
     // regulacija deluje samo v teh primerih
-	if (state == Enable)
-	{
-		FB2_update(0.0);
-	}
     if 	(state == Working)
     {
     	// detekcija, ce delujemo v rezimu regulacije
@@ -535,10 +529,11 @@ void output_bridge_control(void)
     		{
     		case REP:
     			// repetitivni regulator
-    			u_out_RepReg.in = u_ac_dft.Out - u_out;
+    			u_out_RepReg.in = u_ac_dft.Out - (u_out_RepReg_k_in * u_out);
     			REP_float_calc(&u_out_RepReg);
 
-    			u_out_PIreg.Ref = u_ac_dft.Out + 0.9 * u_out_RepReg.out;
+    			// PI regulator
+    			u_out_PIreg.Ref = u_ac_dft.Out + (u_out_RepReg_k_out * u_out_RepReg.out);
     			u_out_PIreg.Fdb = u_out;
     			u_out_PIreg.Ff = 0.0;
     			PID_FLOAT_CALC(u_out_PIreg);
@@ -570,7 +565,7 @@ void output_bridge_control(void)
     	else
     	{
     		// krmiljenje (brez regulacije)
-    		FB2_update(IF_zeljen * u_ac_form);
+    		FB2_update(0.0);
     	}
     }
     // sicer pa nicim integralna stanja

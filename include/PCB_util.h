@@ -44,6 +44,7 @@ extern bool PCB_CPLD_over_current_filter(void);
 **************************************************************/
 extern void PCB_CPLD_MOSFET_MCU_on(void);
 extern void PCB_CPLD_MOSFET_MCU_off(void);
+bool PCB_CPLD_MOSFET_MCU_status(void);
 /**************************************************************
 * Funckija izhoda LATCH_RESET
 **************************************************************/
@@ -74,6 +75,8 @@ extern void PCB_relay2_off(void);
 * Funckija, ki vklopi Rele3 (Filter_main_relay)
 **************************************************************/
 extern void PCB_relay3_on(void);
+// relay 3 status
+bool PCB_relay3_status(void);
 
 /**************************************************************
 * Funckija, ki izklopi Rele3 (Filter_main_relay)
