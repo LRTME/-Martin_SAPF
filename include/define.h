@@ -51,7 +51,7 @@
 #define     u_ac_RMS_MAX		253.0
 #define     DEL_UDC_MAX			47.0
 #define     DEL_UDC_MIN			-0.1
-#define		u_f_LIM				30.0
+#define		u_f_LIM				40.0
 
 // deklaracije za logicne operacije
 #define     TRUE            true

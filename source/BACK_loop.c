@@ -273,13 +273,12 @@ void standby_fcn(void)
 
 void enable_fcn(void)
 {
-	// vkljucim MOSFET, vklopim izhodni mostiè (duty = 0)
+	// vkljucim MOSFET
 	if (	(PCB_CPLD_MOSFET_MCU_status() == FALSE)
 			&&	(PCB_relay3_status() == FALSE)
 			&&	(FB2_status() == FB_DIS)				)
 	{
 		PCB_CPLD_MOSFET_MCU_on();
-//		FB2_enable();
 	}
 
 	// izkljucim rele3

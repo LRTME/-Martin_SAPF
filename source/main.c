@@ -71,7 +71,7 @@ void main(void)
     // saj bi se mi v nasprotnem primeru izvedla zašèitna prekinitev
         FLT_int_setup();
 
-    // pocakam, da se izvede kalibracija tokovnih sond
+    // pocakam, da se izvede kalibracija tokovnih in napetostnih sond
         DELAY_US(10000);
         start_calibration = TRUE;
         while(calibration_done == FALSE)
