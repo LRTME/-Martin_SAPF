@@ -287,14 +287,14 @@ void PER_int_setup(void)
     sync_reg.OutMin = -SWITCH_FREQ/10;
 
     // inicializacija PI regulator u_out
-    u_out_PIreg.Kp = 0.0065;
+    u_out_PIreg.Kp = 0.006;
     u_out_PIreg.Ki = 1.0e-6;
     u_out_PIreg.Kff = 0.0;
     u_out_PIreg.OutMax = +0.99;		// zaradi bootstrap driverjev ne gre do 1.0
     u_out_PIreg.OutMin = -0.99;		// zaradi bootstrap driverjev ne gre do 1.0
 
     // inicializacija PI regulator u_out_DC
-    u_out_DC_PIreg.Kp = 0.99;
+    u_out_DC_PIreg.Kp = 0.1;
     u_out_DC_PIreg.Ki = 5.0e-6;
     u_out_DC_PIreg.Kff = 0.0;
     u_out_DC_PIreg.OutMax = +0.99;		// zaradi bootstrap driverjev ne gre do 1.0
@@ -595,7 +595,7 @@ void output_bridge_control(void)
 
     		// PI regulator DC komponente
     		u_out_DC_PIreg.Ref = 0;
-    		u_out_DC_PIreg.Fdb = u_f_f.Mean;
+    		u_out_DC_PIreg.Fdb = -u_out_f.Mean;
     		PID_FLOAT_CALC(u_out_DC_PIreg);
 
 			// duty za izhodni mostic
