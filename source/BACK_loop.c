@@ -12,9 +12,6 @@
 bool ENABLE_SW = FALSE;  			// pulz, ko pritisnemo na tipko ENABLE
 bool RESET_SW = FALSE;  			// pulz, ko pritisnemo na tipko RESET
 
-bool MOSFET_flag = FALSE;
-bool relay3_flag = FALSE;
-
 bool pulse_1000ms = FALSE;
 bool pulse_500ms = FALSE;
 bool pulse_100ms = FALSE;
@@ -273,19 +270,12 @@ void standby_fcn(void)
 
 void enable_fcn(void)
 {
-	// vkljucim MOSFET
+	// vkljucim MOSFET in izkljucim rele 3 ter nastavim stevec
 	if (	(PCB_CPLD_MOSFET_MCU_status() == FALSE)
 			&&	(PCB_relay3_status() == FALSE)
 			&&	(FB2_status() == FB_DIS)				)
 	{
 		PCB_CPLD_MOSFET_MCU_on();
-	}
-
-	// izkljucim rele3
-	if (		(PCB_CPLD_MOSFET_MCU_status() == TRUE)
-			&&	(PCB_relay3_status() == FALSE)
-			&&	(FB2_status() == FB_DIS)					)
-	{
 		PCB_relay3_on();
 
 		// nastavim stevec
@@ -299,8 +289,8 @@ void enable_fcn(void)
 		}
 	}
 
-	// po 50 ms izkljucim MOSFET, stanje regulacije
-	if (	(pulse_10ms_cnt - pulse_10ms_cnt_previous >= delay_MOSFET_relay_10ms)
+	// po 50 ms izkljucim MOSFET, vkljucim FB2, stanje regulacije
+	if (	((pulse_10ms_cnt - pulse_10ms_cnt_previous) >= delay_MOSFET_relay_10ms)
 			&&	(PCB_CPLD_MOSFET_MCU_status() == TRUE)
 			&&	(PCB_relay3_status() == TRUE)
 			&&	(FB2_status() == FB_DIS)						)
@@ -348,7 +338,7 @@ void disable_fcn(void)
 	}
 
 	// po 50ms, ko rele preklopi ugasnemo kratkosticna MOSFET-a
-	if (		(pulse_10ms_cnt - pulse_10ms_cnt_previous >= delay_MOSFET_relay_10ms)
+	if (		((pulse_10ms_cnt - pulse_10ms_cnt_previous) >= delay_MOSFET_relay_10ms)
 			&&	(PCB_CPLD_MOSFET_MCU_status() == TRUE)
 			&&	(PCB_relay3_status() == FALSE)
 			&&	(FB2_status() == FB_DIS)					)

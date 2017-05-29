@@ -37,6 +37,8 @@ float   u_dc = 0.0;
 float   u_f = 0.0;
 float   u_out = 0.0;
 
+float	u_predznak = 0.0;
+
 // empiricno dolocena
 float   u_ac_offset = 2034.0;
 float   u_out_offset = 2036.0;
@@ -82,9 +84,9 @@ PID_float   IS_reg = PID_FLOAT_DEFAULTS;
 PID_float	u_out_PIreg = PID_FLOAT_DEFAULTS;
 PID_float	u_out_DC_PIreg = PID_FLOAT_DEFAULTS;
 REP_float	u_out_RepReg = REP_FLOAT_DEFAULTS;
-float		u_out_RepReg_k_out = 0.9;
+float		u_out_RepReg_k_out = 1.0;
 float		u_out_RepReg_k_in = 1.0;
-
+float		u_out_duty = 0.0;
 // sinhronizacija na omrežje
 float       sync_base_freq = SWITCH_FREQ;
 PID_float   sync_reg    = PID_FLOAT_DEFAULTS;
@@ -239,7 +241,7 @@ void PER_int_setup(void)
     dlog.iptr2 = &u_out_PIreg.Ref;
     dlog.iptr3 = &u_ac_dft.Out;
     dlog.iptr4 = &u_out_PIreg.Err;
-    dlog.iptr5 = &u_ac_form;
+    dlog.iptr5 = &u_out_RepReg.out;
     dlog.iptr6 = &u_out;
     dlog.iptr7 = &u_f;
     dlog.iptr8 = &I_dc_abf;
@@ -285,24 +287,24 @@ void PER_int_setup(void)
     sync_reg.OutMin = -SWITCH_FREQ/10;
 
     // inicializacija PI regulator u_out
-    u_out_PIreg.Kp = 0.0;
-    u_out_PIreg.Ki = 0.0;
+    u_out_PIreg.Kp = 0.0065;
+    u_out_PIreg.Ki = 1.0e-6;
     u_out_PIreg.Kff = 0.0;
     u_out_PIreg.OutMax = +0.99;		// zaradi bootstrap driverjev ne gre do 1.0
     u_out_PIreg.OutMin = -0.99;		// zaradi bootstrap driverjev ne gre do 1.0
 
     // inicializacija PI regulator u_out_DC
     u_out_DC_PIreg.Kp = 0.99;
-    u_out_DC_PIreg.Ki = 1.0e-7;
+    u_out_DC_PIreg.Ki = 5.0e-6;
     u_out_DC_PIreg.Kff = 0.0;
     u_out_DC_PIreg.OutMax = +0.99;		// zaradi bootstrap driverjev ne gre do 1.0
     u_out_DC_PIreg.OutMin = -0.99;		// zaradi bootstrap driverjev ne gre do 1.0
 
     // inicializacija repetitivni regulator u_out
     u_out_RepReg.gain = 1;
-    u_out_RepReg.w0 = 0.95;
-    u_out_RepReg.w1 = 0.0;
-    u_out_RepReg.w2 = 0.0;
+    u_out_RepReg.w0 = 0.7;
+    u_out_RepReg.w1 = 0.1;
+    u_out_RepReg.w2 = 0.05;
     u_out_RepReg.OutMax = 40.0;		// limita DC linka
     u_out_RepReg.OutMin = -40.0;	// limita Dc linka
     u_out_RepReg.delay_komp = 0;
@@ -440,6 +442,9 @@ void get_electrical(void)
     power_out = u_f * IF;
 
     power_in = (24.0 / 230.0) * u_ac * IS;
+
+    // predznak
+    u_predznak = u_ac_dft.Out - u_ac;
 
     // zakasnim IS
     IS_delay.in = IS * IS_reg.Out;
@@ -583,8 +588,8 @@ void output_bridge_control(void)
     		}
 
     		// PI regulator
-    		u_out_PIreg.Ref = u_ac_dft.Out + (u_out_RepReg_k_out * u_out_RepReg.out);
-    		u_out_PIreg.Fdb = u_out;
+    		u_out_PIreg.Ref = u_ac_dft.Out + (u_out_RepReg_k_out * u_out_RepReg.out) - u_out;
+    		u_out_PIreg.Fdb = u_f;
     		u_out_PIreg.Ff = 0.0;
     		PID_FLOAT_CALC(u_out_PIreg);
 
@@ -593,13 +598,25 @@ void output_bridge_control(void)
     		u_out_DC_PIreg.Fdb = u_f_f.Mean;
     		PID_FLOAT_CALC(u_out_DC_PIreg);
 
-			// posljem vse skupaj na mostic
-    		FB2_update(u_out_PIreg.Out + u_out_DC_PIreg.Out);
+			// duty za izhodni mostic
+    		u_out_duty = u_out_DC_PIreg.Out - u_out_PIreg.Out;
+    		// omejim izhod (limita: -0.99 - +0.99)
+    		if(u_out_duty >= 1.0)
+    		{
+    			u_out_duty = 0.99;
+    		}
+
+    		if(u_out_duty <= -1.0)
+    		{
+    			u_out_duty = -0.99;
+    		}
+    		// posljem vse skupaj na mostic
+    		FB2_update(u_out_duty);
     	}
     	else
     	{
     		// krmiljenje (brez regulacije)
-    		FB2_update(u_ac_form * IF_zeljen);
+    		FB2_update(IF_zeljen);
     	}
     }
     // sicer pa nicim integralna stanja
@@ -645,7 +662,7 @@ void check_limits(void)
             PCB_relay3_off();
         }
 
-        if (	(u_f > u_f_LIM)
+        if (	(fabs(u_f) > u_f_LIM)
         	&&	(state == Working)	)
         {
         	fault_flags.overvoltage_u_f = TRUE;
