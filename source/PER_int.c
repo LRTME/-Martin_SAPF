@@ -287,8 +287,8 @@ void PER_int_setup(void)
     sync_reg.OutMin = -SWITCH_FREQ/10;
 
     // inicializacija PI regulator u_out
-    u_out_PIreg.Kp = 0.006;
-    u_out_PIreg.Ki = 1.0e-6;
+    u_out_PIreg.Kp = 0.0084;
+    u_out_PIreg.Ki = 0.0;
     u_out_PIreg.Kff = 0.0;
     u_out_PIreg.OutMax = +0.99;		// zaradi bootstrap driverjev ne gre do 1.0
     u_out_PIreg.OutMin = -0.99;		// zaradi bootstrap driverjev ne gre do 1.0
@@ -302,9 +302,9 @@ void PER_int_setup(void)
 
     // inicializacija repetitivni regulator u_out
     u_out_RepReg.gain = 1;
-    u_out_RepReg.w0 = 0.7;
-    u_out_RepReg.w1 = 0.1;
-    u_out_RepReg.w2 = 0.05;
+    u_out_RepReg.w0 = 0.75;
+    u_out_RepReg.w1 = 0.08;
+    u_out_RepReg.w2 = 0.03;
     u_out_RepReg.OutMax = 40.0;		// limita DC linka
     u_out_RepReg.OutMin = -40.0;	// limita Dc linka
     u_out_RepReg.delay_komp = 0;
