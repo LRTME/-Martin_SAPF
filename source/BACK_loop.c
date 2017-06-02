@@ -12,6 +12,9 @@
 bool ENABLE_SW = FALSE;  			// pulz, ko pritisnemo na tipko ENABLE
 bool RESET_SW = FALSE;  			// pulz, ko pritisnemo na tipko RESET
 
+bool	enable = FALSE;
+bool	disable = FALSE;
+
 bool pulse_1000ms = FALSE;
 bool pulse_500ms = FALSE;
 bool pulse_100ms = FALSE;
@@ -278,6 +281,8 @@ void enable_fcn(void)
 		PCB_CPLD_MOSFET_MCU_on();
 		PCB_relay3_on();
 
+		enable = TRUE;
+
 		// nastavim stevec
 		if(pulse_10ms_cnt <= (100 - delay_MOSFET_relay_10ms))
 		{
@@ -298,6 +303,8 @@ void enable_fcn(void)
 		PCB_CPLD_MOSFET_MCU_off();
 		FB2_enable();
 		PCB_LED_WORKING_on();
+
+		enable = FALSE;
 
 		state = Working;
 	}
@@ -325,6 +332,8 @@ void disable_fcn(void)
 		PCB_relay3_off();
 		FB2_disable();
 
+		disable = TRUE;
+
 		// ponastavim stevec
 		if(pulse_10ms_cnt <= (100 - delay_MOSFET_relay_10ms))
 		{
@@ -345,6 +354,8 @@ void disable_fcn(void)
 	{
 		PCB_CPLD_MOSFET_MCU_off();
 		PCB_LED_WORKING_off();
+
+		disable = FALSE;
 
 		state = Standby;
 	}

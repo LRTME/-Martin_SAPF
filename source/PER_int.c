@@ -48,7 +48,7 @@ float   u_f_offset = 2048.0;
 
 float   u_ac_gain = -((1000 + 0.47) / (5 * 0.47)) * (3.3 / 4096);
 float   u_dc_gain = ((330 + 1.8) / (5 * 1.8)) * DEL_UDC_CORR_F * (3.3 / 4096);
-float   u_f_gain = ((330 + 1.8) / (5 * 1.8)) * (3.3 / 4096);
+float   u_f_gain = -((330 + 1.8) / (5 * 1.8)) * (3.3 / 4096);
 float   u_out_gain = ((1000 + 0.47) / (5 * 0.47)) * (3.3 / 4096);
 
 // NTC
@@ -82,11 +82,12 @@ PID_float   IS_reg = PID_FLOAT_DEFAULTS;
 
 // regulacija izhodne napetosti
 PID_float	u_out_PIreg = PID_FLOAT_DEFAULTS;
-PID_float	u_out_DC_PIreg = PID_FLOAT_DEFAULTS;
 REP_float	u_out_RepReg = REP_FLOAT_DEFAULTS;
-float		u_out_RepReg_k_out = 1.0;
+float		u_out_RepReg_k_out = 0.1;
 float		u_out_RepReg_k_in = 1.0;
-float		u_out_duty = 0.0;
+
+float		u_out_duty = 0.0;		// kar posiljam na FB2
+
 // sinhronizacija na omrežje
 float       sync_base_freq = SWITCH_FREQ;
 PID_float   sync_reg    = PID_FLOAT_DEFAULTS;
@@ -287,27 +288,21 @@ void PER_int_setup(void)
     sync_reg.OutMin = -SWITCH_FREQ/10;
 
     // inicializacija PI regulator u_out
-    u_out_PIreg.Kp = 0.0084;
+    u_out_PIreg.Kp = 0.016;
     u_out_PIreg.Ki = 0.0;
     u_out_PIreg.Kff = 0.0;
     u_out_PIreg.OutMax = +0.99;		// zaradi bootstrap driverjev ne gre do 1.0
     u_out_PIreg.OutMin = -0.99;		// zaradi bootstrap driverjev ne gre do 1.0
 
-    // inicializacija PI regulator u_out_DC
-    u_out_DC_PIreg.Kp = 0.1;
-    u_out_DC_PIreg.Ki = 5.0e-6;
-    u_out_DC_PIreg.Kff = 0.0;
-    u_out_DC_PIreg.OutMax = +0.99;		// zaradi bootstrap driverjev ne gre do 1.0
-    u_out_DC_PIreg.OutMin = -0.99;		// zaradi bootstrap driverjev ne gre do 1.0
-
     // inicializacija repetitivni regulator u_out
-    u_out_RepReg.gain = 1;
-    u_out_RepReg.w0 = 0.75;
-    u_out_RepReg.w1 = 0.08;
-    u_out_RepReg.w2 = 0.03;
-    u_out_RepReg.OutMax = 40.0;		// limita DC linka
-    u_out_RepReg.OutMin = -40.0;	// limita Dc linka
+    u_out_RepReg.gain = 0.025;		// 1/40 = 0.025
+    u_out_RepReg.w0 = 0.7;
+    u_out_RepReg.w1 = 0.1;
+    u_out_RepReg.w2 = 0.05;
+    u_out_RepReg.OutMax = 0.99;		// zaradi bootstrap driverjev ne gre do 1.0
+    u_out_RepReg.OutMin = -0.99;	// zaradi bootstrap driverjev ne gre do 1.0
     u_out_RepReg.delay_komp = 0;
+
 
     // inicializiram buffer za rep. reg.
     REP_float_init(&u_out_RepReg);
@@ -551,55 +546,39 @@ void input_bridge_control(void)
 #pragma CODE_SECTION(output_bridge_control, "ramfuncs");
 void output_bridge_control(void)
 {
-    // regulacija deluje samo v teh primerih
+    // regulacija deluje samo v tem primeru
     if 	(state == Working)
     {
     	// detekcija, ce delujemo v rezimu regulacije
     	if (mode == Control)
     	{
-    		// izbira vrste regulacije izhodne napetosti
+    		// PI regulator
+    		u_out_PIreg.Ref = u_out - u_ac_dft.Out;
+    		u_out_PIreg.Fdb = u_f;
+    		u_out_PIreg.Ff = 0.0;
+    		PID_FLOAT_CALC(u_out_PIreg);
+
+    		// izbira vrste regulacije izhodne napetosti poleg osnovnega PI regulatorja
     		switch (out_control)
     		{
     		case REP:
     			// repetitivni regulator
-    			u_out_RepReg.in = u_ac_dft.Out - (u_out_RepReg_k_in * u_out);
+    			u_out_RepReg.in = u_out_RepReg_k_in * (u_out - u_ac_dft.Out - u_f);
     			REP_float_calc(&u_out_RepReg);
     			break;
 
     		case DFTF:
     			// DFT filter
-    			u_out_PIreg.Ref = u_ac_dft.Out;
-    			u_out_PIreg.Fdb = u_out;
-    			u_out_PIreg.Ff = 0.0;
-    			PID_FLOAT_CALC(u_out_PIreg);
-    			// posljem vse skupaj na mostic
-    			FB2_update(u_out_PIreg.Out);
     			break;
 
     		case RES:
     			// resonanèni regulator
-    			u_out_PIreg.Ref = u_ac_dft.Out;
-    			u_out_PIreg.Fdb = u_out;
-    			u_out_PIreg.Ff = 0.0;
-    			PID_FLOAT_CALC(u_out_PIreg);
-    			// posljem vse skupaj na mostic
-    			FB2_update(u_out_PIreg.Out);
     			break;
     		}
 
-    		// PI regulator
-    		u_out_PIreg.Ref = u_ac_dft.Out + (u_out_RepReg_k_out * u_out_RepReg.out) - u_out;
-    		u_out_PIreg.Fdb = u_f;
-    		u_out_PIreg.Ff = 0.0;
-    		PID_FLOAT_CALC(u_out_PIreg);
-
-    		// PI regulator DC komponente
-    		u_out_DC_PIreg.Ref = 0;
-    		u_out_DC_PIreg.Fdb = -u_out_f.Mean;
-    		PID_FLOAT_CALC(u_out_DC_PIreg);
-
 			// duty za izhodni mostic
-    		u_out_duty = u_out_DC_PIreg.Out - u_out_PIreg.Out;
+    		u_out_duty = u_out_PIreg.Out + u_out_RepReg_k_out * u_out_RepReg.out;
+
     		// omejim izhod (limita: -0.99 - +0.99)
     		if(u_out_duty >= 1.0)
     		{
