@@ -12,9 +12,6 @@
 bool ENABLE_SW = FALSE;  			// pulz, ko pritisnemo na tipko ENABLE
 bool RESET_SW = FALSE;  			// pulz, ko pritisnemo na tipko RESET
 
-bool	enable = FALSE;
-bool	disable = FALSE;
-
 bool pulse_1000ms = FALSE;
 bool pulse_500ms = FALSE;
 bool pulse_100ms = FALSE;
@@ -273,6 +270,7 @@ void standby_fcn(void)
 
 void enable_fcn(void)
 {
+
 	// vkljucim MOSFET in izkljucim rele 3 ter nastavim stevec
 	if (	(PCB_CPLD_MOSFET_MCU_status() == FALSE)
 			&&	(PCB_relay3_status() == FALSE)
@@ -281,7 +279,6 @@ void enable_fcn(void)
 		PCB_CPLD_MOSFET_MCU_on();
 		PCB_relay3_on();
 
-		enable = TRUE;
 
 		// nastavim stevec
 		if(pulse_10ms_cnt <= (100 - delay_MOSFET_relay_10ms))
@@ -294,19 +291,13 @@ void enable_fcn(void)
 		}
 	}
 
-	// po 50 ms izkljucim MOSFET, vkljucim FB2, stanje regulacije
+	// po 50 ms dam znak, da se lahko vkljuci FB2 in izklopi MOSFET
 	if (	((pulse_10ms_cnt - pulse_10ms_cnt_previous) >= delay_MOSFET_relay_10ms)
 			&&	(PCB_CPLD_MOSFET_MCU_status() == TRUE)
 			&&	(PCB_relay3_status() == TRUE)
 			&&	(FB2_status() == FB_DIS)						)
 	{
-		PCB_CPLD_MOSFET_MCU_off();
-		FB2_enable();
-		PCB_LED_WORKING_on();
-
-		enable = FALSE;
-
-		state = Working;
+		enable = TRUE;
 	}
 }
 
@@ -332,16 +323,14 @@ void disable_fcn(void)
 		PCB_relay3_off();
 		FB2_disable();
 
-		disable = TRUE;
-
 		// ponastavim stevec
-		if(pulse_10ms_cnt <= (100 - delay_MOSFET_relay_10ms))
+		if(pulse_10ms_cnt <= (99 - delay_MOSFET_relay_10ms))
 		{
 			pulse_10ms_cnt_previous = pulse_10ms_cnt;
 		}
 		else
 		{
-			pulse_10ms_cnt_previous = pulse_10ms_cnt - 100;
+			pulse_10ms_cnt_previous = pulse_10ms_cnt - 99;
 		}
 
 	}
@@ -352,12 +341,7 @@ void disable_fcn(void)
 			&&	(PCB_relay3_status() == FALSE)
 			&&	(FB2_status() == FB_DIS)					)
 	{
-		PCB_CPLD_MOSFET_MCU_off();
-		PCB_LED_WORKING_off();
-
-		disable = FALSE;
-
-		state = Standby;
+		disable = TRUE;
 	}
 }
 

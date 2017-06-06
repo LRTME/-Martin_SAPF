@@ -82,8 +82,9 @@ PID_float   IS_reg = PID_FLOAT_DEFAULTS;
 
 // regulacija izhodne napetosti
 PID_float	u_out_PIreg = PID_FLOAT_DEFAULTS;
+PID_float	u_out_DC_PIreg = PID_FLOAT_DEFAULTS;
 REP_float	u_out_RepReg = REP_FLOAT_DEFAULTS;
-float		u_out_RepReg_k_out = 0.1;
+float		u_out_RepReg_k_out = 0.09;
 float		u_out_RepReg_k_in = 1.0;
 
 float		u_out_duty = 0.0;		// kar posiljam na FB2
@@ -127,6 +128,8 @@ float   temperatura = 0.0;
 void get_electrical(void);
 void sync(void);
 void input_bridge_control(void);
+void output_bridge_enable(void);
+void output_bridge_disable(void);
 void output_bridge_control(void);
 void check_limits(void);
 float NTC_temp(void);
@@ -177,6 +180,9 @@ void interrupt PER_int(void)
 
     // regulacija u_dc
     input_bridge_control();
+
+    output_bridge_enable();
+    output_bridge_disable();
 
     // regulacija u_out
     output_bridge_control();
@@ -239,10 +245,10 @@ void PER_int_setup(void)
     dlog.trig_value = 0.5;
 
     dlog.iptr1 = &u_ac;
-    dlog.iptr2 = &u_out_PIreg.Ref;
+    dlog.iptr2 = &u_ac_form;
     dlog.iptr3 = &u_ac_dft.Out;
     dlog.iptr4 = &u_out_PIreg.Err;
-    dlog.iptr5 = &u_out_RepReg.out;
+    dlog.iptr5 = &u_out_PIreg.Ref;
     dlog.iptr6 = &u_out;
     dlog.iptr7 = &u_f;
     dlog.iptr8 = &I_dc_abf;
@@ -287,8 +293,15 @@ void PER_int_setup(void)
     sync_reg.OutMax = +SWITCH_FREQ/10;
     sync_reg.OutMin = -SWITCH_FREQ/10;
 
+    // inicializacija PI regulator u_out_DC
+    u_out_DC_PIreg.Kp = 0.0;
+    u_out_DC_PIreg.Ki = 5.0e-7;
+    u_out_DC_PIreg.Kff = 0.0;
+    u_out_DC_PIreg.OutMax = +0.99;		// zaradi bootstrap driverjev ne gre do 1.0
+    u_out_DC_PIreg.OutMin = -0.99;		// zaradi bootstrap driverjev ne gre do 1.0
+
     // inicializacija PI regulator u_out
-    u_out_PIreg.Kp = 0.016;
+    u_out_PIreg.Kp = 0.015;
     u_out_PIreg.Ki = 0.0;
     u_out_PIreg.Kff = 0.0;
     u_out_PIreg.OutMax = +0.99;		// zaradi bootstrap driverjev ne gre do 1.0
@@ -297,8 +310,8 @@ void PER_int_setup(void)
     // inicializacija repetitivni regulator u_out
     u_out_RepReg.gain = 0.025;		// 1/40 = 0.025
     u_out_RepReg.w0 = 0.7;
-    u_out_RepReg.w1 = 0.1;
-    u_out_RepReg.w2 = 0.05;
+    u_out_RepReg.w1 = 0.01;
+    u_out_RepReg.w2 = 0.01;
     u_out_RepReg.OutMax = 0.99;		// zaradi bootstrap driverjev ne gre do 1.0
     u_out_RepReg.OutMin = -0.99;	// zaradi bootstrap driverjev ne gre do 1.0
     u_out_RepReg.delay_komp = 0;
@@ -543,6 +556,58 @@ void input_bridge_control(void)
     }
 }
 
+#pragma CODE_SECTION(output_bridge_enable, "ramfuncs");
+void output_bridge_enable(void)
+{
+	// delujemo samo v primeru vklopa izhodnega mostica, ko je rele 3 ze odklopljen
+	if (	(state == Enable)
+		&&	(enable == TRUE)	)
+	{
+		// detekcija kota ~0°
+		if (	(u_ac_form < 2.8e-4)
+			&&	(u_ac_form > -2.8e-4)	)
+		{
+			FB2_enable();
+			PCB_CPLD_MOSFET_MCU_off();
+			PCB_LED_WORKING_on();
+			enable = FALSE;
+			state = Working;
+		}
+
+		// detekcija kota ~90°
+	/*	if (u_ac_form > (1.0 - 2.75e-4))
+		{
+			FB2_enable();
+			PCB_CPLD_MOSFET_MCU_off();
+			PCB_LED_WORKING_on();
+			enable = FALSE;
+			state = Working;
+		} */
+
+	}
+}
+
+#pragma CODE_SECTION(output_bridge_enable, "ramfuncs");
+void output_bridge_disable(void)
+{
+	// delujemo samo v primeru izklopa izhodnega mostica, ko je rele 3 ze vklopljen
+		if (	(state == Disable)
+			&&	(disable == TRUE)	)
+		{
+			// detekcija kota ~0°
+			if (	(u_ac_form < 2.8e-4)
+				&&	(u_ac_form > -2.8e-4)	)
+			{
+				PCB_CPLD_MOSFET_MCU_off();
+				PCB_LED_WORKING_off();
+
+				disable = FALSE;
+
+				state = Standby;
+			}
+		}
+}
+
 #pragma CODE_SECTION(output_bridge_control, "ramfuncs");
 void output_bridge_control(void)
 {
@@ -552,11 +617,20 @@ void output_bridge_control(void)
     	// detekcija, ce delujemo v rezimu regulacije
     	if (mode == Control)
     	{
+    		// PI regulator za odpravo DC offseta
+    		u_out_DC_PIreg.Ref = 0;
+    		u_out_DC_PIreg.Fdb = -u_out_f.Mean;
+    		u_out_DC_PIreg.Ff = 0.0;
+    		PID_FLOAT_CALC(u_out_DC_PIreg);
+
     		// PI regulator
     		u_out_PIreg.Ref = u_out - u_ac_dft.Out;
     		u_out_PIreg.Fdb = u_f;
     		u_out_PIreg.Ff = 0.0;
     		PID_FLOAT_CALC(u_out_PIreg);
+
+    		// duty za izhodni mostic
+    		u_out_duty = u_out_DC_PIreg.Out + u_out_PIreg.Out;
 
     		// izbira vrste regulacije izhodne napetosti poleg osnovnega PI regulatorja
     		switch (out_control)
@@ -565,6 +639,9 @@ void output_bridge_control(void)
     			// repetitivni regulator
     			u_out_RepReg.in = u_out_RepReg_k_in * (u_out - u_ac_dft.Out - u_f);
     			REP_float_calc(&u_out_RepReg);
+
+    			u_out_duty = u_out_duty + u_out_RepReg_k_out * u_out_RepReg.out;
+
     			break;
 
     		case DFTF:
@@ -575,9 +652,6 @@ void output_bridge_control(void)
     			// resonanèni regulator
     			break;
     		}
-
-			// duty za izhodni mostic
-    		u_out_duty = u_out_PIreg.Out + u_out_RepReg_k_out * u_out_RepReg.out;
 
     		// omejim izhod (limita: -0.99 - +0.99)
     		if(u_out_duty >= 1.0)
@@ -595,7 +669,7 @@ void output_bridge_control(void)
     	else
     	{
     		// krmiljenje (brez regulacije)
-    		FB2_update(IF_zeljen);
+    		FB2_update(u_ac_form * IF_zeljen);
     	}
     }
     // sicer pa nicim integralna stanja

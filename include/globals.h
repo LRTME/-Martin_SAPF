@@ -47,10 +47,11 @@ extern volatile bool start_calibration;
 
 // za zagon in delovanje
 extern SLEW_float   u_dc_slew;
-extern SLEW_float   u_out_slew;
 extern PID_float    u_dc_reg;
-extern PID_float	u_out_reg;
 
+// za vklop/izklop izhodnega mostica
+extern volatile bool enable;
+extern volatile bool disable;
 
 extern float u_dc;
 extern float u_ac_rms;
