@@ -211,7 +211,10 @@ void interrupt PER_int(void)
         	FB1_disable();
         	FB2_disable();
 
-        	// izklopim vse kontaktorjev
+        	// izklopim 5V_ISO linijo
+        	PCB_5V_ISO_off();
+
+        	// izklopim vse kontaktorje
         	PCB_relay1_off();
         	PCB_relay2_off();
         	PCB_relay3_off();
@@ -561,7 +564,10 @@ void output_bridge_enable(void)
 {
 	// delujemo samo v primeru vklopa izhodnega mostica, ko je rele 3 ze odklopljen
 	if (	(state == Enable)
-		&&	(enable == TRUE)	)
+		&&	(enable == TRUE)
+		&&	(PCB_CPLD_MOSFET_MCU_status() == TRUE)
+		&&	(PCB_relay3_status() == TRUE)
+		&&	(FB2_status() == FB_DIS)				)
 	{
 		// detekcija kota ~0°
 		if (	(u_ac_form < 2.8e-4)
@@ -570,7 +576,10 @@ void output_bridge_enable(void)
 			FB2_enable();
 			PCB_CPLD_MOSFET_MCU_off();
 			PCB_LED_WORKING_on();
+
+			// pobrisem zastavico
 			enable = FALSE;
+
 			state = Working;
 		}
 
@@ -590,20 +599,22 @@ void output_bridge_enable(void)
 #pragma CODE_SECTION(output_bridge_enable, "ramfuncs");
 void output_bridge_disable(void)
 {
-	// delujemo samo v primeru izklopa izhodnega mostica, ko je rele 3 ze vklopljen
+	// zacetek izklopne rutine, pri kotu 0°
 		if (	(state == Disable)
-			&&	(disable == TRUE)	)
+			&&	(PCB_CPLD_MOSFET_MCU_status() == FALSE)
+			&&	(PCB_relay3_status() == TRUE)
+			&&	(FB2_status() == FB_EN)					)
 		{
 			// detekcija kota ~0°
 			if (	(u_ac_form < 2.8e-4)
 				&&	(u_ac_form > -2.8e-4)	)
 			{
-				PCB_CPLD_MOSFET_MCU_off();
-				PCB_LED_WORKING_off();
+				PCB_CPLD_MOSFET_MCU_on();
+				PCB_relay3_off();
+				FB2_disable();
 
-				disable = FALSE;
-
-				state = Standby;
+				// postavim zastavico za nadaljo izklopno rutino v Back_loop
+				disable = TRUE;
 			}
 		}
 }
@@ -624,7 +635,7 @@ void output_bridge_control(void)
     		PID_FLOAT_CALC(u_out_DC_PIreg);
 
     		// PI regulator
-    		u_out_PIreg.Ref = u_out - u_ac_dft.Out;
+    		u_out_PIreg.Ref = u_out - GRID_AMPLITUDE * u_ac_form;
     		u_out_PIreg.Fdb = u_f;
     		u_out_PIreg.Ff = 0.0;
     		PID_FLOAT_CALC(u_out_PIreg);
@@ -637,7 +648,7 @@ void output_bridge_control(void)
     		{
     		case REP:
     			// repetitivni regulator
-    			u_out_RepReg.in = u_out_RepReg_k_in * (u_out - u_ac_dft.Out - u_f);
+    			u_out_RepReg.in = u_out_RepReg_k_in * (u_out - GRID_AMPLITUDE * u_ac_form - u_f);
     			REP_float_calc(&u_out_RepReg);
 
     			u_out_duty = u_out_duty + u_out_RepReg_k_out * u_out_RepReg.out;
@@ -693,6 +704,9 @@ void check_limits(void)
             FB1_disable();
             FB2_disable();
 
+            // izklopim 5V_ISO linijo
+            PCB_5V_ISO_off();
+
             // izklopim vse kontaktorje
             PCB_relay1_off();
             PCB_relay2_off();
@@ -709,6 +723,9 @@ void check_limits(void)
             FB1_disable();
             FB2_disable();
 
+            // izklopim 5V_ISO linijo
+                        PCB_5V_ISO_off();
+
             // izklopim vse kontaktorje
             PCB_relay1_off();
             PCB_relay2_off();
@@ -724,6 +741,9 @@ void check_limits(void)
         	FB1_disable();
         	FB2_disable();
 
+        	// izklopim 5V_ISO linijo
+        	            PCB_5V_ISO_off();
+
         	// izklopim vse kontaktorje
         	PCB_relay1_off();
         	PCB_relay2_off();
@@ -737,6 +757,9 @@ void check_limits(void)
             // izklopim mostic
             FB1_disable();
             FB2_disable();
+
+            // izklopim 5V_ISO linijo
+            PCB_5V_ISO_off();
 
             // izklopim vse kontaktorje
             PCB_relay1_off();
@@ -754,6 +777,9 @@ void check_limits(void)
             FB1_disable();
             FB2_disable();
 
+            // izklopim 5V_ISO linijo
+            PCB_5V_ISO_off();
+
             // izklopim vse kontaktorje
             PCB_relay1_off();
             PCB_relay2_off();
@@ -768,6 +794,9 @@ void check_limits(void)
         	FB1_disable();
         	FB2_disable();
 
+        	// izklopim 5V_ISO linijo
+        	PCB_5V_ISO_off();
+
        		// izklopim vse kontaktorje
        		PCB_relay1_off();
        		PCB_relay2_off();
@@ -781,6 +810,9 @@ void check_limits(void)
             // izklopim mostic
             FB1_disable();
             FB2_disable();
+
+            // izklopim 5V_ISO linijo
+            PCB_5V_ISO_off();
 
             // izklopim vse kontaktorje
             PCB_relay1_off();

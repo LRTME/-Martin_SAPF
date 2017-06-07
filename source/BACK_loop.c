@@ -273,29 +273,29 @@ void enable_fcn(void)
 
 	// vkljucim MOSFET in izkljucim rele 3 ter nastavim stevec
 	if (	(PCB_CPLD_MOSFET_MCU_status() == FALSE)
-			&&	(PCB_relay3_status() == FALSE)
-			&&	(FB2_status() == FB_DIS)				)
+		&&	(PCB_relay3_status() == FALSE)
+		&&	(FB2_status() == FB_DIS)				)
 	{
 		PCB_CPLD_MOSFET_MCU_on();
 		PCB_relay3_on();
 
 
 		// nastavim stevec
-		if(pulse_10ms_cnt <= (100 - delay_MOSFET_relay_10ms))
+		if(pulse_10ms_cnt <= (99 - delay_MOSFET_relay_10ms))
 		{
 			pulse_10ms_cnt_previous = pulse_10ms_cnt;
 		}
 		else
 		{
-			pulse_10ms_cnt_previous = pulse_10ms_cnt - 100;
+			pulse_10ms_cnt_previous = pulse_10ms_cnt - 99;
 		}
 	}
 
-	// po 50 ms dam znak, da se lahko vkljuci FB2 in izklopi MOSFET
+	// po 50 ms dam znak, da se lahko v PER_int vkljuci FB2 (ob kotu 0°) in izklopi MOSFET
 	if (	((pulse_10ms_cnt - pulse_10ms_cnt_previous) >= delay_MOSFET_relay_10ms)
-			&&	(PCB_CPLD_MOSFET_MCU_status() == TRUE)
-			&&	(PCB_relay3_status() == TRUE)
-			&&	(FB2_status() == FB_DIS)						)
+		&&	(PCB_CPLD_MOSFET_MCU_status() == TRUE)
+		&&	(PCB_relay3_status() == TRUE)
+		&&	(FB2_status() == FB_DIS)						)
 	{
 		enable = TRUE;
 	}
@@ -314,15 +314,13 @@ void working_fcn(void)
 
 void disable_fcn(void)
 {
-	// vkljucim kratkosticna MOSFET-a, ponovno sklenem rele 3, izklopim izhodno stopnjo
-	if (		(PCB_CPLD_MOSFET_MCU_status() == FALSE)
-		&&		(PCB_relay3_status() == TRUE)
-		&&		(FB2_status() == FB_EN)				)
-	{
-		PCB_CPLD_MOSFET_MCU_on();
-		PCB_relay3_off();
-		FB2_disable();
+	// postane aktivno sele po izklopnem delu v PER_int (izklop pri kotu 0°), disable == TRUE
+	if (		(PCB_CPLD_MOSFET_MCU_status() == TRUE)
+			&&	(PCB_relay3_status() == FALSE)
+			&&	(FB2_status() == FB_DIS)
+			&&	(disable == TRUE)					)
 
+	{
 		// ponastavim stevec
 		if(pulse_10ms_cnt <= (99 - delay_MOSFET_relay_10ms))
 		{
@@ -333,15 +331,22 @@ void disable_fcn(void)
 			pulse_10ms_cnt_previous = pulse_10ms_cnt - 99;
 		}
 
+		// pobrisem zastavico
+		disable = FALSE;
+
 	}
 
-	// po 50ms, ko rele preklopi ugasnemo kratkosticna MOSFET-a
+	// po 50ms, ko rele zagotovo preklopi, ugasnemo kratkosticna MOSFET-a
 	if (		((pulse_10ms_cnt - pulse_10ms_cnt_previous) >= delay_MOSFET_relay_10ms)
 			&&	(PCB_CPLD_MOSFET_MCU_status() == TRUE)
 			&&	(PCB_relay3_status() == FALSE)
-			&&	(FB2_status() == FB_DIS)					)
+			&&	(FB2_status() == FB_DIS)
+			&&	(disable == FALSE)						)
 	{
-		disable = TRUE;
+		PCB_CPLD_MOSFET_MCU_off();
+		PCB_LED_WORKING_off();
+
+		state = Standby;
 	}
 }
 
@@ -358,7 +363,6 @@ void fault_fcn(void)
     	// then force a WD reset
     	WdRegs.WDCR.all = 0x0040;
     	EDIS;
-
     }
     // signalizacija
     PCB_LED_FAULT_on();
@@ -369,6 +373,9 @@ void fault_sensed_fcn(void)
     // izklopim mostic
     FB1_disable();
     FB2_disable();
+
+    // izklopim 5V_ISO linijo
+    PCB_5V_ISO_off();
 
     // izklopim vse kontaktorjev
     PCB_relay1_off();

@@ -202,7 +202,19 @@ bool PCB_relay3_status(void)
 		return (FALSE);
 	}
 }
-/*************************************************************/
+
+/**************************************************************
+* Funkcija za vklop/izklop 5V_ISO linije
+**************************************************************/
+void PCB_5V_ISO_on(void)
+{
+	GpioDataRegs.GPASET.bit.GPIO8 = 1;
+}
+
+void PCB_5V_ISO_off(void)
+{
+	GpioDataRegs.GPACLEAR.bit.GPIO8 = 1;
+}
 
 /**************************************************************
 * Funkcije za vklop/izklop LED
@@ -340,6 +352,10 @@ void PCB_init(void)
         GPIO_SetupPinMux(72, GPIO_MUX_CPU1, 0);
         GPIO_SetupPinOptions(72, GPIO_OUTPUT, GPIO_PUSHPULL);
 
+        // GPIO8 - 5V_ISO remote on/off
+        GPIO_SetupPinMux(8, GPIO_MUX_CPU1, 0);
+        GPIO_SetupPinOptions(8, GPIO_OUTPUT, GPIO_PUSHPULL);
+
         // GPIO25 - MOSFET_MCU
         GPIO_SetupPinMux(25, GPIO_MUX_CPU1, 0);
         GPIO_SetupPinOptions(25, GPIO_OUTPUT, GPIO_PUSHPULL);
@@ -416,6 +432,7 @@ void PCB_init(void)
         PCB_relay2_off();
         PCB_relay3_off();
         PCB_CPLD_MOSFET_MCU_off();
+        PCB_5V_ISO_on();
 
         PCB_LED_FAULT_off();
 		PCB_LED_READY_off();

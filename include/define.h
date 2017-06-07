@@ -29,6 +29,9 @@
 // frekvenca omrežja
 #define		GRID_FREQ		50
 
+// amplituda omrezja
+#define		GRID_AMPLITUDE	325.2691193
+
 // število vzorcev v eni periodi
 #define		SAMPLE_POINTS	(SAMPLE_FREQ/GRID_FREQ)
 
