@@ -10,6 +10,7 @@
 #define     __DC_FLOAT_H__
 
 #include    "define.h"
+#include	"globals.h"
 
 /* definicija konstant, ki jih potrebujemo  */
 
@@ -18,22 +19,23 @@
 
 typedef struct DC_FLOAT_STRUCT
 {
-    float   In;                    // Input
-    float   Mean;                  // srednja vrednost
-    int     m;                     // sample index
-    float   Buffer[DC_FLOAT_SIZE]; // buffer B
+    float   In;                    	// Input
+    float   Mean;                  	// srednja vrednost
+    int     m;                     	// sample index
+    float   Buffer[DC_FLOAT_SIZE];	// buffer B
 } DC_float;
 
 typedef DC_float* DC_float_handle;
 
+
 /*-----------------------------------------------------------------------------
 Default initalizer for the DC_fixed object.
 -----------------------------------------------------------------------------*/                     
-#define DC_FLOAT_DEFAULTS   \
-{                           \
-    0.0,                    \
-    0.0,                    \
-    0                      \
+#define DC_FLOAT_DEFAULTS		\
+{								\
+    0.0,                      	\
+    0.0,						\
+    0							\
 }
 
 /*------------------------------------------------------------------------------
@@ -41,11 +43,11 @@ Default initalizer for the DC_fixed object.
 ------------------------------------------------------------------------------*/
 #define DC_FLOAT_MACRO(v)                           	\
 {                                                   	\
-    v.Mean = v.Mean + ((1.0/DC_FLOAT_SIZE) * 			\
+    v.Mean = v.Mean + ((1.0/DC_FLOAT_SIZE) * 				\
                              (v.In - v.Buffer[v.m])); 	\
     v.Buffer[v.m] = v.In;                           	\
     v.m++;                                          	\
-    if (v.m == DC_FLOAT_SIZE)                  			\
+    if (v.m == DC_FLOAT_SIZE)         	         			\
     {                                               	\
         v.m = 0;                                    	\
     }                                               	\
@@ -56,7 +58,7 @@ Default initalizer for the DC_fixed object.
 ------------------------------------------------------------------------------*/
 #define DC_FLOAT_MACRO_INIT(v)                  \
 {                                               \
-    for (v.m = 0; v.m < DC_FLOAT_SIZE; v.m++)   \
+    for (v.m = 0; v.m < DC_FLOAT_SIZE; v.m++)	\
     {                                           \
         v.Buffer[v.m] = (0.0);               	\
     }                                           \

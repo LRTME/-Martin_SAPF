@@ -13,6 +13,7 @@
 #include    "SLEW_float.h"
 #include    "PID_float.h"
 #include	"RES_float.h"
+#include	"DC_float.h"
 
 // stevec prekinitev
 extern volatile float    interrupt_cnt;
@@ -54,6 +55,7 @@ extern volatile bool enable;
 extern volatile bool disable;
 
 extern float u_dc;
+extern float u_ac;
 extern float u_ac_rms;
 extern float u_out;
 extern float u_f;
