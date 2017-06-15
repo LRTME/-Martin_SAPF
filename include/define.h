@@ -49,7 +49,7 @@
 
 // limitne vrednosti napetosti, tokov
 #define     IS_LIM				6.0
-#define     IF_LIM				25.0
+#define     IF_LIM				15.0
 #define     u_ac_RMS_MIN		196.0
 #define     u_ac_RMS_MAX		253.0
 #define     DEL_UDC_MAX			47.0

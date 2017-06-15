@@ -49,6 +49,7 @@ void PCB_WD_KICK_int(void)
 * Funckija, ki vrne stanje strojne zascite s CPLD-ja (trip)
 * - GPIO19
 **************************************************************/
+#pragma CODE_SECTION(PCB_CPLD_trip, "ramfuncs");
 bool PCB_CPLD_trip(void)
 {
 	if (GpioDataRegs.GPADAT.bit.GPIO19 == 1)
@@ -81,6 +82,7 @@ void PCB_CPLD_LATCH_RESET(void)
 * Funckija, ki vrne stanje "over_voltage" zapaha s CPLD-ja
 * (over_voltage) - GPIO17
 **************************************************************/
+#pragma CODE_SECTION(PCB_CPLD_over_voltage, "ramfuncs");
 bool PCB_CPLD_over_voltage(void)
 {
 	if(GpioDataRegs.GPADAT.bit.GPIO17 == 1)
@@ -97,6 +99,7 @@ bool PCB_CPLD_over_voltage(void)
 * Funckija, ki vrne stanje "over_current_supply" zapaha s CPLD-ja
 * (over_current_supply) - GPIO11
 **************************************************************/
+#pragma CODE_SECTION(PCB_CPLD_over_current_supply, "ramfuncs");
 bool PCB_CPLD_over_current_supply(void)
 {
 	if(GpioDataRegs.GPADAT.bit.GPIO11 == 1)
@@ -113,6 +116,7 @@ bool PCB_CPLD_over_current_supply(void)
 * Funckija, ki vrne stanje "over_current_filter" zapaha s CPLD-ja
 * (over_current_filter) - GPIO15
 **************************************************************/
+#pragma CODE_SECTION(PCB_CPLD_over_current_filter, "ramfuncs");
 bool PCB_CPLD_over_current_filter(void)
 {
 	if(GpioDataRegs.GPADAT.bit.GPIO15 == 1)
@@ -129,16 +133,19 @@ bool PCB_CPLD_over_current_filter(void)
 ***************************************************************
 * Funckija izhoda MOSFET_MCU - GPIO25
 **************************************************************/
+#pragma CODE_SECTION(PCB_CPLD_MOSFET_MCU_on, "ramfuncs");
 void PCB_CPLD_MOSFET_MCU_on(void)
 {
 	GpioDataRegs.GPASET.bit.GPIO25 = 1;
 }
 
+#pragma CODE_SECTION(PCB_CPLD_MOSFET_MCU_off, "ramfuncs");
 void PCB_CPLD_MOSFET_MCU_off(void)
 {
 	GpioDataRegs.GPACLEAR.bit.GPIO25 = 1;
 }
 
+#pragma CODE_SECTION(PCB_CPLD_MOSFET_MCU_status, "ramfuncs");
 bool PCB_CPLD_MOSFET_MCU_status(void)
 {
 	if(GpioDataRegs.GPADAT.bit.GPIO25 == 1)
@@ -155,11 +162,13 @@ bool PCB_CPLD_MOSFET_MCU_status(void)
 ***************************************************************
 * Funckije za Rele1 (Supply_main_relay) - GPIO29
 **************************************************************/
+#pragma CODE_SECTION(PCB_relay1_on, "ramfuncs");
 void PCB_relay1_on(void)
 {
 	GpioDataRegs.GPASET.bit.GPIO29 = 1;
 }
 
+#pragma CODE_SECTION(PCB_relay1_off, "ramfuncs");
 void PCB_relay1_off(void)
 {
 	GpioDataRegs.GPACLEAR.bit.GPIO29 = 1;
@@ -168,11 +177,13 @@ void PCB_relay1_off(void)
 /**************************************************************
 * Funckije za Rele2 (Supply_resistor_relay) - GPIO23
 **************************************************************/
+#pragma CODE_SECTION(PCB_relay2_on, "ramfuncs");
 void PCB_relay2_on(void)
 {
 	GpioDataRegs.GPASET.bit.GPIO23 = 1;
 }
 
+#pragma CODE_SECTION(PCB_relay2_off, "ramfuncs");
 void PCB_relay2_off(void)
 {
 	GpioDataRegs.GPACLEAR.bit.GPIO23 = 1;
@@ -181,16 +192,19 @@ void PCB_relay2_off(void)
 /**************************************************************
 * Funckije za Rele3 (Filter_main_relay) - GPIO72
 **************************************************************/
+#pragma CODE_SECTION(PCB_relay3_on, "ramfuncs");
 void PCB_relay3_on(void)
 {
 	GpioDataRegs.GPCSET.bit.GPIO72 = 1;
 }
 
+#pragma CODE_SECTION(PCB_relay3_off, "ramfuncs");
 void PCB_relay3_off(void)
 {
 	GpioDataRegs.GPCCLEAR.bit.GPIO72 = 1;
 }
 
+#pragma CODE_SECTION(PCB_relay3_status, "ramfuncs");
 bool PCB_relay3_status(void)
 {
 	if(GpioDataRegs.GPCDAT.bit.GPIO72 == 1)
@@ -206,11 +220,13 @@ bool PCB_relay3_status(void)
 /**************************************************************
 * Funkcija za vklop/izklop 5V_ISO linije
 **************************************************************/
+#pragma CODE_SECTION(PCB_5V_ISO_on, "ramfuncs");
 void PCB_5V_ISO_on(void)
 {
 	GpioDataRegs.GPASET.bit.GPIO8 = 1;
 }
 
+#pragma CODE_SECTION(PCB_5V_ISO_off, "ramfuncs");
 void PCB_5V_ISO_off(void)
 {
 	GpioDataRegs.GPACLEAR.bit.GPIO8 = 1;
@@ -221,6 +237,7 @@ void PCB_5V_ISO_off(void)
 ***************************************************************
 * Funckija, ki vklopi LED FAULT (SIG_FAULT)
 **************************************************************/
+#pragma CODE_SECTION(PCB_LED_FAULT_on, "ramfuncs");
 void PCB_LED_FAULT_on(void)
 {
 	GpioDataRegs.GPASET.bit.GPIO12 = 1;
@@ -229,6 +246,7 @@ void PCB_LED_FAULT_on(void)
 /**************************************************************
 * Funckija, ki izklopi LED FAULT (SIG_FAULT)
 **************************************************************/
+#pragma CODE_SECTION(PCB_LED_FAULT_off, "ramfuncs");
 void PCB_LED_FAULT_off(void)
 {
 	GpioDataRegs.GPACLEAR.bit.GPIO12 = 1;
@@ -237,6 +255,7 @@ void PCB_LED_FAULT_off(void)
 /**************************************************************
 * Funckija, ki vklopi LED READY (SIG_READY)
 **************************************************************/
+#pragma CODE_SECTION(PCB_LED_READY_on, "ramfuncs");
 void PCB_LED_READY_on(void)
 {
 	GpioDataRegs.GPBSET.bit.GPIO38 = 1;
@@ -245,6 +264,7 @@ void PCB_LED_READY_on(void)
 /**************************************************************
 * Funckija, ki izklopi LED READY (SIG_READY)
 **************************************************************/
+#pragma CODE_SECTION(PCB_LED_READY_off, "ramfuncs");
 void PCB_LED_READY_off(void)
 {
 	GpioDataRegs.GPBCLEAR.bit.GPIO38 = 1;
@@ -253,6 +273,7 @@ void PCB_LED_READY_off(void)
 /**************************************************************
 * Funckija, ki vklopi LED WORKING (SIG_WORKING)
 **************************************************************/
+#pragma CODE_SECTION(PCB_LED_WORKING_on, "ramfuncs");
 void PCB_LED_WORKING_on(void)
 {
 	GpioDataRegs.GPASET.bit.GPIO18 = 1;
@@ -261,6 +282,7 @@ void PCB_LED_WORKING_on(void)
 /**************************************************************
 * Funckija, ki izklopi LED WORKING (SIG_WORKING)
 **************************************************************/
+#pragma CODE_SECTION(PCB_LED_WORKING_off, "ramfuncs");
 void PCB_LED_WORKING_off(void)
 {
 	GpioDataRegs.GPACLEAR.bit.GPIO18 = 1;
@@ -272,6 +294,7 @@ void PCB_LED_WORKING_off(void)
 ***************************************************************
 * Funckija ki vrne stanje ENABLE tipke (SW_ENABLE)
 **************************************************************/
+#pragma CODE_SECTION(PCB_SW_ENABLE, "ramfuncs");
 bool PCB_SW_ENABLE(void)
 {
 	if (GpioDataRegs.GPBDAT.bit.GPIO39 == 1)
@@ -287,6 +310,7 @@ bool PCB_SW_ENABLE(void)
 /**************************************************************
 * Funckija ki vrne stanje RESET tipke (SW_RESET)
 **************************************************************/
+#pragma CODE_SECTION(PCB_SW_RESET, "ramfuncs");
 bool PCB_SW_RESET(void)
 {
 	if (GpioDataRegs.GPCDAT.bit.GPIO69 == 1)

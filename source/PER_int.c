@@ -83,7 +83,7 @@ PID_float	u_out_PIreg = PID_FLOAT_DEFAULTS;
 PID_float	IF_DC_PIreg = PID_FLOAT_DEFAULTS;
 REP_float	u_out_RepReg = REP_FLOAT_DEFAULTS;
 
-float		u_out_RepReg_k_out = 0.11;
+float		u_out_RepReg_k_out = 0.15;
 float		u_out_RepReg_k_in = 1.0;
 
 float		u_out_duty = 0.0;		// kar posiljam na FB2
@@ -304,14 +304,14 @@ void PER_int_setup(void)
     sync_reg.OutMin = -SWITCH_FREQ/10;
 
     // inicializacija PI regulator IF_DC
-    IF_DC_PIreg.Kp = 0.227;
+    IF_DC_PIreg.Kp = 1.0;
     IF_DC_PIreg.Ki = 0.0;
     IF_DC_PIreg.Kff = 0.0;
     IF_DC_PIreg.OutMax = +0.99;		// zaradi bootstrap driverjev ne gre do 1.0
     IF_DC_PIreg.OutMin = -0.99;		// zaradi bootstrap driverjev ne gre do 1.0
 
     // inicializacija PI regulator u_out
-    u_out_PIreg.Kp = 0.015;
+    u_out_PIreg.Kp = 0.013;
     u_out_PIreg.Ki = 0.0;
     u_out_PIreg.Kff = 0.0;
     u_out_PIreg.OutMax = +0.99;		// zaradi bootstrap driverjev ne gre do 1.0
@@ -320,8 +320,8 @@ void PER_int_setup(void)
     // inicializacija repetitivni regulator u_out
     u_out_RepReg.gain = 0.025;		// 1/40 = 0.025
     u_out_RepReg.w0 = 0.7;
-    u_out_RepReg.w1 = 0.01;
-    u_out_RepReg.w2 = 0.01;
+    u_out_RepReg.w1 = 0.0;
+    u_out_RepReg.w2 = 0.0;
     u_out_RepReg.OutMax = 0.99;		// zaradi bootstrap driverjev ne gre do 1.0
     u_out_RepReg.OutMin = -0.99;	// zaradi bootstrap driverjev ne gre do 1.0
     u_out_RepReg.delay_komp = 0;
@@ -611,17 +611,6 @@ void output_bridge_enable(void)
 
 			state = Working;
 		}
-
-		// detekcija kota ~90°
-	/*	if (u_ac_form > (1.0 - 2.75e-4))
-		{
-			FB2_enable();
-			PCB_CPLD_MOSFET_MCU_off();
-			PCB_LED_WORKING_on();
-			enable = FALSE;
-			state = Working;
-		} */
-
 	}
 }
 
@@ -652,7 +641,9 @@ void output_bridge_disable(void)
 void output_bridge_control(void)
 {
     // regulacija deluje samo v tem primeru
-    if 	(state == Working)
+    if 	(	(state == Working)
+    	||	(state == Working)
+    	||	(state == Disable)	)
     {
     	// detekcija, ce delujemo v rezimu regulacije
     	if (mode == Control)
@@ -664,7 +655,7 @@ void output_bridge_control(void)
     		PID_FLOAT_CALC(IF_DC_PIreg);
 
     		// PI regulator
-    		u_out_PIreg.Ref = u_out - u_ac_zeljena;
+    		u_out_PIreg.Ref = u_out - u_ac_dft.Out;
     		u_out_PIreg.Fdb = u_f;
     		u_out_PIreg.Ff = 0.0;
     		PID_FLOAT_CALC(u_out_PIreg);
@@ -677,7 +668,7 @@ void output_bridge_control(void)
     		{
     		case REP:
     			// repetitivni regulator
-    			u_out_RepReg.in = u_out_RepReg_k_in * (u_out - GRID_AMPLITUDE * u_ac_form - u_f);
+    			u_out_RepReg.in = u_out_RepReg_k_in * (u_out - u_ac_dft.Out - u_f);
     			REP_float_calc(&u_out_RepReg);
 
     			u_out_duty = u_out_duty + u_out_RepReg_k_out * u_out_RepReg.out;

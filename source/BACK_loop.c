@@ -198,6 +198,7 @@ void pulse_gen(void)
     }
 }
 
+#pragma CODE_SECTION(SW_detect, "ramfuncs");
 void SW_detect(void)
 {
     // lokalne spremenljivke
@@ -257,6 +258,7 @@ void SW_detect(void)
 
 }
 
+#pragma CODE_SECTION(standby_fcn, "ramfuncs");
 void standby_fcn(void)
 {
 	PCB_LED_READY_on();
@@ -268,6 +270,7 @@ void standby_fcn(void)
 	}
 }
 
+#pragma CODE_SECTION(enable_fcn, "ramfuncs");
 void enable_fcn(void)
 {
 
@@ -301,6 +304,7 @@ void enable_fcn(void)
 	}
 }
 
+#pragma CODE_SECTION(working_fcn, "ramfuncs");
 void working_fcn(void)
 {
 
@@ -312,6 +316,7 @@ void working_fcn(void)
 
 }
 
+#pragma CODE_SECTION(disable_fcn, "ramfuncs");
 void disable_fcn(void)
 {
 	// postane aktivno sele po izklopnem delu v PER_int (izklop pri kotu 0°), disable == TRUE
@@ -350,6 +355,7 @@ void disable_fcn(void)
 	}
 }
 
+#pragma CODE_SECTION(fault_fcn, "ramfuncs");
 void fault_fcn(void)
 {
     // pobrišem napako, in grem v standby
@@ -368,6 +374,7 @@ void fault_fcn(void)
     PCB_LED_FAULT_on();
 }
 
+#pragma CODE_SECTION(fault_sensed_fcn, "ramfuncs");
 void fault_sensed_fcn(void)
 {
     // izklopim mostic
