@@ -190,24 +190,24 @@ void PCB_relay2_off(void)
 }
 
 /**************************************************************
-* Funckije za Rele3 (Filter_main_relay) - GPIO72
+* Funckije za Rele3 (Filter_main_relay) - GPIO21
 **************************************************************/
 #pragma CODE_SECTION(PCB_relay3_on, "ramfuncs");
 void PCB_relay3_on(void)
 {
-	GpioDataRegs.GPCSET.bit.GPIO72 = 1;
+	GpioDataRegs.GPASET.bit.GPIO21 = 1;
 }
 
 #pragma CODE_SECTION(PCB_relay3_off, "ramfuncs");
 void PCB_relay3_off(void)
 {
-	GpioDataRegs.GPCCLEAR.bit.GPIO72 = 1;
+	GpioDataRegs.GPACLEAR.bit.GPIO21 = 1;
 }
 
 #pragma CODE_SECTION(PCB_relay3_status, "ramfuncs");
 bool PCB_relay3_status(void)
 {
-	if(GpioDataRegs.GPCDAT.bit.GPIO72 == 1)
+	if(GpioDataRegs.GPADAT.bit.GPIO21 == 1)
 	{
 		return (TRUE);
 	}
@@ -373,8 +373,8 @@ void PCB_init(void)
         GPIO_SetupPinOptions(23, GPIO_OUTPUT, GPIO_PUSHPULL);
 
         // GPIO72 - Filter_main_relay (Relay 3)
-        GPIO_SetupPinMux(72, GPIO_MUX_CPU1, 0);
-        GPIO_SetupPinOptions(72, GPIO_OUTPUT, GPIO_PUSHPULL);
+        GPIO_SetupPinMux(21, GPIO_MUX_CPU1, 0);
+        GPIO_SetupPinOptions(21, GPIO_OUTPUT, GPIO_PUSHPULL);
 
         // GPIO8 - 5V_ISO remote on/off
         GPIO_SetupPinMux(8, GPIO_MUX_CPU1, 0);

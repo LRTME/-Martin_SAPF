@@ -675,10 +675,6 @@ void output_bridge_control(void)
 
     			break;
 
-    		case DFTF:
-    			// DFT filter
-    			break;
-
     		case RES:
     			// resonanèni regulator
     			break;

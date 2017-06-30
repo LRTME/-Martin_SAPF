@@ -35,7 +35,7 @@
 #define		DEL_UDC_CORR_F	1.020895522
 
 // definicije za status regulacije izhoda
-enum OUT_STATE { REP=0, DFTF, RES};
+enum OUT_STATE { REP=0, RES};
 
 /**************************************************************
 * Funckija, ki pripravi vse potrebno za izvajanje
