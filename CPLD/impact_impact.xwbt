@@ -1,8 +1,0 @@
-INTSTYLE=impact
-INFILE=D:\Martin_Rozej\Martin_SAPF\CPLD\impact.xsl
-OUTFILE=D:\Martin_Rozej\Martin_SAPF\CPLD\impact.xsl
-FAMILY=Single
-PART=Single
-WORKINGDIR=D:\Martin_Rozej\Martin_SAPF\CPLD
-LICENSE=iMPACT
-USER_INFO=iMPACT

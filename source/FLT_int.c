@@ -13,16 +13,15 @@
 #pragma CODE_SECTION(FLT_int_TZ1, "ramfuncs");
 void interrupt FLT_int_TZ1(void)
 {
-
-    // Spustimo INT zastavico v TZ enoti
-    EALLOW;
-    EPwm1Regs.TZCLR.bit.INT = 1;
-    EDIS;
-
-    // in onemogocim prekinitve, da ne padem zopet notri
+    // onemogocim prekinitve, da ne padem zopet notri
     // ta prekinitev je ponovno omogocena, ko se ponovno zazene enota
     EALLOW;
     EPwm1Regs.TZEINT.bit.OST = 0;
+    EDIS;
+
+    // in Spustimo INT zastavico v TZ enoti
+    EALLOW;
+    EPwm1Regs.TZCLR.bit.INT = 1;
     EDIS;
 
     // ter javim, da je prišlo do HW zašèite
@@ -32,10 +31,26 @@ void interrupt FLT_int_TZ1(void)
     FB1_disable();
     FB2_disable();
 
-    // izklopim vse kontaktorjev
+    // izklopim vse kontaktorje
     PCB_relay1_off();
     PCB_relay2_off();
     PCB_relay3_off();
+
+    // detektiram vrsto napake
+    if(PCB_CPLD_over_voltage() == FALSE)
+    {
+    	fault_flags.overvoltage_u_f = TRUE;
+    }
+
+	if(PCB_CPLD_over_current_supply() == FALSE)
+	{
+		fault_flags.overcurrent_IS = TRUE;
+	}
+
+	if(PCB_CPLD_over_current_filter() == FALSE)
+	{
+		fault_flags.overcurrent_IF = TRUE;
+	}
 
     // Spustimo INT zastavico v PIE enoti
     PieCtrlRegs.PIEACK.all = PIEACK_GROUP2;

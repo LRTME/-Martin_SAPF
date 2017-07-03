@@ -29,6 +29,9 @@
 // frekvenca omrežja
 #define		GRID_FREQ		50
 
+// amplituda omrezja
+#define		GRID_AMPLITUDE	325.2691193
+
 // število vzorcev v eni periodi
 #define		SAMPLE_POINTS	(SAMPLE_FREQ/GRID_FREQ)
 
@@ -41,21 +44,17 @@
 #define     ZSQRT2          0.70710678118654752440084436210485
 #define     PI              3.1415926535897932384626433832795
 
-// maksimalna izhodna moc v wattih
-#define     P_MAX           100
-// maksimalni bremenski tok v amperih
-#define     I_MAX           4
-// maksimalna izhodna napetost
-#define     U_MAX           35
 // nastavljena napetost enosmernega tokokroga
 #define     DEL_UDC_REF        	40.0
 
+// limitne vrednosti napetosti, tokov
 #define     IS_LIM				6.0
-#define     IF_LIM				25.0
+#define     IF_LIM				15.0
 #define     u_ac_RMS_MIN		196.0
 #define     u_ac_RMS_MAX		253.0
-#define     DEL_UDC_MAX			45.0
-#define     DEL_UDC_MIN			-0.5
+#define     DEL_UDC_MAX			47.0
+#define     DEL_UDC_MIN			-0.1
+#define		u_f_LIM				40.0
 
 // deklaracije za logicne operacije
 #define     TRUE            true

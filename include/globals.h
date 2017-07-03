@@ -13,6 +13,7 @@
 #include    "SLEW_float.h"
 #include    "PID_float.h"
 #include	"RES_float.h"
+#include	"DC_float.h"
 
 // stevec prekinitev
 extern volatile float    interrupt_cnt;
@@ -32,6 +33,7 @@ extern struct FAULT_FLAGS
     bool    overvoltage_u_dc:1;
     bool    undervoltage_u_ac:1;
     bool    overvoltage_u_ac:1;
+    bool	overvoltage_u_f:1;
     bool    cpu_overrun:1;
     bool    fault_registered:1;
 } fault_flags;
@@ -46,12 +48,14 @@ extern volatile bool start_calibration;
 
 // za zagon in delovanje
 extern SLEW_float   u_dc_slew;
-extern SLEW_float   u_out_slew;
 extern PID_float    u_dc_reg;
-extern RES_float	u_out_reg;
 
+// za vklop/izklop izhodnega mostica
+extern volatile bool enable;
+extern volatile bool disable;
 
 extern float u_dc;
+extern float u_ac;
 extern float u_ac_rms;
 extern float u_out;
 extern float u_f;
