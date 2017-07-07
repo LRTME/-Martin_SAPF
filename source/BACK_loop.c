@@ -281,6 +281,7 @@ void enable_fcn(void)
 	{
 		PCB_CPLD_MOSFET_MCU_on();
 		PCB_relay3_on();
+		FB2_enable();
 
 
 		// nastavim stevec
@@ -298,9 +299,10 @@ void enable_fcn(void)
 	if (	((pulse_10ms_cnt - pulse_10ms_cnt_previous) >= delay_MOSFET_relay_10ms)
 		&&	(PCB_CPLD_MOSFET_MCU_status() == TRUE)
 		&&	(PCB_relay3_status() == TRUE)
-		&&	(FB2_status() == FB_DIS)						)
+		&&	(FB2_status() == FB_EN)						)
 	{
 		enable = TRUE;
+		ENABLE_SW = FALSE;
 	}
 }
 
@@ -351,6 +353,7 @@ void disable_fcn(void)
 		PCB_CPLD_MOSFET_MCU_off();
 		PCB_LED_WORKING_off();
 
+		ENABLE_SW = FALSE;
 		state = Standby;
 	}
 }

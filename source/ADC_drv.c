@@ -114,7 +114,7 @@ void ADC_init(void)
     AdcbRegs.ADCSOC3CTL.bit.TRIGSEL = 5;        //trigger on ePWM1 SOCB/D
 
     // ADCD channel setup
-    //D0 - M_TEMP
+    //D0 - LEM_I_out
     AdcdRegs.ADCSOC0CTL.bit.CHSEL = 0;          //SOC0 will convert pin D0
     AdcdRegs.ADCSOC0CTL.bit.ACQPS = acqps_set;  //sample window
     AdcdRegs.ADCSOC0CTL.bit.TRIGSEL = 5;        //trigger on ePWM1 SOCB/D
