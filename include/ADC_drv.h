@@ -26,7 +26,7 @@
 #define     DEL_UDC_adc		(AdcbResultRegs.ADCRESULT1)		//B1
 #define     IS_adc 			(AdcbResultRegs.ADCRESULT3)		//B3
 
-#define     M_TEMP_adc     	(AdcdResultRegs.ADCRESULT0)		//D0
+#define     I_out_adc     	(AdcdResultRegs.ADCRESULT0)		//D0
 
 /**************************************************************
 * inicializiramo ADC
