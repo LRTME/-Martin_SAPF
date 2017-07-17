@@ -306,7 +306,7 @@ void PER_int_setup(void)
     sync_reg.OutMin = -SWITCH_FREQ/10;
 
     // inicializacija PI regulator u_out_DC
-    u_out_DC_PIreg.Kp = 0.012;
+    u_out_DC_PIreg.Kp = 0.013;
     u_out_DC_PIreg.Ki = 0.0;
     u_out_DC_PIreg.Kff = 0.0;
     u_out_DC_PIreg.OutMax = +0.99;		// zaradi bootstrap driverjev ne gre do 1.0
