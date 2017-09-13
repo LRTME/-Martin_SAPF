@@ -412,7 +412,7 @@ void FB1_period(float perioda)
 
     // izlocim celi del in ostanek
     celi_del = (long)temp_tbper;
-    ostanek = temp_tbper - celi_del;
+    ostanek = ostanek + temp_tbper - celi_del;
     // povecam celi del, ce je ostanek veji od 1
     if (ostanek > 1.0)
     {
@@ -437,7 +437,7 @@ void FB2_period(float perioda)
     
     // izlocim celi del in ostanek
     celi_del = (long)temp_tbper;
-    ostanek = temp_tbper - celi_del;
+    ostanek = ostanek + temp_tbper - celi_del;
     // povecam celi del, ce je ostanek veji od 1
     if (ostanek > 1.0)
     {
@@ -468,7 +468,7 @@ void FB1_frequency(float frekvenca)
 
     // izlocim celi del in ostanek
     celi_del = (long)temp_tbper;
-    ostanek = temp_tbper - celi_del;
+    ostanek = ostanek + temp_tbper - celi_del;
     // povecam celi del, ce je ostanek veji od 1
     if (ostanek > 1.0)
     {
@@ -493,7 +493,7 @@ void FB2_frequency(float frekvenca)
 
     // izlocim celi del in ostanek
     celi_del = (long)temp_tbper;
-    ostanek = temp_tbper - celi_del;
+    ostanek = ostanek + temp_tbper - celi_del;
     // povecam celi del, ce je ostanek veji od 1
     if (ostanek > 1.0)
     {

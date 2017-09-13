@@ -8,7 +8,7 @@
 #define     __DEFINE_H__
 
 #include	"stddef.h"
-#include	"stdbool.h"
+//#include	"stdbool.h"
 #include	"stdint.h"
 
 // frekvenca PWM-ja (20kHz)
@@ -50,15 +50,15 @@
 // limitne vrednosti napetosti, tokov
 #define     IS_LIM				6.0
 #define     IF_LIM				25.0
-#define     u_ac_RMS_MIN		196.0
-#define     u_ac_RMS_MAX		253.0
+#define     U_AC_RMS_MIN		196.0
+#define     U_AC_RMS_REF        230.0
+#define     U_AC_RMS_MAX		253.0
 #define     DEL_UDC_MAX			47.0
 #define     DEL_UDC_MIN			-0.1
-#define		u_f_LIM				40.0
+#define		U_F_LIM				45.0
 
-// deklaracije za logicne operacije
-#define     TRUE            true
-#define     FALSE           false
+// bool type definition
+typedef enum {FALSE = 0, TRUE} bool;
 
 // kako naj se obnašajo preriferne naprave, ko ustavimo izvajanje programa
 // 0 stop immediately, 1 stop when finished, 2 run free

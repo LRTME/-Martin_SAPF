@@ -87,6 +87,12 @@ void REP_float_calc(REP_float *v)
 void REP_float_zero(REP_float *v)
 {
     v->rep_buf[v->index] = 0.0;
+    // pripravim za naslednjo tocko
+    v->index = v->index + 1;
+    if (v->index >= REP_SAMPLE_SIZE)
+    {
+        v->index = v->index - REP_SAMPLE_SIZE;
+    }
 }
 
 

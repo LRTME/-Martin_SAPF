@@ -7,15 +7,15 @@
 
 #include    "COMM_handlers.h"
 
-bool send_ch1 = TRUE;
-bool send_ch2 = FALSE;
-bool send_ch3 = FALSE;
-bool send_ch4 = FALSE;
+bool send_ch1 = FALSE;
+bool send_ch2 = TRUE;
+bool send_ch3 = TRUE;
+bool send_ch4 = TRUE;
 bool send_ch5 = FALSE;
 bool send_ch6 = FALSE;
 bool send_ch7 = FALSE;
 bool send_ch8 = FALSE;
-int points_to_send = 200;
+int points_to_send = 400;
 
 bool dlog_buffers_sent = TRUE;
 

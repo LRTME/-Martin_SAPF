@@ -8,6 +8,7 @@
 #include    "TIC_toc.h"
 
 enum OUT_STATE out_control = REP;
+bool amp_control = FALSE;
 
 // za oceno obremenjenosti CPU-ja
 float   cpu_load  = 0.0;
@@ -73,6 +74,8 @@ DFT_float   u_out_dft = DFT_FLOAT_DEFAULTS;
 float   u_out_rms = 0.0;
 float   u_out_form = 0.0;
 
+float   u_out_err = 0.0;
+
 // regulacija napetosti enosmernega tokokroga
 PID_float   u_dc_reg = PID_FLOAT_DEFAULTS;
 SLEW_float  u_dc_slew = SLEW_FLOAT_DEFAULTS;
@@ -85,8 +88,7 @@ PID_float	u_out_PIreg = PID_FLOAT_DEFAULTS;
 PID_float	u_out_DC_PIreg = PID_FLOAT_DEFAULTS;
 REP_float	u_out_RepReg = REP_FLOAT_DEFAULTS;
 
-float		u_out_RepReg_k_out = 0.15;
-float		u_out_RepReg_k_in = 1.0;
+float		u_out_RepReg_k_in = 1.0/DEL_UDC_REF;
 
 float		u_out_duty = 0.0;		// kar posiljam na FB2
 
@@ -249,20 +251,20 @@ void PER_int_setup(void)
     dlog.auto_time = 1;
     dlog.holdoff_time = 1;
 
-    dlog.prescalar = 2;
+    dlog.prescalar = 1;
 
-    dlog.slope = Negative;
-    dlog.trig = &ref_gen.kot;
-    dlog.trig_value = 0.5;
+    dlog.slope = Positive;
+    dlog.trig = &u_out;
+    dlog.trig_value = 0.0;
 
     dlog.iptr1 = &u_ac;
-    dlog.iptr2 = &u_ac_form;
-    dlog.iptr3 = &u_ac_dft.Out;
-    dlog.iptr4 = &u_ac_kot;
-    dlog.iptr5 = &I_out;
+    dlog.iptr2 = &u_out;
+    dlog.iptr3 = &u_out_dft.Out;
+    dlog.iptr4 = &u_out_err;
+    dlog.iptr5 = &u_out_duty;
     dlog.iptr6 = &u_out;
     dlog.iptr7 = &u_f;
-    dlog.iptr8 = &IF;
+    dlog.iptr8 = &u_dc;
 
     // inicializiram generator signalov
     ref_gen.type = REF_Step;
@@ -278,6 +280,7 @@ void PER_int_setup(void)
 
     // inicilaliziram DFT
     DFT_FLOAT_MACRO_INIT(u_ac_dft);
+    DFT_FLOAT_MACRO_INIT(u_out_dft);
     DFT_FLOAT_MACRO_INIT(I_out_dft);
 
     // inicializiram u_dc_slew
@@ -306,27 +309,27 @@ void PER_int_setup(void)
     sync_reg.OutMin = -SWITCH_FREQ/10;
 
     // inicializacija PI regulator u_out_DC
-    u_out_DC_PIreg.Kp = 0.013;
-    u_out_DC_PIreg.Ki = 0.0;
+    u_out_DC_PIreg.Kp = 0.0;
+    u_out_DC_PIreg.Ki = -0.0001;
     u_out_DC_PIreg.Kff = 0.0;
     u_out_DC_PIreg.OutMax = +0.99;		// zaradi bootstrap driverjev ne gre do 1.0
     u_out_DC_PIreg.OutMin = -0.99;		// zaradi bootstrap driverjev ne gre do 1.0
 
     // inicializacija PI regulator u_out
-    u_out_PIreg.Kp = 0.013;
-    u_out_PIreg.Ki = 0.0;
+    u_out_PIreg.Kp = 0.001;
+    u_out_PIreg.Ki = 0.0025;
     u_out_PIreg.Kff = 0.0;
     u_out_PIreg.OutMax = +0.99;		// zaradi bootstrap driverjev ne gre do 1.0
     u_out_PIreg.OutMin = -0.99;		// zaradi bootstrap driverjev ne gre do 1.0
 
     // inicializacija repetitivni regulator u_out
-    u_out_RepReg.gain = 0.025;		// 1/40 = 0.025
-    u_out_RepReg.w0 = 0.7;
-    u_out_RepReg.w1 = 0.0;
+    u_out_RepReg.gain = 0.04;
+    u_out_RepReg.w0 = 0.5;
+    u_out_RepReg.w1 = 0.250;
     u_out_RepReg.w2 = 0.0;
     u_out_RepReg.OutMax = 0.99;		// zaradi bootstrap driverjev ne gre do 1.0
     u_out_RepReg.OutMin = -0.99;	// zaradi bootstrap driverjev ne gre do 1.0
-    u_out_RepReg.delay_komp = 0;
+    u_out_RepReg.delay_komp = 2;
 
 
     // inicializiram buffer za rep. reg.
@@ -483,6 +486,19 @@ void get_electrical(void)
 
     // naraèunam amplitudo izhodne napetosti - u_out
     u_out_rms = ZSQRT2 * sqrt(u_out_dft.SumA * u_out_dft.SumA + u_out_dft.SumB *u_out_dft.SumB);
+
+    // naracunam napako
+    // ce ne popravljam amplitude, potem je napaka kar direktna razlika med osnovnim harmonikom
+    // in merjeno napetostjo
+    if (amp_control == FALSE)
+    {
+        u_out_err = u_out_dft.Out - u_out;
+    }
+    // sicer pa ustrezno skaliram osnovni harmonik
+    else
+    {
+        u_out_err = (U_AC_RMS_REF / u_out_rms) * u_out_dft.Out - u_out;
+    }
 
     // normiram, da dobim obliko
     u_out_form = u_out_dft.Out / (u_out_rms * SQRT2);
@@ -670,32 +686,54 @@ void output_bridge_control(void)
     		u_out_DC_PIreg.Ff = 0.0;
     		PID_FLOAT_CALC(u_out_DC_PIreg);
 
-    		// PI regulator
-    		u_out_PIreg.Ref = u_out - u_ac_dft.Out;
-    		u_out_PIreg.Fdb = u_f;
-    		u_out_PIreg.Ff = 0.0;
-    		PID_FLOAT_CALC(u_out_PIreg);
-
-    		// duty za izhodni mostic
-    		u_out_duty = u_out_DC_PIreg.Out + u_out_PIreg.Out;
-
-    	//	u_out_duty = u_out_PIreg.Out;
-
     		// izbira vrste regulacije izhodne napetosti poleg osnovnega PI regulatorja
     		switch (out_control)
     		{
-    		case REP:
-    			// repetitivni regulator
-    			u_out_RepReg.in = u_out_RepReg_k_in * (u_out - u_ac_dft.Out - u_f);
-    			REP_float_calc(&u_out_RepReg);
+    		case PI_ONLY:
+                // PI regulator
+                u_out_PIreg.Ref = 0.0;
+                u_out_PIreg.Fdb = u_out_err;
+                u_out_PIreg.Ff = 0.0;
+                PID_FLOAT_CALC(u_out_PIreg);
 
-    			u_out_duty = u_out_duty + u_out_RepReg_k_out * u_out_RepReg.out;
+                // duty za izhodni mostic
+                u_out_duty = u_out_DC_PIreg.Out + u_out_PIreg.Out;
+
+    		    break;
+
+    		case PI_REP:
+                // PI regulator
+                u_out_PIreg.Ref = 0.0;
+                u_out_PIreg.Fdb = u_out_err;
+                u_out_PIreg.Ff = 0.0;
+                PID_FLOAT_CALC(u_out_PIreg);
+
+                // repetitivni regulator
+                u_out_RepReg.in = u_out_RepReg_k_in * (0.0-u_out_err);
+                REP_float_calc(&u_out_RepReg);
+
+                // duty za izhodni mostic
+                u_out_duty = u_out_DC_PIreg.Out + u_out_PIreg.Out + u_out_RepReg.out;
+
+    		    break;
+
+    		case REP:
+                // repetitivni regulator
+                u_out_RepReg.in = u_out_RepReg_k_in * (0.0-u_out_err);
+                REP_float_calc(&u_out_RepReg);
+
+                // duty za izhodni mostic
+                u_out_duty = u_out_DC_PIreg.Out + u_out_RepReg.out;
 
     			break;
 
     		case RES:
     			// resonanèni regulator
+    		    u_out_duty = 0.0;
     			break;
+
+    		default:
+    		    u_out_duty = 0.0;
     		}
 
     		// omejim izhod (limita: -0.99 - +0.99)
@@ -721,6 +759,9 @@ void output_bridge_control(void)
     else
     {
         FB2_update(0.0);
+        u_out_PIreg.Ui = 0.0;
+        u_out_DC_PIreg.Ui = 0.0;
+        REP_float_zero(&u_out_RepReg);
     }
 }
 
@@ -730,7 +771,7 @@ void check_limits(void)
     // samo èe je kalibracija konènana
     if (calibration_done == TRUE)
     {
-         if (u_ac_rms > u_ac_RMS_MAX)
+         if (u_ac_rms > U_AC_RMS_MAX)
         {
             fault_flags.overvoltage_u_ac = TRUE;
             state = Fault_sensed;
@@ -747,7 +788,7 @@ void check_limits(void)
             PCB_relay3_off();
         }
 
-        if (   (u_ac_rms < u_ac_RMS_MIN)
+        if (   (u_ac_rms < U_AC_RMS_MIN)
                 && (state != Initialization)
                 && (state != Startup))
         {
@@ -766,7 +807,7 @@ void check_limits(void)
             PCB_relay3_off();
         }
 
-        if (	(fabs(u_f) > u_f_LIM)
+        if (	(fabs(u_f) > U_F_LIM)
         	&&	(state == Working)	)
         {
         	fault_flags.overvoltage_u_f = TRUE;
