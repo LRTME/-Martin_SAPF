@@ -15,7 +15,7 @@
 #define     SWITCH_FREQ     20000L
 
 // veèkratnik preklopne frekvence
-#define     SAMPLE_PRESCALE   1
+#define     SAMPLE_PRESCALE 1
 
 // razmerje med preklopno in vzorèno frekvenco
 #define     SAMPLING_RATIO  2

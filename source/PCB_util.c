@@ -271,6 +271,15 @@ void PCB_LED_READY_off(void)
 }
 
 /**************************************************************
+* Funckija, ki togla LED READY (SIG_READY)
+**************************************************************/
+#pragma CODE_SECTION(PCB_LED_READY_toggle, "ramfuncs");
+void PCB_LED_READY_toggle(void)
+{
+    GpioDataRegs.GPBTOGGLE.bit.GPIO38 = 1;
+}
+
+/**************************************************************
 * Funckija, ki vklopi LED WORKING (SIG_WORKING)
 **************************************************************/
 #pragma CODE_SECTION(PCB_LED_WORKING_on, "ramfuncs");
@@ -287,7 +296,15 @@ void PCB_LED_WORKING_off(void)
 {
 	GpioDataRegs.GPACLEAR.bit.GPIO18 = 1;
 }
-/*************************************************************/
+
+/**************************************************************
+* Funkcija, ki toggla LED WORKING (SIG_WORKING)
+**************************************************************/
+#pragma CODE_SECTION(PCB_LED_WORKING_toggle, "ramfuncs");
+void PCB_LED_WORKING_toggle(void)
+{
+    GpioDataRegs.GPATOGGLE.bit.GPIO18 = 1;
+}
 
 /**************************************************************
 * Funkcije za stanje tipk

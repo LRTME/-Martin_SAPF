@@ -106,6 +106,17 @@ extern void PCB_LED_WORKING_on(void);
 * Funckija, ki izklopi LED WORKING (SIG_WORKING)
 **************************************************************/
 extern void PCB_LED_WORKING_off(void);
+
+/**************************************************************
+* Funckija, ki togla LED READY (SIG_READY)
+**************************************************************/
+extern void PCB_LED_READY_toggle(void);
+
+/**************************************************************
+* Funkcija, ki toggla LED WORKING (SIG_WORKING)
+**************************************************************/
+extern void PCB_LED_WORKING_toggle(void);
+
 /**************************************************************
 * Funkcije za stanje tipk
 ***************************************************************

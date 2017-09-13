@@ -68,9 +68,11 @@ DFT_float   I_out_dft = DFT_FLOAT_DEFAULTS;
 float	I_out_rms = 0.0;
 float	I_out_form = 0.0;
 float	I_out_kot = 0.0;
+float   I_out_kot_old = 0.0;
 
 // prvi harmonik in RMS izhodne napetosti (u_out)
 DFT_float   u_out_dft = DFT_FLOAT_DEFAULTS;
+float   u_out_rms_ref = U_AC_RMS_REF;
 float   u_out_rms = 0.0;
 float   u_out_form = 0.0;
 
@@ -262,7 +264,7 @@ void PER_int_setup(void)
     dlog.iptr3 = &u_out_dft.Out;
     dlog.iptr4 = &u_out_err;
     dlog.iptr5 = &u_out_duty;
-    dlog.iptr6 = &u_out;
+    dlog.iptr6 = &IF;
     dlog.iptr7 = &u_f;
     dlog.iptr8 = &u_dc;
 
@@ -497,7 +499,7 @@ void get_electrical(void)
     // sicer pa ustrezno skaliram osnovni harmonik
     else
     {
-        u_out_err = (U_AC_RMS_REF / u_out_rms) * u_out_dft.Out - u_out;
+        u_out_err = (u_out_rms_ref / u_out_rms) * u_out_dft.Out - u_out;
     }
 
     // normiram, da dobim obliko
@@ -525,7 +527,8 @@ void get_electrical(void)
     // normiram, da dobim obliko
     I_out_form = I_out_dft.Out / (I_out_rms * SQRT2);
 
-    // izracunam trenutni kot I_out
+    // izracunam trenutni kot I_out, shranim staro vrednost
+    I_out_kot_old = I_out_kot;
     I_out_kot = 2 * asin(I_out_form) / PI;
 
     // filtriram meritev u_f
@@ -587,7 +590,8 @@ void sync(void)
 void input_bridge_control(void)
 {
     // regulacija deluje samo v teh primerih
-    if (   (state == Standby)
+    if (   (state == Charging)
+        || (state == Standby)
         || (state == Enable)
         || (state == Working)
         || (state == Disable))
@@ -632,12 +636,10 @@ void output_bridge_enable(void)
 		&&	(FB2_status() == FB_EN)				)
 	{
 		// detekcija prehoda toka skozi 0
-		if (	(I_out_kot <= 0.005)
-			&&	(I_out_kot >= -0.005)	)
+		if (	(I_out_kot_old < 0.0)
+			&&	(I_out_kot > 0.0)	)
 		{
-
 			PCB_CPLD_MOSFET_MCU_off();
-			PCB_LED_WORKING_on();
 
 			// pobrisem zastavico
 			enable = FALSE;
@@ -761,6 +763,11 @@ void output_bridge_control(void)
         FB2_update(0.0);
         u_out_PIreg.Ui = 0.0;
         u_out_DC_PIreg.Ui = 0.0;
+
+        u_out_PIreg.Out = 0.0;
+        u_out_DC_PIreg.Out = 0.0;
+        u_out_RepReg.out = 0.0;
+
         REP_float_zero(&u_out_RepReg);
     }
 }
