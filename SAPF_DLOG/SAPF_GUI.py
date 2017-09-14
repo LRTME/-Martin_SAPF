@@ -129,40 +129,20 @@ class ExampleApp(QtWidgets.QMainWindow, GUI_main_window.Ui_MainWindow):
         self.ch6_chkbox.stateChanged.connect(self.ch6_state_changed)
         self.ch7_chkbox.stateChanged.connect(self.ch7_state_changed)
         self.ch8_chkbox.stateChanged.connect(self.ch8_state_changed)
-        # se nr. of. points
-        self.points_spin.setOpts(value=200, dec=True, step=1, minStep=1, int=True)
-        self.points_spin.setMinimum(10)
-        self.points_spin.setMaximum(1000)
-        self.points_spin.valueChanged.connect(self.points_changed)
         # za prescalar
         self.prescalar_spin.setOpts(value=1, dec=True, step=1, minStep=1, int=True)
         self.prescalar_spin.setMinimum(1)
         self.prescalar_spin.setMaximum(100)
         self.prescalar_spin.valueChanged.connect(self.prescaler_changed)
-        # za trigger
-        self.trigger.currentIndexChanged.connect(self.trigger_changed)
 
-        # GUI elementi za generator referencnega signala
-        self.naklon_spin.setOpts(value=100, dec=True, step=1, minStep=1, int=True, decimals=4)
-        self.naklon_spin.setMinimum(1)
-        self.naklon_spin.setMaximum(10000)
-        self.naklon_spin.valueChanged.connect(self.naklon_changed)
+        # za nacin delovanja
+        self.sld_amplituda.valueChanged[int].connect(self.ref_amp_changed)
+        self.sld_amplituda.sliderReleased.connect(self.request_ref_params)
 
-        self.frekvenca_spin.setOpts(value=1, dec=True, step=1, minStep=0.01, int=False)
-        self.frekvenca_spin.setMinimum(0.01)
-        self.frekvenca_spin.setMaximum(1000)
-        self.frekvenca_spin.valueChanged.connect(self.ref_freq_changed)
+        self.ctrl_type.currentIndexChanged.connect(self.ctrl_type_changed)
 
-        self.sld_amp.valueChanged[int].connect(self.ref_amp_changed)
-        self.sld_amp.sliderReleased.connect(self.request_ref_params)
+        self.amp_control.stateChanged.connect(self.amp_control_changed)
 
-        self.sld_offset.valueChanged[int].connect(self.ref_offset_changed)
-        self.sld_offset.sliderReleased.connect(self.request_ref_params)
-
-        self.sld_duty.valueChanged[int].connect(self.ref_duty_changed)
-        self.sld_duty.sliderReleased.connect(self.request_ref_params)
-
-        self.oblika_sel.currentIndexChanged.connect(self.type_changed)
 
     # ko zaprem aplikacijo za ziher zaprem comport
     def closeEvent(self, event):
@@ -184,6 +164,13 @@ class ExampleApp(QtWidgets.QMainWindow, GUI_main_window.Ui_MainWindow):
         # spravim zadnje podatke
         self.ch1_latest = f_nparray
 
+        # naracunam THD in RMS
+        thd = self.get_thd(f_nparray)
+        rms = self.get_rms(f_nparray)
+        # popravim text
+        self.u_in_rms.setText(str(rms))
+        self.u_in_thd.setText(str(thd))
+
         # in klicem izris grafa ce je treba izrisati samo ch1
         if (self.ch1_chkbox.isChecked() and
                 not self.ch2_chkbox.isChecked() and
@@ -204,6 +191,13 @@ class ExampleApp(QtWidgets.QMainWindow, GUI_main_window.Ui_MainWindow):
         # spravim zadnje podatke
         self.ch2_latest = f_nparray
 
+        # naracunam THD in RMS
+        thd = self.get_thd(f_nparray)
+        rms = self.get_rms(f_nparray)
+        # popravim text
+        self.u_out_rms.setText(str(rms))
+        self.u_out_thd.setText(str(thd))
+
         # in klicem izris grafa ce je treba izrisati samo ch2
         if (self.ch2_chkbox.isChecked() and
                 not self.ch3_chkbox.isChecked() and
@@ -222,6 +216,13 @@ class ExampleApp(QtWidgets.QMainWindow, GUI_main_window.Ui_MainWindow):
 
         # spravim zadnje podatke
         self.ch3_latest = f_nparray
+
+        # naracunam THD in RMS
+        thd = self.get_thd(f_nparray)
+        rms = self.get_rms(f_nparray)
+        # popravim text
+        self.i_out_rms.setText(str(rms))
+        self.i_out_thd.setText(str(thd))
 
         # in klicem izris grafa ce je treba izrisati samo ch3
         if (self.ch3_chkbox.isChecked() and
@@ -322,6 +323,24 @@ class ExampleApp(QtWidgets.QMainWindow, GUI_main_window.Ui_MainWindow):
             f_nparray[i] = np.array(value)
             i = i + 1
         return f_nparray
+
+    @staticmethod
+    def get_rms(data):
+        rms = np.sqrt(np.mean(np.square(data)))
+        return rms
+
+    @staticmethod
+    def get_thd(data):
+        rms = np.sqrt(np.mean(np.square(data)))
+        size = len(data)
+        time = np.arange(0, size)
+        sin = np.sin(time * 2 * np.pi / size)
+        cos = np.cos(time * 2 * np.pi / size)
+        suma = (2 / size) * np.sum(data * cos)
+        sumb = (2 / size) * np.sum(data * sin)
+        dft = np.sqrt(suma * suma + sumb * sumb)
+        thd = np.sqrt(rms * rms - dft * dft) / dft
+        return thd
 
     def draw_plot(self):
         # naracunam x os
@@ -516,38 +535,24 @@ class ExampleApp(QtWidgets.QMainWindow, GUI_main_window.Ui_MainWindow):
 
         # sedaj pa odkodiram podatke
         amp = struct.unpack('<f', data[0:4])[0]
-        offset = struct.unpack('<f', data[4:8])[0]
-        freq = struct.unpack('<f', data[8:12])[0]
-        duty = struct.unpack('<f', data[12:16])[0]
-        slew = struct.unpack('<f', data[16:20])[0]
-        type = struct.unpack('<h', data[20:24])[0]
+        amp_control = struct.unpack('<h', data[4:6])[0]
+        ctrl_type = struct.unpack('<h', data[6:8])[0]
 
-        self.frekvenca_spin.blockSignals(True)
-        self.frekvenca_spin.setValue(freq)
-        self.frekvenca_spin.blockSignals(False)
+        self.sld_amplituda.blockSignals(True)
+        self.sld_amplituda.setValue(int(amp - 230))
+        self.sld_amplituda.blockSignals(False)
+        self.lbl_amplituda.setText(str(self.sld_amplituda.value()))
 
-        self.sld_amp.blockSignals(True)
-        self.sld_amp.setValue(int(amp*100))
-        self.sld_amp.blockSignals(False)
-        self.lbl_amp.setText(str(self.sld_amp.value() / 100))
+        self.ctrl_type.blockSignals(True)
+        self.ctrl_type.setCurrentIndex(ctrl_type)
+        self.ctrl_type.blockSignals(False)
 
-        self.sld_offset.blockSignals(True)
-        self.sld_offset.setValue(int(offset*100))
-        self.sld_offset.blockSignals(False)
-        self.lbl_offset.setText(str(self.sld_offset.value() / 100))
-
-        self.sld_duty.blockSignals(True)
-        self.sld_duty.setValue(int(duty*100))
-        self.sld_duty.blockSignals(False)
-        self.lbl_duty.setText(str(self.sld_duty.value() / 100))
-
-        self.naklon_spin.blockSignals(True)
-        self.naklon_spin.setValue(slew)
-        self.naklon_spin.blockSignals(False)
-
-        self.oblika_sel.blockSignals(True)
-        self.oblika_sel.setCurrentIndex(type)
-        self.oblika_sel.blockSignals(False)
+        self.amp_control.blockSignals(True)
+        if amp_control != 0:
+            self.amp_control.setChecked(True)
+        else:
+            self.amp_control.setChecked(False)
+        self.amp_control.blockSignals(False)
 
     def crc_event_print(self):
         crc_num = self.commonitor.get_crc()
@@ -568,57 +573,26 @@ class ExampleApp(QtWidgets.QMainWindow, GUI_main_window.Ui_MainWindow):
 
     def ref_amp_changed(self):
         # osvezim napis pod sliderjem
-        self.lbl_amp.setText(str(self.sld_amp.value() / 100))
+        self.lbl_amplituda.setText(str(self.sld_amplituda.value() + 230))
         # posljem paket po portu
-        data = pack_Float_As_U_Long(self.sld_amp.value() / 100)
+        data = pack_Float_As_U_Long(self.sld_amplituda.value() + 230)
         self.commonitor.send_packet(0x0B10, data)
 
-    def ref_offset_changed(self):
-        # osvezim napis pod sliderjem
-        self.lbl_offset.setText(str(self.sld_offset.value() / 100))
-        # posljem paket po portu
-        data = pack_Float_As_U_Long(self.sld_offset.value() / 100)
+    # ob spremembi nacina delovanja
+    def amp_control_changed(self):
+        data = struct.pack('<h', self.amp_control.isChecked())
         self.commonitor.send_packet(0x0B11, data)
 
-    def ref_freq_changed(self):
-        # posljem paket po portu
-        data = struct.pack('<f', self.frekvenca_spin.value())
+    # ob spremembi regulatorja
+    def ctrl_type_changed(self):
+        data = struct.pack('<h', int(self.ctrl_type.currentIndex()))
         self.commonitor.send_packet(0x0B12, data)
-
-    def ref_duty_changed(self):
-        # osvezim napis pod sliderjem
-        self.lbl_duty.setText(str(self.sld_duty.value() / 100))
-        # posljem paket po portu
-        data = pack_Float_As_U_Long(self.sld_duty.value() / 100)
-        self.commonitor.send_packet(0x0B13, data)
-
-    # ob spremembi naklona
-    def naklon_changed(self):
-        # posljem paket po portu
-        data = struct.pack('<f', int(self.naklon_spin.value()))
-        self.commonitor.send_packet(0x0B14, data)
-
-    # ob spremembi oblike
-    def type_changed(self):
-        data = struct.pack('<h', int(self.oblika_sel.currentIndex()))
-        self.commonitor.send_packet(0x0B15, data)
 
     # ob spremembi prescalerja
     def prescaler_changed(self):
         # posljem paket po portu
         data = struct.pack('<h', self.prescalar_spin.value())
         self.commonitor.send_packet(0x0920, data)
-
-    # ob spremembi stevila tock
-    def points_changed(self):
-        # posljem paket po portu
-        data = struct.pack('<h', int(self.points_spin.value()))
-        self.commonitor.send_packet(0x0921, data)
-
-    # ob spremembi triggerja
-    def trigger_changed(self):
-        # posljem paket po portu
-        self.commonitor.send_packet(0x0922, struct.pack('<h', self.trigger.currentIndex()))
 
     # ob pritisku na ch 1
     def ch1_state_changed(self):
