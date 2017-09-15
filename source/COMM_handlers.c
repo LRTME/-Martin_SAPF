@@ -9,7 +9,7 @@
 
 bool send_ch1 = TRUE;
 bool send_ch2 = TRUE;
-bool send_ch3 = TRUE;
+bool send_ch3 = FALSE;
 bool send_ch4 = FALSE;
 bool send_ch5 = FALSE;
 bool send_ch6 = FALSE;

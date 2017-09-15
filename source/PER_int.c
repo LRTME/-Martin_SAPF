@@ -261,8 +261,8 @@ void PER_int_setup(void)
 
     dlog.iptr1 = &u_ac;
     dlog.iptr2 = &u_out;
-    dlog.iptr3 = &u_out_dft.Out;
-    dlog.iptr4 = &u_out_err;
+    dlog.iptr3 = &u_out_err;
+    dlog.iptr4 = &i_out;
     dlog.iptr5 = &u_out_duty;
     dlog.iptr6 = &i_f;
     dlog.iptr7 = &u_f;
@@ -494,7 +494,7 @@ void get_electrical(void)
     // in merjeno napetostjo
     if (amp_control == FALSE)
     {
-        u_out_err = u_out_dft.Out - u_out;
+        u_out_err = (u_ac_rms / u_out_rms) * u_out_dft.Out - u_out;
     }
     // sicer pa ustrezno skaliram osnovni harmonik
     else

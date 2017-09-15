@@ -7,6 +7,8 @@ import sys
 import com_monitor
 # for statistics
 import numpy as np
+# for THD
+import scipy.fftpack
 # for ploting
 import pyqtgraph as pg
 # for data packing and unpacking
@@ -26,6 +28,8 @@ import COM_statistics_dialog
 # za horizontalno skalo grafa
 frekvenca = 20000
 
+# kje je zapisan baudrate - ce je
+baudrate_file = "baudrate.ini"
 
 class ExampleApp(QtWidgets.QMainWindow, GUI_main_window.Ui_MainWindow):
 
@@ -64,12 +68,6 @@ class ExampleApp(QtWidgets.QMainWindow, GUI_main_window.Ui_MainWindow):
         self.main_plot = self.PlotWidget.plotItem
         self.text = pg.LabelItem()
         self.text.setParentItem(self.main_plot.graphicsItem())
-        self.main_plot.scene().sigMouseMoved.connect(self.mouse_moved_over_plot)
-        proxy = pg.SignalProxy(self.main_plot.scene().sigMouseMoved, rateLimit=5, slot=self.mouse_moved_over_plot)
-        self.vLine = pg.InfiniteLine(angle=90, movable=False, pen=pg.mkPen((255, 0, 0, 128), width=2))
-        self.hLine = pg.InfiniteLine(angle=0, movable=False, pen=pg.mkPen((255, 0, 0, 128), width=2))
-        self.main_plot.addItem(self.vLine, ignoreBounds=True)
-        self.main_plot.addItem(self.hLine, ignoreBounds=True)
         # pripravim vse elemente
         self.plot_ch1 = self.main_plot.plot(np.array([0.0]), np.array([0.0]), pen=pg.mkPen('r', width=3))
         self.plot_ch2 = self.main_plot.plot(np.array([0.0]), np.array([0.0]), pen=pg.mkPen('g', width=3))
@@ -117,6 +115,8 @@ class ExampleApp(QtWidgets.QMainWindow, GUI_main_window.Ui_MainWindow):
         # se meni "connect"
         self.actionConnect_Disconnect.triggered.connect(self.com_meni_clicked)
 
+        self.try_connect_at_startup()
+
         # se meni "com statistics"
         self.actionCom_statistics.triggered.connect(self.com_statistics_clicked)
 
@@ -153,6 +153,30 @@ class ExampleApp(QtWidgets.QMainWindow, GUI_main_window.Ui_MainWindow):
         # klicem sistemski handler
         super(ExampleApp, self).closeEvent(event)
 
+    # ob zagonu skušam odpreti port
+    def try_connect_at_startup(self):
+        # pogledam kateri porti so sploh na voljo
+        list_portov = self.commonitor.get_list_of_ports()
+        # ce je kaksen port na voljo
+        if len(list_portov) != 0:
+            preffered_port = self.commonitor.get_prefered_port()
+            # in ce je naprava priklopljena
+            if preffered_port != None:
+                # in ce imam ini datoteko preberem iz nje
+                if os.path.exists(baudrate_file):
+                    file = open(baudrate_file, "r")
+                    br = file.read()
+                    file.close()
+                    baudrate = int(br)
+                    # in ce je trenutno port zaprt
+                    if self.commonitor.is_port_open() == False:
+                        self.commonitor.open_port(preffered_port, baudrate)
+                        if self.commonitor.is_port_open() == True:
+                            self.statusbar.showMessage("Com port je odprt", 2000)
+                            # zahtevam statusne podatke za data logger in generator signalov
+                            self.commonitor.send_packet(0x092A, None)
+                            self.commonitor.send_packet(0x0B1A, None)
+
     """ rx packets handlesr - in GUI thread"""
     # ko prejmem paket
     def on_received_ch1(self):
@@ -165,11 +189,11 @@ class ExampleApp(QtWidgets.QMainWindow, GUI_main_window.Ui_MainWindow):
         self.ch1_latest = f_nparray
 
         # naracunam THD in RMS
-        thd = self.get_thd(f_nparray)
+        thd = self.get_thd(f_nparray) * 100
         rms = self.get_rms(f_nparray)
         # popravim text
-        self.u_in_rms.setText(str(rms))
-        self.u_in_thd.setText(str(thd))
+        self.u_in_rms.setText(str(eng_string(rms, format='%.2f')))
+        self.u_in_thd.setText("{:.2f}".format(thd))
 
         # in klicem izris grafa ce je treba izrisati samo ch1
         if (self.ch1_chkbox.isChecked() and
@@ -192,11 +216,11 @@ class ExampleApp(QtWidgets.QMainWindow, GUI_main_window.Ui_MainWindow):
         self.ch2_latest = f_nparray
 
         # naracunam THD in RMS
-        thd = self.get_thd(f_nparray)
+        thd = self.get_thd(f_nparray) * 100
         rms = self.get_rms(f_nparray)
         # popravim text
-        self.u_out_rms.setText(str(rms))
-        self.u_out_thd.setText(str(thd))
+        self.u_out_rms.setText(str(eng_string(rms, format='%.2f')))
+        self.u_out_thd.setText("{:.2f}".format(thd))
 
         # in klicem izris grafa ce je treba izrisati samo ch2
         if (self.ch2_chkbox.isChecked() and
@@ -217,13 +241,6 @@ class ExampleApp(QtWidgets.QMainWindow, GUI_main_window.Ui_MainWindow):
         # spravim zadnje podatke
         self.ch3_latest = f_nparray
 
-        # naracunam THD in RMS
-        thd = self.get_thd(f_nparray)
-        rms = self.get_rms(f_nparray)
-        # popravim text
-        self.i_out_rms.setText(str(rms))
-        self.i_out_thd.setText(str(thd))
-
         # in klicem izris grafa ce je treba izrisati samo ch3
         if (self.ch3_chkbox.isChecked() and
                 not self.ch4_chkbox.isChecked() and
@@ -238,6 +255,13 @@ class ExampleApp(QtWidgets.QMainWindow, GUI_main_window.Ui_MainWindow):
         data = self.commonitor.get_data(self)
 
         f_nparray = self.list_to_float(data)
+
+        # naracunam THD in RMS
+        thd = self.get_thd(f_nparray) * 100
+        rms = self.get_rms(f_nparray)
+        # popravim text
+        self.i_out_rms.setText(str(eng_string(rms, format='%.2f')))
+        self.i_out_thd.setText("{:.2f}".format(thd))
 
         # spravim zadnje podatke
         self.ch4_latest = f_nparray
@@ -331,21 +355,24 @@ class ExampleApp(QtWidgets.QMainWindow, GUI_main_window.Ui_MainWindow):
 
     @staticmethod
     def get_thd(data):
-        rms = np.sqrt(np.mean(np.square(data)))
-        size = len(data)
-        time = np.arange(0, size)
-        sin = np.sin(time * 2 * np.pi / size)
-        cos = np.cos(time * 2 * np.pi / size)
-        suma = (2 / size) * np.sum(data * cos)
-        sumb = (2 / size) * np.sum(data * sin)
-        dft = np.sqrt(suma * suma + sumb * sumb)
-        thd = np.sqrt(rms * rms - dft * dft) / dft
+        # naracunam spekter
+        spekter = np.abs(scipy.fftpack.fft(data))
+        #poiscem index glavnega harmonika (naceloma je 1, vendar se spreminja s prescalarjem)
+        index = np.argmax(spekter)
+        spekter[0] = 0
+        # zrcaljeni spekter nicim
+        spekter[200:400] = 0
+        spekter_square = np.square(spekter)
+        spekter_square[index] = 0
+        spekter_sum = np.sum(spekter_square)
+        spekter_sum_squared = np.sqrt(spekter_sum)
+        thd = spekter_sum_squared/spekter[index]
         return thd
 
     def draw_plot(self):
         # naracunam x os
         dt = self.prescalar_spin.value() / frekvenca
-        time = np.arange(0, self.points_spin.value(), 1, dtype=np.float)
+        time = np.arange(0, 400, 1, dtype=np.float)
         time = time * dt
         # ce gre za milisekunde potem skaliram
         # ampak samo v primeru ko risem casovni plot - ce risem FFT potem morajo biti enote sekunde
@@ -354,78 +381,53 @@ class ExampleApp(QtWidgets.QMainWindow, GUI_main_window.Ui_MainWindow):
             time = time * 1000
 
         # graf narisem samo ce sem v normal ali signle mode nacinu
-        if self.trigger_mode.currentText() == "Normal" or self.trigger_mode.currentText() == "Single":
-            if self.ch1_chkbox.isChecked() == True:
-                if len(self.ch1_latest) == len(time):
-                    if self.plot_ch1 not in self.main_plot.listDataItems():
-                        self.main_plot.addItem(self.plot_ch1)
-                    self.plot_ch1.setData(time, self.ch1_latest)
+        if self.ch1_chkbox.isChecked() == True:
+            if len(self.ch1_latest) == len(time):
+                if self.plot_ch1 not in self.main_plot.listDataItems():
+                    self.main_plot.addItem(self.plot_ch1)
+                self.plot_ch1.setData(time, self.ch1_latest)
 
-            if self.ch2_chkbox.isChecked() == True:
-                if len(self.ch2_latest) == len(time):
-                    if self.plot_ch2 not in self.main_plot.listDataItems():
-                        self.main_plot.addItem(self.plot_ch2)
-                    self.plot_ch2.setData(time, self.ch2_latest)
+        if self.ch2_chkbox.isChecked() == True:
+            if len(self.ch2_latest) == len(time):
+                if self.plot_ch2 not in self.main_plot.listDataItems():
+                    self.main_plot.addItem(self.plot_ch2)
+                self.plot_ch2.setData(time, self.ch2_latest)
 
-            if self.ch3_chkbox.isChecked() == True:
-                if len(self.ch3_latest) == len(time):
-                    if self.plot_ch3 not in self.main_plot.listDataItems():
-                        self.main_plot.addItem(self.plot_ch3)
-                    self.plot_ch3.setData(time, self.ch3_latest)
+        if self.ch3_chkbox.isChecked() == True:
+            if len(self.ch3_latest) == len(time):
+                if self.plot_ch3 not in self.main_plot.listDataItems():
+                    self.main_plot.addItem(self.plot_ch3)
+                self.plot_ch3.setData(time, self.ch3_latest)
 
-            if self.ch4_chkbox.isChecked() == True:
-                if len(self.ch4_latest) == len(time):
-                    if self.plot_ch4 not in self.main_plot.listDataItems():
-                        self.main_plot.addItem(self.plot_ch4)
-                    self.plot_ch4.setData(time, self.ch4_latest)
+        if self.ch4_chkbox.isChecked() == True:
+            if len(self.ch4_latest) == len(time):
+                if self.plot_ch4 not in self.main_plot.listDataItems():
+                    self.main_plot.addItem(self.plot_ch4)
+                self.plot_ch4.setData(time, self.ch4_latest)
 
-            if self.ch5_chkbox.isChecked() == True:
-                if len(self.ch5_latest) == len(time):
-                    if self.plot_ch5 not in self.main_plot.listDataItems():
-                        self.main_plot.addItem(self.plot_ch5)
-                    self.plot_ch5.setData(time, self.ch5_latest)
+        if self.ch5_chkbox.isChecked() == True:
+            if len(self.ch5_latest) == len(time):
+                if self.plot_ch5 not in self.main_plot.listDataItems():
+                    self.main_plot.addItem(self.plot_ch5)
+                self.plot_ch5.setData(time, self.ch5_latest)
 
-            if self.ch6_chkbox.isChecked() == True:
-                if len(self.ch6_latest) == len(time):
-                    if self.plot_ch6 not in self.main_plot.listDataItems():
-                        self.main_plot.addItem(self.plot_ch6)
-                    self.plot_ch6.setData(time, self.ch6_latest)
+        if self.ch6_chkbox.isChecked() == True:
+            if len(self.ch6_latest) == len(time):
+                if self.plot_ch6 not in self.main_plot.listDataItems():
+                    self.main_plot.addItem(self.plot_ch6)
+                self.plot_ch6.setData(time, self.ch6_latest)
 
-            if self.ch7_chkbox.isChecked() == True:
-                if len(self.ch7_latest) == len(time):
-                    if self.plot_ch7 not in self.main_plot.listDataItems():
-                        self.main_plot.addItem(self.plot_ch7)
-                    self.plot_ch7.setData(time, self.ch7_latest)
+        if self.ch7_chkbox.isChecked() == True:
+            if len(self.ch7_latest) == len(time):
+                if self.plot_ch7 not in self.main_plot.listDataItems():
+                    self.main_plot.addItem(self.plot_ch7)
+                self.plot_ch7.setData(time, self.ch7_latest)
 
-            if self.ch8_chkbox.isChecked() == True:
-                if len(self.ch8_latest) == len(time):
-                    if self.plot_ch8 not in self.main_plot.listDataItems():
-                        self.main_plot.addItem(self.plot_ch8)
-                    self.plot_ch8.setData(time, self.ch8_latest)
-
-            # ko narisem podatek, narisem tudi crte. Tako ne upocasnim izrisa
-            self.vLine.setPos(self.mouse_point.x())
-            self.hLine.setPos(self.mouse_point.y())
-
-            # ce sem v single mode nacinu potem grem v stop mode
-            if self.trigger_mode.currentText()=="Single":
-                self.trigger_mode.blockSignals(True)
-                self.trigger_mode.setCurrentIndex(2)
-                self.trigger_mode.blockSignals(False)
-
-    def mouse_moved_over_plot(self, evt):
-        pos = evt
-        lokacija_miske = self.PlotWidget.lastMousePos
-        self.mouse_point = self.vb.mapSceneToView(pos)
-        if self.PlotWidget.sceneBoundingRect().contains(pos):
-            # ne narisem crte, da ne upocasnim izrisovanja
-            # self.vLine.setPos(self.mouse_point.x())
-            # self.hLine.setPos(self.mouse_point.y())
-            # ob crte napisem tekst
-            val_x = eng_string(self.mouse_point.x(), format='%.2f')
-            val_y = eng_string(self.mouse_point.y(), format='%.2f')
-            self.text.setText("["+val_x+", "+val_y+"]")
-            self.text.setPos(lokacija_miske[0], lokacija_miske[1])
+        if self.ch8_chkbox.isChecked() == True:
+            if len(self.ch8_latest) == len(time):
+                if self.plot_ch8 not in self.main_plot.listDataItems():
+                    self.main_plot.addItem(self.plot_ch8)
+                self.plot_ch8.setData(time, self.ch8_latest)
 
     def on_dlog_params_received(self):
         # potegnem ven podatke
@@ -445,10 +447,6 @@ class ExampleApp(QtWidgets.QMainWindow, GUI_main_window.Ui_MainWindow):
         trigger = struct.unpack('<h', data[20:22])[0]
 
         # ustrezno nastavim GUI elemente
-        self.points_spin.blockSignals(True)
-        self.points_spin.setValue(points)
-        self.points_spin.blockSignals(False)
-
         self.prescalar_spin.blockSignals(True)
         self.prescalar_spin.setValue(prescalar)
         self.prescalar_spin.blockSignals(False)
@@ -524,10 +522,6 @@ class ExampleApp(QtWidgets.QMainWindow, GUI_main_window.Ui_MainWindow):
             self.plot_ch8.setData(np.array([0.0]), np.array([0.0]))
             self.main_plot.removeItem(self.plot_ch8)
         self.ch8_chkbox.blockSignals(False)
-
-        self.trigger.blockSignals(True)
-        self.trigger.setCurrentIndex(trigger)
-        self.trigger.blockSignals(False)
 
     def on_ref_params_received(self):
         # potegnem ven podatke
