@@ -7,7 +7,7 @@
 #include    "PER_int.h"
 #include    "TIC_toc.h"
 
-enum    OUT_STATE out_control = REP;
+enum    OUT_STATE out_control = PI_REP;
 bool    amp_control = FALSE;
 
 // za oceno obremenjenosti CPU-ja
@@ -95,10 +95,10 @@ float		u_out_RepReg_k_in = 1.0/DEL_UDC_REF;
 float		u_out_duty = 0.0;		// kar posiljam na FB2
 
 // sinhronizacija na omrežje
-float       sync_base_freq = SWITCH_FREQ;
+float       sync_base_freq = SAMPLE_FREQ;
 PID_float   sync_reg    = PID_FLOAT_DEFAULTS;
-float       sync_switch_freq = SWITCH_FREQ;
-float       sync_grid_freq = (SWITCH_FREQ/SAMPLE_POINTS);
+float       sync_switch_freq = SAMPLE_FREQ;
+float       sync_grid_freq = (SAMPLE_FREQ/SAMPLE_POINTS);
 bool        sync_use = TRUE;
 
 // samo za statistiko meritev

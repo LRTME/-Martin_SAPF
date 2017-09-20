@@ -357,11 +357,12 @@ class ExampleApp(QtWidgets.QMainWindow, GUI_main_window.Ui_MainWindow):
     def get_thd(data):
         # naracunam spekter
         spekter = np.abs(scipy.fftpack.fft(data))
-        #poiscem index glavnega harmonika (naceloma je 1, vendar se spreminja s prescalarjem)
+        size = len(spekter)
+        # poiscem index glavnega harmonika (naceloma je 1, vendar se spreminja s prescalarjem)
         index = np.argmax(spekter)
         spekter[0] = 0
         # zrcaljeni spekter nicim
-        spekter[200:400] = 0
+        spekter[int(size/2):size] = 0
         spekter_square = np.square(spekter)
         spekter_square[index] = 0
         spekter_sum = np.sum(spekter_square)
@@ -372,7 +373,7 @@ class ExampleApp(QtWidgets.QMainWindow, GUI_main_window.Ui_MainWindow):
     def draw_plot(self):
         # naracunam x os
         dt = self.prescalar_spin.value() / frekvenca
-        time = np.arange(0, 400, 1, dtype=np.float)
+        time = np.arange(0, len(self.ch1_latest), 1, dtype=np.float)
         time = time * dt
         # ce gre za milisekunde potem skaliram
         # ampak samo v primeru ko risem casovni plot - ce risem FFT potem morajo biti enote sekunde

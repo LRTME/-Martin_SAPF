@@ -14,7 +14,7 @@
 // number of channels
 #define     DLOG_GEN_NR     8
 // size of each buffer
-#define     DLOG_GEN_SIZE   400
+#define     DLOG_GEN_SIZE   SAMPLE_POINTS
 
 // function prototype
 void DLOG_GEN_update(void);

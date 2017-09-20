@@ -19,8 +19,6 @@ PAGE 0 :
 
     P_D01       : origin = 0x00B000,    length = 0x001000       /* on-chip RAM block D0-1 */
     
-    P_GS05      : origin = 0x00C000,    length = 0x006000       /* on-chip RAM block Global Shared 0-5 */
-
     RESET_F     : origin = 0x080000,    length = 0x000002
 
     /* Flash sectors */
@@ -45,7 +43,7 @@ PAGE 1 :
     D_M0        : origin = 0x000122,    length = 0x0002DE       /* on-chip RAM block M0 */
     D_M1        : origin = 0x000400,    length = 0x000400       /* on-chip RAM block M1 */
     
-    D_GS615     : origin = 0x012000,    length = 0x00A000       /* on-chip RAM block Global Shared 6-15 */
+    D_GS015     : origin = 0x00C000,    length = 0x010000       /* on-chip RAM block Global Shared 6-15 */
    
     CPU2TOCPU1RAM   : origin = 0x03F800,    length = 0x000400
     CPU1TOCPU2RAM   : origin = 0x03FC00,    length = 0x000400
@@ -55,11 +53,11 @@ SECTIONS
 {
 
 /* VARIABLES */
-    .bss: >>        D_GS615  PAGE = 1
-    .ebss: >>       D_GS615  PAGE = 1
+    .bss: >>        D_GS015  PAGE = 1
+    .ebss: >>       D_GS015  PAGE = 1
 
 /* CODE */
-    .text: >>       P_LS05 | P_D01 | P_GS05    PAGE = 0, ALIGN(4)
+    .text: >>       P_LS05 | P_D01    PAGE = 0, ALIGN(4)
 
 	ramfuncs:       {
 /*                        rts2800_fpu32_fast_supplement.lib<atan2_f32.obj>(.text)
@@ -71,7 +69,7 @@ SECTIONS
                         *(ramfuncs)
                         *(.TI.ramfunc)
                     }
-                    LOAD = P_LS05 | P_D01 | P_GS05,
+                    LOAD = P_LS05 | P_D01,
                     LOAD_START(_RamfuncsLoadStart),
                     LOAD_SIZE(_RamfuncsLoadSize),
                     LOAD_END(_RamfuncsLoadEnd),
@@ -87,21 +85,21 @@ SECTIONS
                     PAGE = 1
                     
 /* HEAP */  
-    .sysmem: >>     D_GS615  PAGE = 1
-    .esysmem: >>    D_GS615  PAGE = 1
+    .sysmem: >>     D_GS015  PAGE = 1
+    .esysmem: >>    D_GS015  PAGE = 1
 
 /* CONSTANTS */
-    .econst: >>     D_GS615  PAGE = 1
-    .const: >>      D_GS615  PAGE = 1
+    .econst: >>     D_GS015  PAGE = 1
+    .const: >>      D_GS015  PAGE = 1
 
 /* STARTUP CODE */
-    codestart >     RESET_M         PAGE = 0
-    .reset: >>      P_LS05 | P_D01 | P_GS05,    PAGE = 0
-    .cinit: >       P_D01 | P_GS05,    PAGE = 0
+    codestart >     RESET_M         	PAGE = 0
+    .reset: >>      P_LS05 | P_D01,    	PAGE = 0
+    .cinit: >       P_D01,    			PAGE = 0
 
 /* COMPILER GENERATED CODE */
-    .pinit: >>      P_LS05 | P_D01 | P_GS05,    PAGE = 0
-    .switch: >>     P_LS05 | P_D01 | P_GS05,    PAGE = 0
+    .pinit: >>      P_LS05 | P_D01,    	PAGE = 0
+    .switch: >>     P_LS05 | P_D01,    	PAGE = 0
 
 /* The following section definitions are required when using the IPC API Drivers */ 
     GROUP : > CPU1TOCPU2RAM, PAGE = 1 
