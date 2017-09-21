@@ -2,21 +2,24 @@
 import queue
 import serial
 from serial.tools import list_ports
+import serial.threaded
 import threading
+import traceback
 import time
 import cobs
 import struct
-from PyQt5 import  QtCore
+from PyQt5 import QtCore
 from PyCRC.CRC16 import CRC16
 import inspect
 
-
-class ComMonitor(QtCore.QObject):
+class ComMonitor(QtCore.QObject, serial.threaded.Packetizer):
 
     packets_sent = 0
     packets_received = 0
+    non_registered_packets_received = 0
     crc_error_count = 0
     decode_error_count = 0
+    bytes_received = 0
 
     crc_handler_function = False
     crc_print_signal = QtCore.pyqtSignal()
@@ -26,6 +29,11 @@ class ComMonitor(QtCore.QObject):
     tx_handler_signal = QtCore.pyqtSignal()
 
     tx_queue = queue.Queue()
+
+    _object_ref = None
+
+    def set_object(self, obj):
+        self._object_ref = obj
 
     def __init__(self):
         # inicializacija QT-ja
@@ -38,6 +46,8 @@ class ComMonitor(QtCore.QObject):
         self.ser = serial.Serial()
         self.ser.timeout = 0.001
 
+        self.ser.set_buffer_size()
+
         # seznam rx handlerjev
         self.code_list = list()
         self.callback_list = list()
@@ -48,6 +58,8 @@ class ComMonitor(QtCore.QObject):
 
         # stevec napak pri prenosu
         self.crc_error_count = 0
+
+        self.packetizer = None
 
     def send_packet(self, code, data):
         if data is None:
@@ -99,7 +111,12 @@ class ComMonitor(QtCore.QObject):
         return preffered_port
 
     def statistic_data(self):
-        data = (self.packets_sent, self.packets_received, self.crc_error_count, self.decode_error_count)
+        data = (self.packets_sent,
+                self.packets_received,
+                self.crc_error_count,
+                self.decode_error_count,
+                self.non_registered_packets_received,
+                self.bytes_received)
         return data
 
     def open_port(self, portname, baudrate):
@@ -110,9 +127,11 @@ class ComMonitor(QtCore.QObject):
 
         # resetiram stevce paketov
         self.packets_sent = 0;
+        self.non_registered_packets_received = 0
         self.packets_received = 0
         self.crc_error_count = 0
         self.decode_error_count = 0
+        self.bytes_received = 0
 
         if self.ser.isOpen() == True:
             # izpraznim vrsto za posiljanje
@@ -125,11 +144,12 @@ class ComMonitor(QtCore.QObject):
                 self.tx_queue.task_done()
 
             # pripravim thread, ki bo periodicno povpraseval po
-            # prispelih paketi
-            check_thread = threading.Thread(target=self.check_for_new_data)
-            # in ga pozenem
-            check_thread.daemon = True
-            check_thread.start()
+            self.packetizer = serial.threaded.ReaderThread(self.ser, ComMonitor)
+            #self.packetizer = serial.threaded.ReaderThread(self.ser, PacketHandler)
+            # self.packetizer.__enter__()
+            self.packetizer.start()
+            a, b  = self.packetizer.connect()
+            b.set_object(self)
 
             # spraznem vrsto
             while not self.tx_queue.empty():
@@ -147,6 +167,8 @@ class ComMonitor(QtCore.QObject):
         # najprej pocakam da se vsi paketi posljejo
         while not self.tx_queue.empty():
             time.sleep(0.01)
+        # ugasnem rx thread
+        self.packetizer.stop()
         # sele potem pa zaprem port
         with self.com_lock:
             self.ser.__del__()
@@ -174,94 +196,64 @@ class ComMonitor(QtCore.QObject):
                 self.packets_sent = self.packets_sent + 1
         pass
 
-    def check_for_new_data(self):
-        while True:
-            # ce je port zaprt potem pojdi ven, saj se bo nov thread itak startal
-            # ko se port spet odpre
-            if self.ser.isOpen() == False:
-                break
+    def handle_packet(self, data):
+        self._object_ref.bytes_received = self._object_ref.bytes_received + len(data) + 1
+        #print("prejetih bytov:" + str(self.bytes_received))
+        try:
+            decoded_packet = cobs.decode(data)
+        except:
+            self._object_ref.decode_error_count = self._object_ref.decode_error_count + 1
+            # print("narobe dekodiranih " + str(self.decode_error_count) + " paketov")
+        else:
+            # ce pa dobim korekten podatek, pogledam po seznamu handlerjev in klicem ustrezen callback
+            length_of_packet = len(decoded_packet)
+            # potegnem ven kodo
+            code = decoded_packet[0:2]
+            # in podatke
+            packet_data = decoded_packet[2:length_of_packet - 2]
 
-            # se pripravim na sprejem podatkov
-            cobspacket_num = []
-            cobspacket_bytes = b''
+            code_and_data = decoded_packet[0:length_of_packet - 2]
+            # in na koncu se CRC
+            crc_received = int.from_bytes(decoded_packet[length_of_packet - 2:length_of_packet], byteorder='little')
 
-            # berem, dokler ne zaznam konca paketa """
-            i = 0
-            while True:
-                # aha, on tukaj obtici, ko zapiram port
-                self.com_lock.acquire()
+            # sedaj naredim se CRC nad podatki in ukazom
+            crc_of_data = CRC16(True).calculate(bytes(code_and_data))
+
+            # ce sta CRC-ja enaka, potem nadaljujem, sicer pa kar odneham
+            if crc_of_data == crc_received:
+                # uspesno prejet paket
+                self._object_ref.packets_received = self._object_ref.packets_received + 1
+                #print("prejetih paketov:" + str(self.packets_received))
+                # print('packets received: ' + str(self.packets_received))
+                # handlerji po novo
                 try:
-                    # preden preberem pogleda, ce je port sploh se odprt
-                    if self.ser.isOpen() == False:
-                        break
-                    cobschar = self.ser.read(1)
-                finally:
-                    self.com_lock.release()
-                # ce sem dobil prazen byte, potem vse skupaj ponovim
-                if cobschar == b'':
+                    index = self._object_ref.rx_code_list.index(code)
+                    callback = self._object_ref.rx_handler_list[index]
+                    # poklicem handler
+                    if packet_data == None:
+                        callback.rx_handler()
+                    else:
+                        callback.rx_handler(packet_data)
+                except:
+                    # print("rxhandler" + str(code) + "not registered")
+                    self._object_ref.non_registered_packets_received = self._object_ref.non_registered_packets_received + 1
                     pass
-                # ce pa sem dobil podatke, ga pa sestukam skupaj
-                else:
-                    cobschar_num = ord(cobschar)
-                    # ce zaznam konec paketa, grem ven
-                    if cobschar_num == 0:
-                        break
-                    # sicer pa dodam nov bajt v paket
-                    cobspacket_num.append(cobschar_num)
-                    cobspacket_bytes = cobspacket_bytes + cobschar
-                    i = i + 1
 
-            # ce sem port zaprl, potem ni vazno kaj sem dobil
-            if self.ser.isOpen() == False:
-                break
-            # skusam dekodirati paket
-            try:
-                decoded_packet = cobs.decode(cobspacket_bytes)
-            except:
-                self.decode_error_count = self.decode_error_count + 1
-                # print("narobe dekodiranih " + str(self.decode_error_count) + " paketov")
             else:
-                # ce pa dobim korekten podatek, pogledam po seznamu handlerjev in klicem ustrezen callback
-                length_of_packet = len(decoded_packet)
-                # potegnem ven kodo
-                code = decoded_packet[0:2]
-                # in podatke
-                data = decoded_packet[2:length_of_packet-2]
+                # povecam stevec CRC napak
+                self._object_ref.crc_error_count = self._object_ref.crc_error_count + 1
+                # ce je CRC handler registriran potem
+                if self._object_ref.crc_handler_function != False:
+                    # dam stevec na vrsto
+                    self._object_ref.crc_data.put(self._object_ref.crc_error_count)
+                    # in preko signala klicem sistem
+                    self._object_ref.crc_print_signal.emit()
 
-                code_and_data = decoded_packet[0:length_of_packet-2]
-                # in na koncu se CRC
-                crc_received = int.from_bytes(decoded_packet[length_of_packet-2:length_of_packet], byteorder='little')
 
-                # sedaj naredim se CRC nad podatki in ukazom
-                crc_of_data = CRC16(True).calculate(bytes(code_and_data))
-
-                # ce sta CRC-ja enaka, potem nadaljujem, sicer pa kar odneham
-                if crc_of_data == crc_received:
-                    # uspesno prejet paket
-                    self.packets_received = self.packets_received + 1
-                    # print("prejetih " + str(self.packets_received) + " paketov")
-                    # handlerji po novo
-                    try:
-                        index = self.rx_code_list.index(code)
-                        callback = self.rx_handler_list[index]
-                        # poklicem handler
-                        if data == None:
-                            callback.rx_handler()
-                        else:
-                            callback.rx_handler(data)
-                    except:
-                        # print("rxhandler" + str(code) + "not registered")
-                        pass
-
-                else:
-                    # povecam stevec CRC napak
-                    self.crc_error_count = self.crc_error_count + 1
-                    # ce je CRC handler registriran potem
-                    if self.crc_handler_function != False:
-                        # dam stevec na vrsto
-                        self.crc_data.put(self.crc_error_count)
-                        # in preko signala klicem sistem
-                        self.crc_print_signal.emit()
+    def check_for_new_data(self):
+        # sem sploh ne bi smel priti
+        pass
+        pass
 
     def data_to_send(self):
         return self.tx_queue.qsize()
@@ -273,7 +265,7 @@ class ComMonitor(QtCore.QObject):
         function_name = str(rx_function.__name__)
         self.rx_handler_name_list.append(function_name)
         self.rx_handler_list.append(rx_worker)
-        self.rx_code_list.append((struct.pack('<h', code)))
+        self.rx_code_list.append((struct.pack('<H', code)))
 
     def get_data(self, caller):
         called_by = inspect.stack()[1][3]
@@ -293,7 +285,6 @@ class ComMonitor(QtCore.QObject):
     def get_crc(self):
         data = self.crc_data.get()
         return data
-
 
 class RxWorker(QtCore.QObject):
     # signal s katerim povezem RxWorker-ja in rx_function
