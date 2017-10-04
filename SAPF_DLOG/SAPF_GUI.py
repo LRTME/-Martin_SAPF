@@ -28,6 +28,9 @@ import COM_statistics_dialog
 # za horizontalno skalo grafa
 frekvenca = 20000
 
+# za izbiro pravega COM vodila
+com_serial_number = "TI1FX0GOB"
+
 # kje je zapisan baudrate - ce je
 baudrate_file = "baudrate.ini"
 
@@ -115,7 +118,11 @@ class ExampleApp(QtWidgets.QMainWindow, GUI_main_window.Ui_MainWindow):
         # se meni "connect"
         self.actionConnect_Disconnect.triggered.connect(self.com_meni_clicked)
 
-        self.try_connect_at_startup()
+        # pripravim dialoga
+        self.com_dialog = COM_settings_dialog.ComDialog(self)
+        self.com_stat_dialog = COM_statistics_dialog.ComStat(self)
+
+        self.com_dialog.try_connect_at_startup(serial_number=com_serial_number)
 
         # se meni "com statistics"
         self.actionCom_statistics.triggered.connect(self.com_statistics_clicked)
@@ -153,35 +160,11 @@ class ExampleApp(QtWidgets.QMainWindow, GUI_main_window.Ui_MainWindow):
         # klicem sistemski handler
         super(ExampleApp, self).closeEvent(event)
 
-    # ob zagonu skušam odpreti port
-    def try_connect_at_startup(self):
-        # pogledam kateri porti so sploh na voljo
-        list_portov = self.commonitor.get_list_of_ports()
-        # ce je kaksen port na voljo
-        if len(list_portov) != 0:
-            preffered_port = self.commonitor.get_prefered_port()
-            # in ce je naprava priklopljena
-            if preffered_port != None:
-                # in ce imam ini datoteko preberem iz nje
-                if os.path.exists(baudrate_file):
-                    file = open(baudrate_file, "r")
-                    br = file.read()
-                    file.close()
-                    baudrate = int(br)
-                    # in ce je trenutno port zaprt
-                    if self.commonitor.is_port_open() == False:
-                        self.commonitor.open_port(preffered_port, baudrate)
-                        if self.commonitor.is_port_open() == True:
-                            self.statusbar.showMessage("Com port je odprt", 2000)
-                            # zahtevam statusne podatke za data logger in generator signalov
-                            self.commonitor.send_packet(0x092A, None)
-                            self.commonitor.send_packet(0x0B1A, None)
-
     """ rx packets handlesr - in GUI thread"""
     # ko prejmem paket
     def on_received_ch1(self):
         # potegnem ven podatke
-        data = self.commonitor.get_data(self)
+        data = self.commonitor.get_data()
 
         f_nparray = self.list_to_float(data)
 
@@ -208,7 +191,7 @@ class ExampleApp(QtWidgets.QMainWindow, GUI_main_window.Ui_MainWindow):
 
     def on_received_ch2(self):
         # potegnem ven podatke
-        data = self.commonitor.get_data(self)
+        data = self.commonitor.get_data()
 
         f_nparray = self.list_to_float(data)
 
@@ -234,7 +217,7 @@ class ExampleApp(QtWidgets.QMainWindow, GUI_main_window.Ui_MainWindow):
 
     def on_received_ch3(self):
         # potegnem ven podatke
-        data = self.commonitor.get_data(self)
+        data = self.commonitor.get_data()
 
         f_nparray = self.list_to_float(data)
 
@@ -252,7 +235,7 @@ class ExampleApp(QtWidgets.QMainWindow, GUI_main_window.Ui_MainWindow):
 
     def on_received_ch4(self):
         # potegnem ven podatke
-        data = self.commonitor.get_data(self)
+        data = self.commonitor.get_data()
 
         f_nparray = self.list_to_float(data)
 
@@ -276,7 +259,7 @@ class ExampleApp(QtWidgets.QMainWindow, GUI_main_window.Ui_MainWindow):
 
     def on_received_ch5(self):
         # potegnem ven podatke
-        data = self.commonitor.get_data(self)
+        data = self.commonitor.get_data()
 
         f_nparray = self.list_to_float(data)
 
@@ -292,7 +275,7 @@ class ExampleApp(QtWidgets.QMainWindow, GUI_main_window.Ui_MainWindow):
 
     def on_received_ch6(self):
         # potegnem ven podatke
-        data = self.commonitor.get_data(self)
+        data = self.commonitor.get_data()
 
         f_nparray = self.list_to_float(data)
 
@@ -307,7 +290,7 @@ class ExampleApp(QtWidgets.QMainWindow, GUI_main_window.Ui_MainWindow):
 
     def on_received_ch7(self):
         # potegnem ven podatke
-        data = self.commonitor.get_data(self)
+        data = self.commonitor.get_data()
 
         f_nparray = self.list_to_float(data)
 
@@ -321,7 +304,7 @@ class ExampleApp(QtWidgets.QMainWindow, GUI_main_window.Ui_MainWindow):
 
     def on_received_ch8(self):
         # potegnem ven podatke
-        data = self.commonitor.get_data(self)
+        data = self.commonitor.get_data()
 
         f_nparray = self.list_to_float(data)
 
@@ -432,7 +415,7 @@ class ExampleApp(QtWidgets.QMainWindow, GUI_main_window.Ui_MainWindow):
 
     def on_dlog_params_received(self):
         # potegnem ven podatke
-        data = self.commonitor.get_data(self)
+        data = self.commonitor.get_data()
 
         # sedaj pa odkodiram podatke
         send_ch1 = struct.unpack('<h', data[0:2])[0]
@@ -526,7 +509,7 @@ class ExampleApp(QtWidgets.QMainWindow, GUI_main_window.Ui_MainWindow):
 
     def on_ref_params_received(self):
         # potegnem ven podatke
-        data = self.commonitor.get_data(self)
+        data = self.commonitor.get_data()
 
         # sedaj pa odkodiram podatke
         amp = struct.unpack('<f', data[0:4])[0]
@@ -556,12 +539,10 @@ class ExampleApp(QtWidgets.QMainWindow, GUI_main_window.Ui_MainWindow):
     """ GUI event handlerji """
     # ob pritisku na meni com
     def com_meni_clicked(self):
-        com_dialog = COM_settings_dialog.ComDialog(self)
-        com_dialog.show()
+        self.com_dialog.show()
 
     def com_statistics_clicked(self):
-        com_stat_dialog = COM_statistics_dialog.ComStat(self)
-        com_stat_dialog.show()
+        self.com_stat_dialog.show()
 
     def request_ref_params(self):
         self.commonitor.send_packet(0x0B1A, None)

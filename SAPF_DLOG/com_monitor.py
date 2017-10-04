@@ -93,7 +93,7 @@ class ComMonitor(QtCore.QObject, serial.threaded.Packetizer):
         return tup_list
 
     @staticmethod
-    def get_prefered_port():
+    def get_prefered_port(serial=None):
         ports_available = list_ports.comports()
         list_of_ports = list(ports_available)
         list_of_ports_available = list()
@@ -105,9 +105,17 @@ class ComMonitor(QtCore.QObject, serial.threaded.Packetizer):
             preffered_port = list_of_ports[0][0]
             for element in list_of_ports:
                 list_of_ports_available.append(element[0])
-                if 'USB' in element[1]:
-                    preffered_port = element[0]
-                    break
+                # ce ni dolocena serijska stevilka, potem glej samo zaq USB descripto
+                if serial == None:
+                    if 'USB' in element.description:
+                        preffered_port = element.device
+                        break
+                # sicer pa poglej ce se serijska ujema
+                else:
+                    if serial in element.hwid:
+                        preffered_port = element.device
+                        break
+
         return preffered_port
 
     def statistic_data(self):
@@ -126,7 +134,7 @@ class ComMonitor(QtCore.QObject, serial.threaded.Packetizer):
         self.ser.open()
 
         # resetiram stevce paketov
-        self.packets_sent = 0;
+        self.packets_sent = 0
         self.non_registered_packets_received = 0
         self.packets_received = 0
         self.crc_error_count = 0
@@ -145,10 +153,8 @@ class ComMonitor(QtCore.QObject, serial.threaded.Packetizer):
 
             # pripravim thread, ki bo periodicno povpraseval po
             self.packetizer = serial.threaded.ReaderThread(self.ser, ComMonitor)
-            #self.packetizer = serial.threaded.ReaderThread(self.ser, PacketHandler)
-            # self.packetizer.__enter__()
             self.packetizer.start()
-            a, b  = self.packetizer.connect()
+            a, b = self.packetizer.connect()
             b.set_object(self)
 
             # spraznem vrsto
@@ -198,12 +204,10 @@ class ComMonitor(QtCore.QObject, serial.threaded.Packetizer):
 
     def handle_packet(self, data):
         self._object_ref.bytes_received = self._object_ref.bytes_received + len(data) + 1
-        #print("prejetih bytov:" + str(self.bytes_received))
         try:
             decoded_packet = cobs.decode(data)
         except:
             self._object_ref.decode_error_count = self._object_ref.decode_error_count + 1
-            # print("narobe dekodiranih " + str(self.decode_error_count) + " paketov")
         else:
             # ce pa dobim korekten podatek, pogledam po seznamu handlerjev in klicem ustrezen callback
             length_of_packet = len(decoded_packet)
@@ -223,8 +227,6 @@ class ComMonitor(QtCore.QObject, serial.threaded.Packetizer):
             if crc_of_data == crc_received:
                 # uspesno prejet paket
                 self._object_ref.packets_received = self._object_ref.packets_received + 1
-                #print("prejetih paketov:" + str(self.packets_received))
-                # print('packets received: ' + str(self.packets_received))
                 # handlerji po novo
                 try:
                     index = self._object_ref.rx_code_list.index(code)
@@ -235,7 +237,6 @@ class ComMonitor(QtCore.QObject, serial.threaded.Packetizer):
                     else:
                         callback.rx_handler(packet_data)
                 except:
-                    # print("rxhandler" + str(code) + "not registered")
                     self._object_ref.non_registered_packets_received = self._object_ref.non_registered_packets_received + 1
                     pass
 
@@ -267,7 +268,7 @@ class ComMonitor(QtCore.QObject, serial.threaded.Packetizer):
         self.rx_handler_list.append(rx_worker)
         self.rx_code_list.append((struct.pack('<H', code)))
 
-    def get_data(self, caller):
+    def get_data(self):
         called_by = inspect.stack()[1][3]
         # poiscem kateri worker ima podatke
         index = self.rx_handler_name_list.index(called_by)
@@ -285,6 +286,7 @@ class ComMonitor(QtCore.QObject, serial.threaded.Packetizer):
     def get_crc(self):
         data = self.crc_data.get()
         return data
+
 
 class RxWorker(QtCore.QObject):
     # signal s katerim povezem RxWorker-ja in rx_function
@@ -307,9 +309,8 @@ class RxWorker(QtCore.QObject):
             pass
         else:
             self.rx_handler_queue.put(data)
-
         # v vsakem primeru pa signaliziram
-            self.rx_handler_signal.emit()
+        self.rx_handler_signal.emit()
 
     def get_data(self):
         return self.rx_handler_queue.get()

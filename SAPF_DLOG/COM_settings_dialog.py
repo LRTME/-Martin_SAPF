@@ -3,7 +3,7 @@ import COM_settings
 import os
 
 # Import the PyQt4 module we'll need
-from PyQt5 import QtWidgets
+from PyQt5 import QtWidgets, QtCore
 
 # selected baud rate
 baudrate = 2*50000
@@ -60,6 +60,10 @@ class ComDialog(QtWidgets.QDialog, COM_settings.Ui_Dialog):
 
         # registrisam spremebo baud_rate-a
         self.baud_select.activated.connect(self.baud_clicked)
+        
+        # ustvarim timer za periodicno povprasevanje
+        self.periodic_timer = QtCore.QTimer()
+        self.periodic_timer.timeout.connect(self.periodic_query)
 
     # osvezim seznam com portov
     def refresh_ports(self):
@@ -95,6 +99,11 @@ class ComDialog(QtWidgets.QDialog, COM_settings.Ui_Dialog):
             self.btn_connect.setText("Connect")
             # sporocim v GUI, da je port zaprt
             self.app.statusbar.showMessage("Com port je zaprt", 2000)
+            # omogocim nastavljanje porta
+            self.com_select.setDisabled(False)
+            self.baud_select.setDisabled(False)
+            # ustavim timer
+            self.periodic_timer.stop()
 
         # sicer ga pa odprem
         else:
@@ -104,6 +113,10 @@ class ComDialog(QtWidgets.QDialog, COM_settings.Ui_Dialog):
             if chosen_port != "":
                 self.app.commonitor.open_port(chosen_port, baudrate)
                 if self.app.commonitor.is_port_open() == True:
+                    # onemogocim spremebe porta in hitrosti
+                    self.com_select.setDisabled(True)
+                    self.baud_select.setDisabled(True)
+                    
                     # prevzamem nadzor
                     self.btn_connect.setText("Disconnect")
                     self.app.statusbar.showMessage("Com port je odprt", 2000)
@@ -111,11 +124,47 @@ class ComDialog(QtWidgets.QDialog, COM_settings.Ui_Dialog):
                     # zahtevam statusne podatke za data logger in generator signalov
                     self.app.commonitor.send_packet(0x092A, None)
                     self.app.commonitor.send_packet(0x0B1A, None)
+                    
+                    # pozenem timer thread
+                    self.periodic_timer.start(1000)
+                    
                 else:
                     self.app.commonitor.close_port()
                     self.btn_connect.setText("Connect")
+                    self.periodic_timer.stop()
 
     # ce pritisnem OK potem zaprem okno
     def ok_click(self):
         self.close()
+
+    # nov thread, ki periodično poslje zahtevo po svezih podatkih
+    def periodic_query(self):
+        self.app.commonitor.send_packet(0x092A, None)
+        self.app.commonitor.send_packet(0x0B1A, None)
+
+    # ob zagonu skušam odpreti port
+    def try_connect_at_startup(self, serial_number):
+        # pogledam kateri porti so sploh na voljo
+        list_portov = self.app.commonitor.get_list_of_ports()
+        # ce je kaksen port na voljo
+        if len(list_portov) != 0:
+            preffered_port = self.app.commonitor.get_prefered_port(serial=serial_number)
+            # in ce je naprava priklopljena
+            if preffered_port != None:
+                # in ce imam ini datoteko preberem iz nje
+                if os.path.exists(baudrate_file):
+                    file = open(baudrate_file, "r")
+                    br = file.read()
+                    file.close()
+                    baudrate = int(br)
+                    # in ce je trenutno port zaprt
+                    if self.app.commonitor.is_port_open() == False:
+                        self.app.commonitor.open_port(preffered_port, baudrate)
+                        if self.app.commonitor.is_port_open() == True:
+                            self.app.statusbar.showMessage("Com port je odprt", 2000)
+                            # zahtevam statusne podatke za data logger in generator signalov
+                            self.app.commonitor.send_packet(0x092A, None)
+                            self.app.commonitor.send_packet(0x0B1A, None)
+                            self.periodic_timer.start(1000)
+
 
