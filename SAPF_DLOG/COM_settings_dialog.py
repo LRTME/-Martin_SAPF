@@ -31,10 +31,15 @@ class ComDialog(QtWidgets.QDialog, COM_settings.Ui_Dialog):
 
         # populiram combbox za izbiro porta
         list_portov = self.app.commonitor.get_list_of_ports()
+        self.com_select.clear()
         self.com_select.addItems(list_portov)
         # ce je kaksen port na voljo
         if len(list_portov) != 0:
-            self.com_select.setCurrentIndex(list_portov.index(self.app.commonitor.get_prefered_port()))
+            # ce ni primernega potem izberi prvega
+            if self.app.commonitor.get_prefered_port() == None:
+                self.com_select.setCurrentIndex(0)
+            else:
+                self.com_select.setCurrentIndex(list_portov.index(self.app.commonitor.get_prefered_port(serial="TI1FX0GOB")))
         self.com_select.setEditable(False)
 
         # ce imam ini datoteko preberem iz nje
@@ -75,7 +80,10 @@ class ComDialog(QtWidgets.QDialog, COM_settings.Ui_Dialog):
         self.com_select.addItems(list_portov)
         # privzeto izberem najprimernejsi port
         if len(list_portov) != 0:
-            self.com_select.setCurrentIndex(list_portov.index(self.app.commonitor.get_prefered_port()))
+            if self.app.commonitor.get_prefered_port() == None:
+                self.com_select.setCurrentIndex(0)
+            else:
+                self.com_select.setCurrentIndex(list_portov.index(self.app.commonitor.get_prefered_port(serial="TI1FX0GOB")))
         self.com_select.setEditable(False)
 
     # ob izbiri baudrate-a
@@ -138,9 +146,13 @@ class ComDialog(QtWidgets.QDialog, COM_settings.Ui_Dialog):
         self.close()
 
     # nov thread, ki periodično poslje zahtevo po svezih podatkih
+    # ce je port odprt. Sicer ustavi sam sebe
     def periodic_query(self):
-        self.app.commonitor.send_packet(0x092A, None)
-        self.app.commonitor.send_packet(0x0B1A, None)
+        if self.app.commonitor.is_port_open():
+            self.app.commonitor.send_packet(0x092A, None)
+            self.app.commonitor.send_packet(0x0B1A, None)
+        else:
+            self.periodic_timer.stop()
 
     # ob zagonu skušam odpreti port
     def try_connect_at_startup(self, serial_number):
@@ -162,9 +174,37 @@ class ComDialog(QtWidgets.QDialog, COM_settings.Ui_Dialog):
                         self.app.commonitor.open_port(preffered_port, baudrate)
                         if self.app.commonitor.is_port_open() == True:
                             self.app.statusbar.showMessage("Com port je odprt", 2000)
+                            self.btn_connect.setText("Disconnect")
+                            # onemogocim spremebe porta in hitrosti
+                            self.com_select.setDisabled(True)
+                            self.baud_select.setDisabled(True)
                             # zahtevam statusne podatke za data logger in generator signalov
                             self.app.commonitor.send_packet(0x092A, None)
                             self.app.commonitor.send_packet(0x0B1A, None)
                             self.periodic_timer.start(1000)
 
+    def showEvent(self, show_event):
+        # ustrezno nastavim napis na gumbu
+        if self.app.commonitor.is_port_open() == True:
+            self.btn_connect.setText("Disconnect")
+            self.com_select.setDisabled(True)
+            self.baud_select.setDisabled(True)
+        else:
+            self.btn_connect.setText("Connect")
+            self.com_select.setDisabled(False)
+            self.baud_select.setDisabled(False)
+            self.periodic_timer.stop()
+
+        # populiram combbox za izbiro porta
+        list_portov = self.app.commonitor.get_list_of_ports()
+        self.com_select.clear()
+        self.com_select.addItems(list_portov)
+        # ce je kaksen port na voljo
+        if len(list_portov) != 0:
+            # ce ni primernega potem izberi prvega
+            if self.app.commonitor.get_prefered_port() == None:
+                self.com_select.setCurrentIndex(0)
+            else:
+                self.com_select.setCurrentIndex(list_portov.index(self.app.commonitor.get_prefered_port(serial="TI1FX0GOB")))
+        self.com_select.setEditable(False)
 

@@ -101,8 +101,7 @@ class ComMonitor(QtCore.QObject, serial.threaded.Packetizer):
         if len(list_of_ports) == 0:
             preffered_port = None
         else:
-            # ce ni drugega, bo tudi prvi po vrsti dovolj dober
-            preffered_port = list_of_ports[0][0]
+            preffered_port = None
             for element in list_of_ports:
                 list_of_ports_available.append(element[0])
                 # ce ni dolocena serijska stevilka, potem glej samo zaq USB descripto
@@ -176,8 +175,7 @@ class ComMonitor(QtCore.QObject, serial.threaded.Packetizer):
         # ugasnem rx thread
         self.packetizer.stop()
         # sele potem pa zaprem port
-        with self.com_lock:
-            self.ser.__del__()
+        self.ser.__del__()
         return self.ser.isOpen()
 
     def is_port_open(self):
@@ -198,8 +196,19 @@ class ComMonitor(QtCore.QObject, serial.threaded.Packetizer):
                 break
             # ce je kaj za poslat potem poslji
             if cobs_encoded is not None:
-                self.ser.write(cobs_encoded)
-                self.packets_sent = self.packets_sent + 1
+                try:
+                    self.ser.write(cobs_encoded)
+                    self.packets_sent = self.packets_sent + 1
+                except serial.SerialException:
+                    break
+                except serial.writeTimeoutError:
+                    break
+            pass
+
+    def connection_lost(self, exc):
+        # sele potem pa zaprem port-sploh ne morem zapreti porta
+        # iz rx thread-a
+        self._object_ref.ser.close()
         pass
 
     def handle_packet(self, data):

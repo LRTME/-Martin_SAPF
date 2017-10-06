@@ -20,6 +20,11 @@ import os.path
 # za slike
 import os
 
+# za asmo eno instanco applikacije
+from win32event import CreateMutex
+from win32api import CloseHandle, GetLastError
+from winerror import ERROR_ALREADY_EXISTS
+
 # GUI elementi
 import GUI_main_window
 import COM_settings_dialog
@@ -33,6 +38,7 @@ com_serial_number = "TI1FX0GOB"
 
 # kje je zapisan baudrate - ce je
 baudrate_file = "baudrate.ini"
+
 
 class ExampleApp(QtWidgets.QMainWindow, GUI_main_window.Ui_MainWindow):
 
@@ -120,9 +126,9 @@ class ExampleApp(QtWidgets.QMainWindow, GUI_main_window.Ui_MainWindow):
 
         # pripravim dialoga
         self.com_dialog = COM_settings_dialog.ComDialog(self)
-        self.com_stat_dialog = COM_statistics_dialog.ComStat(self)
-
         self.com_dialog.try_connect_at_startup(serial_number=com_serial_number)
+
+        self.com_stat_dialog = COM_statistics_dialog.ComStat(self)
 
         # se meni "com statistics"
         self.actionCom_statistics.triggered.connect(self.com_statistics_clicked)
@@ -367,51 +373,67 @@ class ExampleApp(QtWidgets.QMainWindow, GUI_main_window.Ui_MainWindow):
         # graf narisem samo ce sem v normal ali signle mode nacinu
         if self.ch1_chkbox.isChecked() == True:
             if len(self.ch1_latest) == len(time):
+                self.plot_ch1.setData(time, self.ch1_latest)
                 if self.plot_ch1 not in self.main_plot.listDataItems():
                     self.main_plot.addItem(self.plot_ch1)
-                self.plot_ch1.setData(time, self.ch1_latest)
+            else:
+                self.main_plot.removeItem(self.plot_ch1)
 
         if self.ch2_chkbox.isChecked() == True:
             if len(self.ch2_latest) == len(time):
+                self.plot_ch2.setData(time, self.ch2_latest)
                 if self.plot_ch2 not in self.main_plot.listDataItems():
                     self.main_plot.addItem(self.plot_ch2)
-                self.plot_ch2.setData(time, self.ch2_latest)
+            else:
+                self.main_plot.removeItem(self.plot_ch2)
 
         if self.ch3_chkbox.isChecked() == True:
             if len(self.ch3_latest) == len(time):
+                self.plot_ch3.setData(time, self.ch3_latest)
                 if self.plot_ch3 not in self.main_plot.listDataItems():
                     self.main_plot.addItem(self.plot_ch3)
-                self.plot_ch3.setData(time, self.ch3_latest)
+            else:
+                self.main_plot.removeItem(self.plot_ch3)
 
         if self.ch4_chkbox.isChecked() == True:
             if len(self.ch4_latest) == len(time):
+                self.plot_ch4.setData(time, self.ch4_latest)
                 if self.plot_ch4 not in self.main_plot.listDataItems():
                     self.main_plot.addItem(self.plot_ch4)
-                self.plot_ch4.setData(time, self.ch4_latest)
+            else:
+                self.main_plot.removeItem(self.plot_ch4)
 
         if self.ch5_chkbox.isChecked() == True:
             if len(self.ch5_latest) == len(time):
+                self.plot_ch5.setData(time, self.ch5_latest)
                 if self.plot_ch5 not in self.main_plot.listDataItems():
                     self.main_plot.addItem(self.plot_ch5)
-                self.plot_ch5.setData(time, self.ch5_latest)
+            else:
+                self.main_plot.removeItem(self.plot_ch5)
 
         if self.ch6_chkbox.isChecked() == True:
             if len(self.ch6_latest) == len(time):
+                self.plot_ch6.setData(time, self.ch6_latest)
                 if self.plot_ch6 not in self.main_plot.listDataItems():
                     self.main_plot.addItem(self.plot_ch6)
-                self.plot_ch6.setData(time, self.ch6_latest)
+            else:
+                self.main_plot.removeItem(self.plot_ch6)
 
         if self.ch7_chkbox.isChecked() == True:
             if len(self.ch7_latest) == len(time):
+                self.plot_ch7.setData(time, self.ch7_latest)
                 if self.plot_ch7 not in self.main_plot.listDataItems():
                     self.main_plot.addItem(self.plot_ch7)
-                self.plot_ch7.setData(time, self.ch7_latest)
+            else:
+                self.main_plot.removeItem(self.plot_ch7)
 
         if self.ch8_chkbox.isChecked() == True:
             if len(self.ch8_latest) == len(time):
+                self.plot_ch8.setData(time, self.ch8_latest)
                 if self.plot_ch8 not in self.main_plot.listDataItems():
                     self.main_plot.addItem(self.plot_ch8)
-                self.plot_ch8.setData(time, self.ch8_latest)
+            else:
+                self.main_plot.removeItem(self.plot_ch8)
 
     def on_dlog_params_received(self):
         # potegnem ven podatke
@@ -440,8 +462,6 @@ class ExampleApp(QtWidgets.QMainWindow, GUI_main_window.Ui_MainWindow):
             self.ch1_chkbox.setChecked(True)
         else:
             self.ch1_chkbox.setChecked(False)
-            self.plot_ch1.setData(np.array([0.0]), np.array([0.0]))
-            self.main_plot.removeItem(self.plot_ch1)
         self.ch1_chkbox.blockSignals(False)
 
         self.ch2_chkbox.blockSignals(True)
@@ -449,8 +469,6 @@ class ExampleApp(QtWidgets.QMainWindow, GUI_main_window.Ui_MainWindow):
             self.ch2_chkbox.setChecked(True)
         else:
             self.ch2_chkbox.setChecked(False)
-            self.plot_ch2.setData(np.array([0.0]), np.array([0.0]))
-            self.main_plot.removeItem(self.plot_ch2)
         self.ch2_chkbox.blockSignals(False)
 
         self.ch3_chkbox.blockSignals(True)
@@ -458,8 +476,6 @@ class ExampleApp(QtWidgets.QMainWindow, GUI_main_window.Ui_MainWindow):
             self.ch3_chkbox.setChecked(True)
         else:
             self.ch3_chkbox.setChecked(False)
-            self.plot_ch3.setData(np.array([0.0]), np.array([0.0]))
-            self.main_plot.removeItem(self.plot_ch3)
         self.ch3_chkbox.blockSignals(False)
 
         self.ch4_chkbox.blockSignals(True)
@@ -467,8 +483,6 @@ class ExampleApp(QtWidgets.QMainWindow, GUI_main_window.Ui_MainWindow):
             self.ch4_chkbox.setChecked(True)
         else:
             self.ch4_chkbox.setChecked(False)
-            self.plot_ch4.setData(np.array([0.0]), np.array([0.0]))
-            self.main_plot.removeItem(self.plot_ch4)
         self.ch4_chkbox.blockSignals(False)
 
         self.ch5_chkbox.blockSignals(True)
@@ -476,8 +490,6 @@ class ExampleApp(QtWidgets.QMainWindow, GUI_main_window.Ui_MainWindow):
             self.ch5_chkbox.setChecked(True)
         else:
             self.ch5_chkbox.setChecked(False)
-            self.plot_ch5.setData(np.array([0.0]), np.array([0.0]))
-            self.main_plot.removeItem(self.plot_ch5)
         self.ch5_chkbox.blockSignals(False)
 
         self.ch6_chkbox.blockSignals(True)
@@ -485,8 +497,6 @@ class ExampleApp(QtWidgets.QMainWindow, GUI_main_window.Ui_MainWindow):
             self.ch6_chkbox.setChecked(True)
         else:
             self.ch6_chkbox.setChecked(False)
-            self.plot_ch6.setData(np.array([0.0]), np.array([0.0]))
-            self.main_plot.removeItem(self.plot_ch6)
         self.ch6_chkbox.blockSignals(False)
 
         self.ch7_chkbox.blockSignals(True)
@@ -494,8 +504,6 @@ class ExampleApp(QtWidgets.QMainWindow, GUI_main_window.Ui_MainWindow):
             self.ch7_chkbox.setChecked(True)
         else:
             self.ch7_chkbox.setChecked(False)
-            self.plot_ch7.setData(np.array([0.0]), np.array([0.0]))
-            self.main_plot.removeItem(self.plot_ch7)
         self.ch7_chkbox.blockSignals(False)
 
         self.ch8_chkbox.blockSignals(True)
@@ -503,8 +511,6 @@ class ExampleApp(QtWidgets.QMainWindow, GUI_main_window.Ui_MainWindow):
             self.ch8_chkbox.setChecked(True)
         else:
             self.ch8_chkbox.setChecked(False)
-            self.plot_ch8.setData(np.array([0.0]), np.array([0.0]))
-            self.main_plot.removeItem(self.plot_ch8)
         self.ch8_chkbox.blockSignals(False)
 
     def on_ref_params_received(self):
@@ -519,7 +525,7 @@ class ExampleApp(QtWidgets.QMainWindow, GUI_main_window.Ui_MainWindow):
         self.sld_amplituda.blockSignals(True)
         self.sld_amplituda.setValue(int(amp - 230))
         self.sld_amplituda.blockSignals(False)
-        self.lbl_amplituda.setText(str(self.sld_amplituda.value()))
+        self.lbl_amplituda.setText(str(amp))
 
         self.ctrl_type.blockSignals(True)
         self.ctrl_type.setCurrentIndex(ctrl_type)
@@ -574,81 +580,57 @@ class ExampleApp(QtWidgets.QMainWindow, GUI_main_window.Ui_MainWindow):
     def ch1_state_changed(self):
         if self.ch1_chkbox.isChecked() == True:
             self.commonitor.send_packet(0x0911, struct.pack('<h', 0x0001))
-            self.main_plot.addItem(self.plot_ch1)
         else:
             self.commonitor.send_packet(0x0911, struct.pack('<h', 0x0000))
-            self.plot_ch1.setData(np.array([0.0]), np.array([0.0]))
-            self.main_plot.removeItem(self.plot_ch1)
 
     # ob pritisku na ch 2
     def ch2_state_changed(self):
         if self.ch2_chkbox.isChecked() == True:
             self.commonitor.send_packet(0x0912, struct.pack('<h', 0x0001))
-            self.main_plot.addItem(self.plot_ch2)
         else:
             self.commonitor.send_packet(0x0912, struct.pack('<h', 0x0000))
-            self.plot_ch2.setData(np.array([0.0]), np.array([0.0]))
-            self.main_plot.removeItem(self.plot_ch2)
 
     # ob pritisku na ch 3
     def ch3_state_changed(self):
         if self.ch3_chkbox.isChecked() == True:
             self.commonitor.send_packet(0x0913, struct.pack('<h', 0x0001))
-            self.main_plot.addItem(self.plot_ch3)
         else:
             self.commonitor.send_packet(0x0913, struct.pack('<h', 0x0000))
-            self.plot_ch3.setData(np.array([0.0]), np.array([0.0]))
-            self.main_plot.removeItem(self.plot_ch3)
 
     # ob pritisku na ch 4
     def ch4_state_changed(self):
         if self.ch4_chkbox.isChecked() == True:
             self.commonitor.send_packet(0x0914, struct.pack('<h', 0x0001))
-            self.main_plot.addItem(self.plot_ch4)
         else:
             self.commonitor.send_packet(0x0914, struct.pack('<h', 0x0000))
-            self.plot_ch4.setData(np.array([0.0]), np.array([0.0]))
-            self.main_plot.removeItem(self.plot_ch4)
 
     # ob pritisku na ch 5
     def ch5_state_changed(self):
         if self.ch5_chkbox.isChecked() == True:
             self.commonitor.send_packet(0x0915, struct.pack('<h', 0x0001))
-            self.main_plot.addItem(self.plot_ch5)
         else:
             self.commonitor.send_packet(0x0915, struct.pack('<h', 0x0000))
-            self.plot_ch5.setData(np.array([0.0]), np.array([0.0]))
-            self.main_plot.removeItem(self.plot_ch5)
 
     # ob pritisku na ch 6
     def ch6_state_changed(self):
         if self.ch6_chkbox.isChecked() == True:
             self.commonitor.send_packet(0x0916, struct.pack('<h', 0x0001))
-            self.main_plot.addItem(self.plot_ch6)
         else:
             self.commonitor.send_packet(0x0916, struct.pack('<h', 0x0000))
-            self.plot_ch6.setData(np.array([0.0]), np.array([0.0]))
-            self.main_plot.removeItem(self.plot_ch6)
 
     # ob pritisku na ch 7
     def ch7_state_changed(self):
         if self.ch7_chkbox.isChecked() == True:
             self.commonitor.send_packet(0x0917, struct.pack('<h', 0x0001))
-            self.main_plot.addItem(self.plot_ch7)
         else:
             self.commonitor.send_packet(0x0917, struct.pack('<h', 0x0000))
-            self.plot_ch7.setData(np.array([0.0]), np.array([0.0]))
-            self.main_plot.removeItem(self.plot_ch7)
 
     # ob pritisku na ch 8
     def ch8_state_changed(self):
         if self.ch8_chkbox.isChecked() == True:
             self.commonitor.send_packet(0x0918, struct.pack('<h', 0x0001))
-            self.main_plot.addItem(self.plot_ch8)
         else:
             self.commonitor.send_packet(0x0918, struct.pack('<h', 0x0000))
-            self.plot_ch8.setData(np.array([0.0]), np.array([0.0]))
-            self.main_plot.removeItem(self.plot_ch8)
 
 
 # pomozne funkcije
@@ -713,8 +695,31 @@ def resource_path(relative_path):
     return os.path.join(base_path, relative_path)
 
 
+class SingleInstance:
+    """ Limits application to single instance """
+
+    def __init__(self):
+        self.mutexname = "testmutex_{D0E858DF-985E-4907-B7FB-8D732C3FC3B9}"
+        self.mutex = CreateMutex(None, False, self.mutexname)
+        self.lasterror = GetLastError()
+
+    def aleradyrunning(self):
+        return (self.lasterror == ERROR_ALREADY_EXISTS)
+
+    def __del__(self):
+        if self.mutex:
+            CloseHandle(self.mutex)
+
+
 # glavna funkicja
 def main():
+    # do this at beginnig of your application
+    myapp = SingleInstance()
+    # check is another instance of same program running
+    if myapp.aleradyrunning():
+        # tukaj bi lahko pokazal vsaj kakĹˇno okno
+        sys.exit(0)
+
     # A new instance of QApplication
     app = QtWidgets.QApplication(sys.argv)
     # We set the form to be our ExampleApp (design)
