@@ -156,6 +156,15 @@ class ExampleApp(QtWidgets.QMainWindow, GUI_main_window.Ui_MainWindow):
 
         self.amp_control.stateChanged.connect(self.amp_control_changed)
 
+        # za filtriranje
+        self.u_out_thd_f = 0.0
+        self.u_out_rms_f = 0.0
+        self.u_in_thd_f = 0.0
+        self.u_in_rms_f = 0.0
+        self.i_out_thd_f = 0.0
+        self.i_out_rms_f = 0.0
+        self.alpha = 0.1
+
 
     # ko zaprem aplikacijo za ziher zaprem comport
     def closeEvent(self, event):
@@ -180,9 +189,13 @@ class ExampleApp(QtWidgets.QMainWindow, GUI_main_window.Ui_MainWindow):
         # naracunam THD in RMS
         thd = self.get_thd(f_nparray) * 100
         rms = self.get_rms(f_nparray)
+        # filtriram THD in RMS
+        self.u_in_thd_f = self.u_in_thd_f * (1 - self.alpha) + thd * self.alpha
+        self.u_in_rms_f = self.u_in_rms_f * (1 - self.alpha) + rms * self.alpha
+
         # popravim text
-        self.u_in_rms.setText(str(eng_string(rms, format='%.2f')))
-        self.u_in_thd.setText("{:.2f}".format(thd))
+        self.u_in_rms.setText(str(eng_string(self.u_in_rms_f, format='%.1f')))
+        self.u_in_thd.setText("{:.2f}".format(self.u_in_thd_f))
 
         # in klicem izris grafa ce je treba izrisati samo ch1
         if (self.ch1_chkbox.isChecked() and
@@ -207,9 +220,12 @@ class ExampleApp(QtWidgets.QMainWindow, GUI_main_window.Ui_MainWindow):
         # naracunam THD in RMS
         thd = self.get_thd(f_nparray) * 100
         rms = self.get_rms(f_nparray)
+        # filtriram THD in RMS
+        self.u_out_thd_f = self.u_out_thd_f * (1 - self.alpha) + thd * self.alpha
+        self.u_out_rms_f = self.u_out_rms_f * (1 - self.alpha) + rms * self.alpha
         # popravim text
-        self.u_out_rms.setText(str(eng_string(rms, format='%.2f')))
-        self.u_out_thd.setText("{:.2f}".format(thd))
+        self.u_out_rms.setText(str(eng_string(self.u_out_rms_f, format='%.1f')))
+        self.u_out_thd.setText("{:.2f}".format(self.u_out_thd_f))
 
         # in klicem izris grafa ce je treba izrisati samo ch2
         if (self.ch2_chkbox.isChecked() and
@@ -248,9 +264,12 @@ class ExampleApp(QtWidgets.QMainWindow, GUI_main_window.Ui_MainWindow):
         # naracunam THD in RMS
         thd = self.get_thd(f_nparray) * 100
         rms = self.get_rms(f_nparray)
+        # filtriram THD in RMS
+        self.i_out_thd_f = self.i_out_thd_f * (1 - self.alpha) + thd * self.alpha
+        self.i_out_rms_f = self.i_out_rms_f * (1 - self.alpha) + rms * self.alpha
         # popravim text
-        self.i_out_rms.setText(str(eng_string(rms, format='%.2f')))
-        self.i_out_thd.setText("{:.2f}".format(thd))
+        self.i_out_rms.setText(str(eng_string(self.i_out_rms_f, format='%.1f')))
+        self.i_out_thd.setText("{:.2f}".format(self.i_out_thd_f))
 
         # spravim zadnje podatke
         self.ch4_latest = f_nparray
@@ -357,6 +376,8 @@ class ExampleApp(QtWidgets.QMainWindow, GUI_main_window.Ui_MainWindow):
         spekter_sum = np.sum(spekter_square)
         spekter_sum_squared = np.sqrt(spekter_sum)
         thd = spekter_sum_squared/spekter[index]
+        if math.isinf(thd) or math.isnan(thd):
+            thd = 0.0
         return thd
 
     def draw_plot(self):
@@ -376,64 +397,64 @@ class ExampleApp(QtWidgets.QMainWindow, GUI_main_window.Ui_MainWindow):
                 self.plot_ch1.setData(time, self.ch1_latest)
                 if self.plot_ch1 not in self.main_plot.listDataItems():
                     self.main_plot.addItem(self.plot_ch1)
-            else:
-                self.main_plot.removeItem(self.plot_ch1)
+        else:
+            self.main_plot.removeItem(self.plot_ch1)
 
         if self.ch2_chkbox.isChecked() == True:
             if len(self.ch2_latest) == len(time):
                 self.plot_ch2.setData(time, self.ch2_latest)
                 if self.plot_ch2 not in self.main_plot.listDataItems():
                     self.main_plot.addItem(self.plot_ch2)
-            else:
-                self.main_plot.removeItem(self.plot_ch2)
+        else:
+            self.main_plot.removeItem(self.plot_ch2)
 
         if self.ch3_chkbox.isChecked() == True:
             if len(self.ch3_latest) == len(time):
                 self.plot_ch3.setData(time, self.ch3_latest)
                 if self.plot_ch3 not in self.main_plot.listDataItems():
                     self.main_plot.addItem(self.plot_ch3)
-            else:
-                self.main_plot.removeItem(self.plot_ch3)
+        else:
+            self.main_plot.removeItem(self.plot_ch3)
 
         if self.ch4_chkbox.isChecked() == True:
             if len(self.ch4_latest) == len(time):
                 self.plot_ch4.setData(time, self.ch4_latest)
                 if self.plot_ch4 not in self.main_plot.listDataItems():
                     self.main_plot.addItem(self.plot_ch4)
-            else:
-                self.main_plot.removeItem(self.plot_ch4)
+        else:
+            self.main_plot.removeItem(self.plot_ch4)
 
         if self.ch5_chkbox.isChecked() == True:
             if len(self.ch5_latest) == len(time):
                 self.plot_ch5.setData(time, self.ch5_latest)
                 if self.plot_ch5 not in self.main_plot.listDataItems():
                     self.main_plot.addItem(self.plot_ch5)
-            else:
-                self.main_plot.removeItem(self.plot_ch5)
+        else:
+            self.main_plot.removeItem(self.plot_ch5)
 
         if self.ch6_chkbox.isChecked() == True:
             if len(self.ch6_latest) == len(time):
                 self.plot_ch6.setData(time, self.ch6_latest)
                 if self.plot_ch6 not in self.main_plot.listDataItems():
                     self.main_plot.addItem(self.plot_ch6)
-            else:
-                self.main_plot.removeItem(self.plot_ch6)
+        else:
+            self.main_plot.removeItem(self.plot_ch6)
 
         if self.ch7_chkbox.isChecked() == True:
             if len(self.ch7_latest) == len(time):
                 self.plot_ch7.setData(time, self.ch7_latest)
                 if self.plot_ch7 not in self.main_plot.listDataItems():
                     self.main_plot.addItem(self.plot_ch7)
-            else:
-                self.main_plot.removeItem(self.plot_ch7)
+        else:
+            self.main_plot.removeItem(self.plot_ch7)
 
         if self.ch8_chkbox.isChecked() == True:
             if len(self.ch8_latest) == len(time):
                 self.plot_ch8.setData(time, self.ch8_latest)
                 if self.plot_ch8 not in self.main_plot.listDataItems():
                     self.main_plot.addItem(self.plot_ch8)
-            else:
-                self.main_plot.removeItem(self.plot_ch8)
+        else:
+            self.main_plot.removeItem(self.plot_ch8)
 
     def on_dlog_params_received(self):
         # potegnem ven podatke
