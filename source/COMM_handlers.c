@@ -7,22 +7,27 @@
 
 #include    "COMM_handlers.h"
 
-bool send_ch1 = FALSE;
+// status which channel to send
+bool send_ch1 = TRUE;
 bool send_ch2 = TRUE;
-bool send_ch3 = TRUE;
-bool send_ch4 = TRUE;
+bool send_ch3 = FALSE;
+bool send_ch4 = FALSE;
 bool send_ch5 = FALSE;
 bool send_ch6 = FALSE;
 bool send_ch7 = FALSE;
 bool send_ch8 = FALSE;
-int points_to_send = 400;
 
+// number of point to send
+int points_to_send = SAMPLE_POINTS;
+
+// internal state in order ot restard DLOG only when all data was sent. This prevents data corruption
 bool dlog_buffers_sent = TRUE;
 
 // buffer-ja za COBS kodiranje in dekodiranje
 // pototipi funkcij
 inline float get_float_from_int(int *ptr);
 void int_from_float(float number, int *ptr_to_int);
+
 
 // rx handlerji
 void UART_ch_1(int *data);
@@ -36,17 +41,13 @@ void UART_ch_8(int *data);
 void dlog_sent(void);
 
 void UART_dlog_prescalar(int *data);
-void UART_dlog_points(int *data);
 void UART_dlog_send_parameters(int *data);
-void UART_dlog_trigger(int *data);
 
-void UART_ref_gen_amp(int *data);
-void UART_ref_gen_offset(int *data);
-void UART_ref_gen_freq(int *data);
-void UART_ref_gen_duty(int *data);
-void UART_ref_gen_slew(int *data);
-void UART_ref_gen_type(int *data);
-void UART_ref_send_parameters(int *data);
+void UART_send_parameters(int *data);
+void UART_u_out_amp(int *data);
+void UART_u_out_mode(int *data);
+void UART_ctrl_type(int *data);
+void UART_dc_ctrl_type(int *data);
 
 // tx handlerji
 inline void send_dlog_ch1(void);
@@ -72,19 +73,32 @@ inline void send_dlog_ch7(void);
 inline void send_dlog_ch8(void);
 #endif
 void send_dlog_params(void);
-void send_ref_params(void);
+void send_parameters(void);
 
-extern float napetost;
+extern float u_out_rms_ref ;
+extern bool amp_control;
+#include    "PER_int.h"
+extern enum OUT_STATE out_control;
 
+extern bool pulse_1000ms;
+extern bool pulse_500ms;
+extern bool pulse_100ms;
+extern bool pulse_50ms;
+extern bool pulse_10ms;
+
+/**************************************************************
+* Function which initializes complete communication stack
+* returns:
+**************************************************************/
 void COMM_initialization(void)
 {
-    // inicializiram serijko vodilo
+    // initialize SCI port
     SCI_init(COMM_BAUDRATE);
 
-    // inicializiram LRTME stack
+    // initialize LRTME protocol stack
     LRTME_init();
 
-    // registriram funkcijo
+    // register all recive callback functions
     LRTME_receive_register(0x0911, &UART_ch_1);
     LRTME_receive_register(0x0912, &UART_ch_2);
     LRTME_receive_register(0x0913, &UART_ch_3);
@@ -95,35 +109,39 @@ void COMM_initialization(void)
     LRTME_receive_register(0x0918, &UART_ch_8);
 
     LRTME_receive_register(0x0920, &UART_dlog_prescalar);
-    LRTME_receive_register(0x0921, &UART_dlog_points);
-    LRTME_receive_register(0x0922, &UART_dlog_trigger);
     LRTME_receive_register(0x092A, &UART_dlog_send_parameters);
 
-    LRTME_receive_register(0x0B10, &UART_ref_gen_amp);
-    LRTME_receive_register(0x0B11, &UART_ref_gen_offset);
-    LRTME_receive_register(0x0B12, &UART_ref_gen_freq);
-    LRTME_receive_register(0x0B13, &UART_ref_gen_duty);
-    LRTME_receive_register(0x0B14, &UART_ref_gen_slew);
-    LRTME_receive_register(0x0B15, &UART_ref_gen_type);
+    LRTME_receive_register(0x0B10, &UART_u_out_amp);
+    LRTME_receive_register(0x0B11, &UART_u_out_mode);
+    LRTME_receive_register(0x0B12, &UART_ctrl_type);
 
-    LRTME_receive_register(0x0B1A, &UART_ref_send_parameters);
+    LRTME_receive_register(0x0B13, &UART_dc_ctrl_type);
 
-    // pred zagonom pošljem nastavitve, èe GUI sluèajno že teèe
-    send_dlog_params();
-    send_ref_params();
+    LRTME_receive_register(0x0B1A, &UART_send_parameters);
+
 }
 
+/**************************************************************
+* Function which periodicaly sends required packets (DLOG, ...)
+* and checks for new packets
+* returns:
+**************************************************************/
 #pragma CODE_SECTION(COMM_runtime, "ramfuncs");
 void COMM_runtime(void)
 {
+    // local variables
     int packets_in_waiting;
 
-    // v kolikor ni preveè podatkov za pošiljanje
+    // check how many packets wait for transmision
     packets_in_waiting = LRTME_tx_queue_poll();
 
+    // send requirted DLOG chanels only when sampling has stoped and
+    // transmission queue is realtively empty, and not in quiet mode
+    // and I am sending
     if (   (dlog.mode == Stop)
         && (dlog_buffers_sent == TRUE)
-        && (packets_in_waiting < 2))
+        && (packets_in_waiting < 3)
+        && (LRTME_quiet() == FALSE))
     {
         dlog_buffers_sent = FALSE;
         if (send_ch1 == TRUE)
@@ -172,23 +190,32 @@ void COMM_runtime(void)
             send_dlog_ch8();
         }
         #endif
-        // da pripravim na posiljanje, ce so vsi kanali izklopljeni in se potem ponovno vklopijo
+        // if no channels are required to send, acknowledge this and release DLOG to continue sampling
         if ( (send_ch1 == FALSE) && (send_ch2 == FALSE) && (send_ch3 == FALSE) && (send_ch4 == FALSE) &&
              (send_ch5 == FALSE) && (send_ch6 == FALSE) && (send_ch7 == FALSE) && (send_ch8 == FALSE))
         {
             dlog_sent();
         }
+        // if in quiet mode, ready for next time
+        if (LRTME_quiet() == TRUE)
+        {
+            dlog_sent();
+        }
     }
 
-    // klièem handler za komunikacijo
+    // call LRTME communication stack to handle transmmission and reception
     LRTME_stack();
 }
 
+/**************************************************************
+* Function which sends dlog setup
+* returns:
+**************************************************************/
 void send_dlog_params(void)
 {
     static int status[11];
 
-    // status sestavim skupaj iz
+    // consturct the status string
     status[0] = send_ch1;
     status[1] = send_ch2;
     status[2] = send_ch3;
@@ -210,16 +237,14 @@ void send_dlog_params(void)
     LRTME_send(0x090A, status, 2 * sizeof(status), NULL);
 }
 
-void send_ref_params(void)
+void send_parameters(void)
 {
     static int status[11];
 
-    int_from_float(ref_gen.amp, &status[0]);
-    int_from_float(ref_gen.offset, &status[2]);
-    int_from_float(ref_gen.freq, &status[4]);
-    int_from_float(ref_gen.duty, &status[6]);
-    int_from_float(ref_gen.slew, &status[8]);
-    status[10] = ref_gen.type, &status[0];
+    int_from_float(u_out_rms_ref, &status[0]);
+    status[2] = amp_control;
+    status[3] = out_control;
+    status[4] = dc_control;
 
     LRTME_send(0x0B0A, status, 2 * sizeof(status), NULL);
 }
@@ -537,112 +562,78 @@ void UART_dlog_send_parameters(int *data)
 // v tej funkciji ne uporabim podatkov, ker juh tudi COM handler ne posreduje
 #pragma diag_push
 #pragma diag_suppress 880
-void UART_ref_send_parameters(int *data)
+void UART_send_parameters(int *data)
 {
     // PC je zahteval status
-    send_ref_params();
+    send_parameters();
 }
 #pragma diag_pop
 
 
-// spremenim trigger
-void UART_dlog_trigger(int *data)
-{
-    int podatki = *data;
-
-    if (podatki == 0)
-    {
-        trigger = Ref_cnt;
-        dlog.trig = &ref_gen.kot;
-    }
-    else
-    {
-        trigger = Napetost;
-        dlog.trig = &napetost;
-    }
-    send_dlog_params();
-}
-
-void UART_ref_gen_amp(int *data)
+void UART_u_out_amp(int *data)
 {
     float   temp;
     temp = get_float_from_int(data);
 
     // okej sedaj imam v "temp" vrednost amplitude
-    if (temp >= 0)
+    if ((temp >= 220.0) && (temp <= 240.0))
     {
-        ref_gen.amp = temp;
+        u_out_rms_ref = temp;
     }
 }
 
-void UART_ref_gen_offset(int *data)
-{
-    float   temp;
-    temp = get_float_from_int(data);
-
-    // okej sedaj imam v "temp" vrednost offseta
-    ref_gen.offset = temp;
-}
-
-void UART_ref_gen_freq(int *data)
-{
-    float   temp;
-    temp = get_float_from_int(data);
-    // okej sedaj imam v "temp" vrednost frekvence
-    if (temp >= 0)
-    {
-        ref_gen.freq = temp;
-    }
-    send_ref_params();
-}
-
-void UART_ref_gen_duty(int *data)
-{
-    float   temp;
-    temp = get_float_from_int(data);
-    // okej sedaj imam v "temp" vrednost vklopnega razmerja
-    // ki mora biti znotraj meja
-    if ((temp >= 0) && (temp <= 1.0))
-    {
-        ref_gen.duty = temp;
-    }
-}
-
-void UART_ref_gen_slew(int *data)
-{
-    float   temp;
-    temp = get_float_from_int(data);
-    // okej sedaj imam v "temp" vrednost naklona
-    // ki mora biti znotraj meja
-    if (temp >= 0)
-    {
-        ref_gen.slew = temp;
-    }
-    send_ref_params();
-}
-
-void UART_ref_gen_type(int *data)
+void UART_u_out_mode(int *data)
 {
     int podatki = *data;
 
     if (podatki == 0)
     {
-        ref_gen.type = REF_Konst;
+        amp_control = FALSE;
     }
     if (podatki == 1)
     {
-        ref_gen.type = REF_Step;
+        amp_control = TRUE;
+    }
+    send_parameters();
+}
+
+void UART_ctrl_type(int *data)
+{
+    int podatki = *data;
+
+    if (podatki == 0)
+    {
+        out_control = PI_ONLY;
+    }
+    if (podatki == 1)
+    {
+        out_control = PI_REP;
     }
     if (podatki == 2)
     {
-        ref_gen.type = REF_Slew;
+        out_control = REP;
     }
     if (podatki == 3)
     {
-        ref_gen.type = REF_Sine;
+        out_control = RES;
     }
-    send_ref_params();
+    send_parameters();
 }
+
+void UART_dc_ctrl_type(int *data)
+{
+    int podatki = *data;
+
+    if (podatki == 0)
+    {
+        dc_control = Voltage;
+    }
+    if (podatki == 1)
+    {
+        dc_control = Current;
+    }
+}
+
 
 #pragma diag_push
 #pragma diag_suppress 179

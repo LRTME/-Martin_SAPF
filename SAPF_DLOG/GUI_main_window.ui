@@ -30,14 +30,37 @@
     </size>
    </property>
    <layout class="QGridLayout" name="gridLayout">
-    <item row="7" column="1" alignment="Qt::AlignHCenter">
-     <widget class="QLabel" name="lbl_offset">
+    <item row="2" column="0">
+     <widget class="QLabel" name="u_in_rms">
       <property name="text">
        <string>0.0</string>
       </property>
      </widget>
     </item>
-    <item row="0" column="2" rowspan="14">
+    <item row="0" column="0" colspan="2">
+     <widget class="QLabel" name="label_6">
+      <property name="minimumSize">
+       <size>
+        <width>160</width>
+        <height>0</height>
+       </size>
+      </property>
+      <property name="text">
+       <string>U_in</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignCenter</set>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="1" alignment="Qt::AlignLeft">
+     <widget class="QLabel" name="u_in_thd">
+      <property name="text">
+       <string>0.0</string>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="2" rowspan="22">
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
        <number>0</number>
@@ -59,34 +82,31 @@
         <property name="bottomMargin">
          <number>11</number>
         </property>
-        <item row="0" column="2" rowspan="20">
-         <widget class="PlotWidget" name="PlotWidget" native="true"/>
-        </item>
         <item row="0" column="0">
          <widget class="QCheckBox" name="ch1_chkbox">
           <property name="text">
-           <string>Ch1</string>
+           <string>U_in</string>
           </property>
          </widget>
         </item>
         <item row="1" column="0">
          <widget class="QCheckBox" name="ch2_chkbox">
           <property name="text">
-           <string>Ch2</string>
+           <string>U_out</string>
           </property>
          </widget>
         </item>
         <item row="2" column="0">
          <widget class="QCheckBox" name="ch3_chkbox">
           <property name="text">
-           <string>Ch3</string>
+           <string>Err</string>
           </property>
          </widget>
         </item>
         <item row="3" column="0">
          <widget class="QCheckBox" name="ch4_chkbox">
           <property name="text">
-           <string>Ch4</string>
+           <string>I_out</string>
           </property>
          </widget>
         </item>
@@ -150,104 +170,7 @@
           </property>
          </widget>
         </item>
-        <item row="10" column="0">
-         <widget class="QLabel" name="points_label">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="text">
-           <string>Points</string>
-          </property>
-         </widget>
-        </item>
-        <item row="11" column="0">
-         <widget class="SpinBox" name="points_spin">
-          <property name="maximumSize">
-           <size>
-            <width>78</width>
-            <height>22</height>
-           </size>
-          </property>
-          <property name="minimum">
-           <number>100</number>
-          </property>
-          <property name="maximum">
-           <number>1000</number>
-          </property>
-          <property name="singleStep">
-           <number>10</number>
-          </property>
-          <property name="value">
-           <number>200</number>
-          </property>
-         </widget>
-        </item>
-        <item row="12" column="0">
-         <widget class="QLabel" name="mode_label">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="text">
-           <string>Trigger</string>
-          </property>
-         </widget>
-        </item>
-        <item row="13" column="0">
-         <widget class="QComboBox" name="trigger">
-          <property name="currentIndex">
-           <number>0</number>
-          </property>
-          <item>
-           <property name="text">
-            <string>Ref_cnt</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Kot</string>
-           </property>
-          </item>
-         </widget>
-        </item>
-        <item row="14" column="0">
-         <widget class="QLabel" name="label_3">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="text">
-           <string>Mode</string>
-          </property>
-         </widget>
-        </item>
-        <item row="15" column="0">
-         <widget class="QComboBox" name="trigger_mode">
-          <item>
-           <property name="text">
-            <string>Normal</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Single</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Stop</string>
-           </property>
-          </item>
-         </widget>
-        </item>
-        <item row="16" column="0" rowspan="4">
+        <item row="10" column="0" rowspan="4">
          <spacer name="verticalSpacer">
           <property name="orientation">
            <enum>Qt::Vertical</enum>
@@ -260,138 +183,34 @@
           </property>
          </spacer>
         </item>
+        <item row="0" column="2" rowspan="14">
+         <widget class="PlotWidget" name="PlotWidget" native="true"/>
+        </item>
        </layout>
       </widget>
       <widget class="QWidget" name="tab_pc">
        <attribute name="title">
-        <string>Podatki</string>
+        <string>Parametri</string>
        </attribute>
        <layout class="QGridLayout" name="gridLayout_4"/>
       </widget>
      </widget>
     </item>
-    <item row="0" column="0">
-     <widget class="QLabel" name="label">
-      <property name="text">
-       <string>Oblika</string>
-      </property>
-     </widget>
-    </item>
-    <item row="10" column="1" alignment="Qt::AlignHCenter">
-     <widget class="QLabel" name="lbl_duty">
-      <property name="text">
-       <string>0.5</string>
-      </property>
-     </widget>
-    </item>
-    <item row="11" column="1" alignment="Qt::AlignHCenter">
-     <widget class="QSlider" name="sld_duty">
-      <property name="minimumSize">
-       <size>
-        <width>0</width>
-        <height>100</height>
-       </size>
-      </property>
-      <property name="maximumSize">
-       <size>
-        <width>16777215</width>
-        <height>100</height>
-       </size>
-      </property>
-      <property name="maximum">
-       <number>100</number>
-      </property>
-      <property name="orientation">
-       <enum>Qt::Vertical</enum>
-      </property>
-     </widget>
-    </item>
-    <item row="9" column="1" alignment="Qt::AlignHCenter">
+    <item row="5" column="1" alignment="Qt::AlignLeft">
      <widget class="QLabel" name="label_9">
       <property name="text">
-       <string>Duty</string>
+       <string>THD</string>
       </property>
      </widget>
     </item>
-    <item row="0" column="1" alignment="Qt::AlignHCenter">
-     <widget class="QLabel" name="label_6">
-      <property name="minimumSize">
-       <size>
-        <width>80</width>
-        <height>0</height>
-       </size>
-      </property>
+    <item row="17" column="0" colspan="2" alignment="Qt::AlignHCenter">
+     <widget class="QLabel" name="label_11">
       <property name="text">
        <string>Amplituda</string>
       </property>
-      <property name="alignment">
-       <set>Qt::AlignCenter</set>
-      </property>
      </widget>
     </item>
-    <item row="1" column="0">
-     <widget class="QComboBox" name="oblika_sel">
-      <property name="minimumSize">
-       <size>
-        <width>70</width>
-        <height>0</height>
-       </size>
-      </property>
-      <property name="maximumSize">
-       <size>
-        <width>70</width>
-        <height>16777215</height>
-       </size>
-      </property>
-      <item>
-       <property name="text">
-        <string>Konst</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>Step</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>Slew</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>Sine</string>
-       </property>
-      </item>
-     </widget>
-    </item>
-    <item row="1" column="1" alignment="Qt::AlignHCenter">
-     <widget class="QLabel" name="lbl_amp">
-      <property name="text">
-       <string>0.0</string>
-      </property>
-     </widget>
-    </item>
-    <item row="3" column="0">
-     <widget class="SpinBox" name="frekvenca_spin">
-      <property name="minimumSize">
-       <size>
-        <width>70</width>
-        <height>0</height>
-       </size>
-      </property>
-      <property name="maximumSize">
-       <size>
-        <width>70</width>
-        <height>16777215</height>
-       </size>
-      </property>
-      <property name="value">
-       <number>1</number>
-      </property>
-     </widget>
-    </item>
-    <item row="12" column="1">
+    <item row="20" column="1">
      <spacer name="verticalSpacer_3">
       <property name="orientation">
        <enum>Qt::Vertical</enum>
@@ -404,8 +223,22 @@
       </property>
      </spacer>
     </item>
-    <item row="8" column="1" alignment="Qt::AlignHCenter">
-     <widget class="QSlider" name="sld_offset">
+    <item row="1" column="1" alignment="Qt::AlignLeft">
+     <widget class="QLabel" name="label_2">
+      <property name="text">
+       <string>THD</string>
+      </property>
+     </widget>
+    </item>
+    <item row="12" column="0">
+     <widget class="QLabel" name="label_8">
+      <property name="text">
+       <string>Tip regulacije</string>
+      </property>
+     </widget>
+    </item>
+    <item row="19" column="0" colspan="2" alignment="Qt::AlignHCenter">
+     <widget class="QSlider" name="sld_amplituda">
       <property name="minimumSize">
        <size>
         <width>0</width>
@@ -418,67 +251,178 @@
         <height>100</height>
        </size>
       </property>
+      <property name="minimum">
+       <number>-10</number>
+      </property>
       <property name="maximum">
-       <number>100</number>
+       <number>10</number>
       </property>
       <property name="orientation">
        <enum>Qt::Vertical</enum>
       </property>
      </widget>
     </item>
-    <item row="2" column="0">
-     <widget class="QLabel" name="label_7">
+    <item row="6" column="1">
+     <widget class="QLabel" name="u_out_thd">
       <property name="text">
-       <string>Frekvenca</string>
+       <string>0.0</string>
       </property>
      </widget>
     </item>
-    <item row="6" column="1" alignment="Qt::AlignHCenter">
-     <widget class="QLabel" name="label_2">
+    <item row="1" column="0">
+     <widget class="QLabel" name="label">
       <property name="text">
-       <string>Offset</string>
+       <string>RMS</string>
       </property>
      </widget>
     </item>
-    <item row="2" column="1" rowspan="4" alignment="Qt::AlignHCenter">
-     <widget class="QSlider" name="sld_amp">
-      <property name="minimumSize">
-       <size>
-        <width>0</width>
-        <height>100</height>
-       </size>
-      </property>
-      <property name="maximum">
-       <number>100</number>
-      </property>
-      <property name="orientation">
-       <enum>Qt::Vertical</enum>
+    <item row="4" column="0" colspan="2" alignment="Qt::AlignHCenter">
+     <widget class="QLabel" name="label_3">
+      <property name="text">
+       <string>U_out</string>
       </property>
      </widget>
     </item>
-    <item row="4" column="0">
+    <item row="8" column="0" colspan="2" alignment="Qt::AlignHCenter">
      <widget class="QLabel" name="label_5">
       <property name="text">
-       <string>Naklon</string>
+       <string>I_out</string>
+      </property>
+     </widget>
+    </item>
+    <item row="13" column="0" colspan="2">
+     <widget class="Line" name="line_4">
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+     </widget>
+    </item>
+    <item row="3" column="0" colspan="2">
+     <widget class="Line" name="line">
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
       </property>
      </widget>
     </item>
     <item row="5" column="0">
-     <widget class="SpinBox" name="naklon_spin">
-      <property name="minimumSize">
-       <size>
-        <width>70</width>
-        <height>0</height>
-       </size>
+     <widget class="QLabel" name="label_7">
+      <property name="text">
+       <string>RMS</string>
       </property>
-      <property name="maximumSize">
-       <size>
-        <width>70</width>
-        <height>16777215</height>
-       </size>
+     </widget>
+    </item>
+    <item row="9" column="1" alignment="Qt::AlignLeft">
+     <widget class="QLabel" name="label_10">
+      <property name="text">
+       <string>THD</string>
       </property>
-      <property name="value">
-       <number>1</number>
+     </widget>
+    </item>
+    <item row="9" column="0">
+     <widget class="QLabel" name="label_4">
+      <property name="text">
+       <string>RMS</string>
+      </property>
+     </widget>
+    </item>
+    <item row="7" column="0" colspan="2">
+     <widget class="Line" name="line_2">
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+     </widget>
+    </item>
+    <item row="16" column="0" colspan="2">
+     <widget class="QCheckBox" name="amp_control">
+      <property name="text">
+       <string>Regulacija amplitude</string>
+      </property>
+     </widget>
+    </item>
+    <item row="6" column="0">
+     <widget class="QLabel" name="u_out_rms">
+      <property name="text">
+       <string>0.0</string>
+      </property>
+     </widget>
+    </item>
+    <item row="12" column="1">
+     <widget class="QComboBox" name="ctrl_type">
+      <item>
+       <property name="text">
+        <string>PI_ONLY</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>PI_REP</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>REP</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>PI_RES</string>
+       </property>
+      </item>
+     </widget>
+    </item>
+    <item row="10" column="0">
+     <widget class="QLabel" name="i_out_rms">
+      <property name="text">
+       <string>0.0</string>
+      </property>
+     </widget>
+    </item>
+    <item row="11" column="0" colspan="2">
+     <widget class="Line" name="line_3">
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+     </widget>
+    </item>
+    <item row="10" column="1">
+     <widget class="QLabel" name="i_out_thd">
+      <property name="text">
+       <string>0.0</string>
+      </property>
+     </widget>
+    </item>
+    <item row="18" column="0" colspan="2" alignment="Qt::AlignHCenter">
+     <widget class="QLabel" name="lbl_amplituda">
+      <property name="text">
+       <string>230</string>
+      </property>
+     </widget>
+    </item>
+    <item row="14" column="0">
+     <widget class="QLabel" name="label_12">
+      <property name="text">
+       <string>DC regulacija</string>
+      </property>
+     </widget>
+    </item>
+    <item row="14" column="1">
+     <widget class="QComboBox" name="ctrl_dc_mode">
+      <item>
+       <property name="text">
+        <string>Voltage</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Current</string>
+       </property>
+      </item>
+     </widget>
+    </item>
+    <item row="15" column="0" colspan="2">
+     <widget class="Line" name="line_5">
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
       </property>
      </widget>
     </item>

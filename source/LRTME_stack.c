@@ -7,12 +7,19 @@
 
 #include "LRTME_stack.h"
 
-// deklaracije statiènih lokalnih spremenljivk
+// packet counters
 long    LRTME_crc_error_count = 0;
 long	LRTME_packets_received = 0;
 long	LRTME_packets_sent = 0;
+long    LRTME_bytes_sent = 0;
 
-// spremenljivke, ki jih potrebujemo pri pošiljanju
+// go silent if nobody is listening
+bool    quiet_mode = TRUE;
+long    quiet_timeout = 5000;     // go quiet after x mili seconds
+long    quiet_timeout_counter = 5000;
+extern  bool pulse_10ms;
+
+// transmision buffers and variables
 int     LRTME_raw_send[LRTME_TX_BUFF_SIZE];
 int     LRTME_raw_send_length;
 int     LRTME_encoded_send[LRTME_TX_BUFF_SIZE];
@@ -36,35 +43,26 @@ int     LRTME_tx_Q_first = 0;
 int     LRTME_tx_Q_last = 0;
 int     LRTME_tx_Q_number = 0;
 
-
-// bufer za podatke, ki so še zakodirani s COBS-om
+// reception buffers and variables
 int     LRTME_raw_received[LRTME_RX_BUFF_SIZE];
-// dolžina prejetega zakodiranega paketa (v bajtih)
 int     LRTME_raw_received_length;
-// buffer za podatke, ki so že odkodirani
 int     LRTME_decoded_received[LRTME_RX_BUFF_SIZE];
-// dolžina prejetega paketa (v bajtih)
 int     LRTME_decoded_received_length;
 
-// prejeti ukaz
 int     LRTME_received_code;
-// funkcija, ki jo je potrebno klicati
 void    (*LRTME_rx_handler)(int *);
 
-// prototip strukture, ki jih postavljam v vrsto ob registraciji handlerjev za prejete ukaze
 struct  LRTME_rx_struct
 {
     int code;
     void (*function)(int *);
 };
 
-// bufer, kamor se bo registiralo vse handler funkcije
+// receive callback registration buffer
 struct  LRTME_rx_struct LRTME_rx_handler_list[LRTME_RX_NR_HANDLERS];
 int     LRTME_rx_list_elements = 0;
 
-
-
-// pototipi lokalnih funkcij
+// declaration of function prototypes
 void LRTME_receive(void);
 void LRTME_receive_register(int code, void (*function)(int *));
 int LRTME_tx_queue_poll(void);
@@ -72,34 +70,67 @@ void LRTME_transmit(void);
 void LRTME_tx_queue_put(struct  LRTME_tx_struct *to_send);
 bool LRTME_tx_queue_get(struct  LRTME_tx_struct *to_send);
 
+/**************************************************************
+* LRTME stack main function
+**************************************************************/
 void LRTME_stack(void)
 {
-    // send
-    LRTME_transmit();
-    // receiva and call hanldes
+    // quiet_timeout
+    if (quiet_mode == FALSE)
+    {
+        if (pulse_10ms == TRUE)
+        {
+            quiet_timeout_counter = quiet_timeout_counter + 10;
+        }
+        if (quiet_timeout_counter >= quiet_timeout)
+        {
+            quiet_mode = TRUE;
+        }
+    }
+    // if any packets arive, then reset the timer and start transmiting
+    if (SCI_chk_packet_ready() == TRUE)
+    {
+        quiet_mode = FALSE;
+        quiet_timeout_counter = 0;
+    }
+
+    // handle reception
     LRTME_receive();
+    // handle transmision
+    LRTME_transmit();
 }
 
+/**************************************************************
+* LRTME are we in quiet mode?
+**************************************************************/
+bool LRTME_quiet(void)
+{
+    return(quiet_mode);
+}
+
+/**************************************************************
+* LRTME transmision of packets
+**************************************************************/
 #pragma CODE_SECTION(LRTME_transmit, "ramfuncs");
 void LRTME_transmit(void)
 {
     struct  LRTME_tx_struct za_poslat;
     int i;
 
-    // èe sploh lahko pošiljam
+    // check if packets cen be sent at all
     if (SCI_data_sent() == TRUE)
     {
-        // in èe je kaj za poslati
+        // if there is anything to sent at all
         if (LRTME_tx_queue_poll() != 0)
         {
-            // poberem, kar je za poslati
+            // get the packet
             LRTME_tx_queue_get(&za_poslat);
             LRTME_raw_send_code = za_poslat.code;
             LRTME_raw_send_data = za_poslat.data;
             LRTME_raw_send_length = za_poslat.length;
             LRTME_raw_tx_callback = za_poslat.LRTME_tx_callback;
 
-            // naložim v buffer
+            // copy in local buffer
             LRTME_raw_send[0] = LRTME_raw_send_code;
             for (i = 1; i <= LRTME_raw_send_length/2; i = i + 1)
             {
@@ -107,57 +138,63 @@ void LRTME_transmit(void)
                 LRTME_raw_send_data = LRTME_raw_send_data + 1;
             }
 
-            // zakodiram
+            // encode packet
             LRTME_encoded_send_length = COBS_encode(LRTME_raw_send, LRTME_raw_send_length + 2, LRTME_encoded_send);
 
-            // ker so podatki že zakodirani lahko že sedaj izvedem callback
-            // èe ga je sploh treba
+            // once encoded issue a callback if necessary
             if (LRTME_raw_tx_callback != NULL)
             {
                 (*LRTME_raw_tx_callback)();
             }
 
-            // javim, da je uspešno poslan
+            // increase the counters
             LRTME_packets_sent = LRTME_packets_sent + 1;
-
-            // potem pa podatke pošljem po serijskem portu
+            LRTME_bytes_sent = LRTME_bytes_sent + LRTME_encoded_send_length;
+            // and send the packet to SCI port
             SCI_send_word(LRTME_encoded_send, LRTME_encoded_send_length);
         }
     }
 }
 
+/**************************************************************
+* put a new packet on send queue
+**************************************************************/
 #pragma CODE_SECTION(LRTME_send, "ramfuncs");
 void LRTME_send(int code, int *data, int length, void    (*tx_callback)(void))
 {
     struct  LRTME_tx_struct za_poslat;
 
-    za_poslat.code = code;
-    za_poslat.data = data;
-    za_poslat.length = length;
-    za_poslat.LRTME_tx_callback = tx_callback;
+    if (quiet_mode == FALSE)
+    {
+        za_poslat.code = code;
+        za_poslat.data = data;
+        za_poslat.length = length;
+        za_poslat.LRTME_tx_callback = tx_callback;
 
-    LRTME_tx_queue_put(&za_poslat);
+        LRTME_tx_queue_put(&za_poslat);
+    }
 }
 
+/**************************************************************
+* return the number of elements on a send queue
+**************************************************************/
 int LRTME_tx_queue_poll(void)
 {
     return (LRTME_tx_Q_number);
 }
+
 /**************************************************************
-* Inicializacija vrste uporabljene za sprejemni buffer
+* transit queue initialization
 * returns:
 **************************************************************/
-
 void LRTME_tx_queue_init(void)
 {
-    // rx queue
     int i = 0;
 
     LRTME_tx_Q_first = 0;
     LRTME_tx_Q_last = 0;
     LRTME_tx_Q_number = 0;
 
-    // inicializacija vrste
     for (i = 0; i < SCI_RX_BUFFER_SIZE; i++)
     {
         LRTME_tx_send_queue[i].code = 0;
@@ -168,30 +205,30 @@ void LRTME_tx_queue_init(void)
 }
 
 /**************************************************************
-* vpisovanje novega elementa v vrsto
+* queue put function
 * returns:
 * arg1:     element to put to the queue
 **************************************************************/
 #pragma CODE_SECTION(LRTME_tx_queue_put, "ramfuncs");
 void LRTME_tx_queue_put(struct  LRTME_tx_struct *to_send)
 {
-    //dam v buffer
+    // place in the queue
     LRTME_tx_send_queue[LRTME_tx_Q_last].code = to_send->code;
     LRTME_tx_send_queue[LRTME_tx_Q_last].data = to_send->data;
     LRTME_tx_send_queue[LRTME_tx_Q_last].length = to_send->length;
     LRTME_tx_send_queue[LRTME_tx_Q_last].LRTME_tx_callback = to_send->LRTME_tx_callback;
 
-    // povecam kazalec in stevec elementov
+    // increase element counter and pointer to last element
     LRTME_tx_Q_last = LRTME_tx_Q_last + 1;
     LRTME_tx_Q_number = LRTME_tx_Q_number + 1;
 
-    // ce sem ze prisel okoli kroznega bufferja
+    // wraparound
     if (LRTME_tx_Q_last >= LRTME_TX_QUEUE_SIZE)
     {
         LRTME_tx_Q_last = 0;
     }
 
-    // ce je vrst polna vrzi ven najstarejsi element
+    // throw the oldest element out if queue is full
     if (LRTME_tx_Q_number >= LRTME_TX_QUEUE_SIZE)
     {
         LRTME_tx_Q_first = LRTME_tx_Q_first + 1;
@@ -200,30 +237,30 @@ void LRTME_tx_queue_put(struct  LRTME_tx_struct *to_send)
     {
         LRTME_tx_Q_first = 0;
     }
-
 }
 
 /**************************************************************
-* pobiranje elementa iz vrste
-* returns:  element from queue
+* queue get function
+* returns:  TRUE if an element was put
+* arg1:     pointer to the element to get
 **************************************************************/
 #pragma CODE_SECTION(LRTME_tx_queue_get, "ramfuncs");
 bool LRTME_tx_queue_get(struct  LRTME_tx_struct *to_send)
 {
-    // poberem lahko samo ce je kaj za pobrat
+    // it there is enything to get
     if (LRTME_tx_Q_number > 0)
     {
-        // preberem podatek
+        // get the element
         to_send->code = LRTME_tx_send_queue[LRTME_tx_Q_first].code;
         to_send->data = LRTME_tx_send_queue[LRTME_tx_Q_first].data;
         to_send->length = LRTME_tx_send_queue[LRTME_tx_Q_first].length;
         to_send->LRTME_tx_callback = LRTME_tx_send_queue[LRTME_tx_Q_first].LRTME_tx_callback;
 
-        // povecam kazalec
+        // increase element counter and pointer to first element
         LRTME_tx_Q_first = LRTME_tx_Q_first + 1;
         LRTME_tx_Q_number = LRTME_tx_Q_number - 1;
 
-        // po potrebi ga obrnem okoli
+        // wraparound
         if (LRTME_tx_Q_first >= LRTME_TX_QUEUE_SIZE)
         {
             LRTME_tx_Q_first = 0;
@@ -231,12 +268,16 @@ bool LRTME_tx_queue_get(struct  LRTME_tx_struct *to_send)
 
         return (TRUE);
     }
+    // otherwise signal there was no element to get
     else
     {
         return (FALSE);
     }
 }
 
+/**************************************************************
+* LRTME reception of packets
+**************************************************************/
 #pragma CODE_SECTION(LRTME_receive, "ramfuncs");
 void LRTME_receive(void)
 {
@@ -244,37 +285,38 @@ void LRTME_receive(void)
 
     bool data_correct;
 
-    // branje z vodila
+    // check if there are any new packets waiting
     if (SCI_chk_packet_ready() == TRUE)
     {
+        // get the packet
         LRTME_raw_received_length = SCI_get_packet(LRTME_raw_received,LRTME_RX_BUFF_SIZE);
 
-        // potem pa še paketek dekodiram
+        // decode the packet
         LRTME_decoded_received_length = COBS_decode(LRTME_raw_received, LRTME_raw_received_length, LRTME_decoded_received, &data_correct);
 
-        // èe je izraèunani CRC enak 0x0000 potem je podatek pravilen
+        // if crc correct
         if (data_correct == TRUE)
         {
-        	// še en uspešno prejet paket
+        	// increase the packet counter
         	LRTME_packets_received = LRTME_packets_received + 1;
 
-            // preberem ukaz
+            // get the code
             LRTME_received_code = LRTME_decoded_received[0];
 
-            // potem pa pogledam po listu, katero funkcijo naj klièem
+            // got through registered handlers
             for (i = 0; i < LRTME_rx_list_elements; i = i + 1)
             {
-                // èe jo najdem, potem nastavim kazalec na fukcijo
+                // if there is
                 if (LRTME_rx_handler_list[i].code == LRTME_received_code)
                 {
                     LRTME_rx_handler = LRTME_rx_handler_list[i].function;
 
-                    // èe so v paketu tudi podatki, potem pokažem na njih
+                    // if packet has data execute callback with pointer to data
                     if (LRTME_decoded_received_length > 2)
                     {
                         (*LRTME_rx_handler)(&LRTME_decoded_received[1]);
                     }
-                    // sicer pa dam null pointer
+                    // otherwise execute callback with null pointer
                     else
                     {
                         (*LRTME_rx_handler)(0);
@@ -282,6 +324,7 @@ void LRTME_receive(void)
                 }
             }
         }
+        // incase of CRC error increase the counter
         else
         {
             LRTME_crc_error_count = LRTME_crc_error_count + 1;
@@ -289,20 +332,26 @@ void LRTME_receive(void)
     }
 }
 
-// registriram nov handler
+/**************************************************************
+* function which registeres receive callback function
+**************************************************************/
 void LRTME_receive_register(int code, void (*function)(int *))
 {
     LRTME_rx_handler_list[LRTME_rx_list_elements].code = code;
     LRTME_rx_handler_list[LRTME_rx_list_elements].function = function;
     LRTME_rx_list_elements = LRTME_rx_list_elements + 1;
 
-    // preverim èe je sploh dovolj prostora
+    // check if there is room available
     if (LRTME_rx_list_elements >= LRTME_RX_NR_HANDLERS)
     {
+        // you should increase LRTME_RX_NR_HANDLERS buffer size
         asm(" ESTOP0");
     }
 }
 
+/**************************************************************
+* LRTME stack initialization
+**************************************************************/
 void LRTME_init(void)
 {
     size_t i;
@@ -324,7 +373,5 @@ void LRTME_init(void)
     {
         LRTME_decoded_received[i] = 0;
     }
-
-
 }
 
