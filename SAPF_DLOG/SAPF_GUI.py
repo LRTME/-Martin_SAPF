@@ -154,6 +154,8 @@ class ExampleApp(QtWidgets.QMainWindow, GUI_main_window.Ui_MainWindow):
 
         self.ctrl_type.currentIndexChanged.connect(self.ctrl_type_changed)
 
+        self.ctrl_dc_mode.currentIndexChanged.connect(self.ctrl_dc_mode_changed)
+
         self.amp_control.stateChanged.connect(self.amp_control_changed)
 
         # za filtriranje
@@ -542,6 +544,7 @@ class ExampleApp(QtWidgets.QMainWindow, GUI_main_window.Ui_MainWindow):
         amp = struct.unpack('<f', data[0:4])[0]
         amp_control = struct.unpack('<h', data[4:6])[0]
         ctrl_type = struct.unpack('<h', data[6:8])[0]
+        ctrl_dc_mode = struct.unpack('<h', data[8:10])[0]
 
         self.sld_amplituda.blockSignals(True)
         self.sld_amplituda.setValue(int(amp - 230))
@@ -551,6 +554,10 @@ class ExampleApp(QtWidgets.QMainWindow, GUI_main_window.Ui_MainWindow):
         self.ctrl_type.blockSignals(True)
         self.ctrl_type.setCurrentIndex(ctrl_type)
         self.ctrl_type.blockSignals(False)
+
+        self.ctrl_dc_mode.blockSignals(True)
+        self.ctrl_dc_mode.setCurrentIndex(ctrl_dc_mode)
+        self.ctrl_dc_mode.blockSignals(False)
 
         self.amp_control.blockSignals(True)
         if amp_control != 0:
@@ -590,6 +597,11 @@ class ExampleApp(QtWidgets.QMainWindow, GUI_main_window.Ui_MainWindow):
     def ctrl_type_changed(self):
         data = struct.pack('<h', int(self.ctrl_type.currentIndex()))
         self.commonitor.send_packet(0x0B12, data)
+
+    # ob spremembi regulacije DC komponente
+    def ctrl_dc_mode_changed(self):
+        data = struct.pack('<h', int(self.ctrl_dc_mode.currentIndex()))
+        self.commonitor.send_packet(0x0B13, data)
 
     # ob spremembi prescalerja
     def prescaler_changed(self):

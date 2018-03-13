@@ -47,6 +47,7 @@ void UART_send_parameters(int *data);
 void UART_u_out_amp(int *data);
 void UART_u_out_mode(int *data);
 void UART_ctrl_type(int *data);
+void UART_dc_ctrl_type(int *data);
 
 // tx handlerji
 inline void send_dlog_ch1(void);
@@ -113,6 +114,8 @@ void COMM_initialization(void)
     LRTME_receive_register(0x0B10, &UART_u_out_amp);
     LRTME_receive_register(0x0B11, &UART_u_out_mode);
     LRTME_receive_register(0x0B12, &UART_ctrl_type);
+
+    LRTME_receive_register(0x0B13, &UART_dc_ctrl_type);
 
     LRTME_receive_register(0x0B1A, &UART_send_parameters);
 
@@ -241,6 +244,7 @@ void send_parameters(void)
     int_from_float(u_out_rms_ref, &status[0]);
     status[2] = amp_control;
     status[3] = out_control;
+    status[4] = dc_control;
 
     LRTME_send(0x0B0A, status, 2 * sizeof(status), NULL);
 }
@@ -615,6 +619,21 @@ void UART_ctrl_type(int *data)
     }
     send_parameters();
 }
+
+void UART_dc_ctrl_type(int *data)
+{
+    int podatki = *data;
+
+    if (podatki == 0)
+    {
+        dc_control = Voltage;
+    }
+    if (podatki == 1)
+    {
+        dc_control = Current;
+    }
+}
+
 
 #pragma diag_push
 #pragma diag_suppress 179

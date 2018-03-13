@@ -684,7 +684,15 @@ void output_bridge_control(void)
     	{
     		// PI regulator za odpravo DC offseta toka
     		u_out_DC_PIreg.Ref = 0;
-    		u_out_DC_PIreg.Fdb = u_out_f.Mean;
+    		if (dc_control == Voltage)
+    		{
+    		    u_out_DC_PIreg.Fdb = u_out_f.Mean;
+    		}
+    		else
+    		{
+    		    u_out_DC_PIreg.Fdb = i_f_f.Mean;
+    		}
+
     		u_out_DC_PIreg.Ff = 0.0;
     		PID_FLOAT_CALC(u_out_DC_PIreg);
 

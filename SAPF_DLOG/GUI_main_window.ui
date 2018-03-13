@@ -60,7 +60,7 @@
       </property>
      </widget>
     </item>
-    <item row="0" column="2" rowspan="20">
+    <item row="0" column="2" rowspan="22">
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
        <number>0</number>
@@ -203,14 +203,14 @@
       </property>
      </widget>
     </item>
-    <item row="15" column="0" colspan="2" alignment="Qt::AlignHCenter">
+    <item row="17" column="0" colspan="2" alignment="Qt::AlignHCenter">
      <widget class="QLabel" name="label_11">
       <property name="text">
        <string>Amplituda</string>
       </property>
      </widget>
     </item>
-    <item row="18" column="1">
+    <item row="20" column="1">
      <spacer name="verticalSpacer_3">
       <property name="orientation">
        <enum>Qt::Vertical</enum>
@@ -237,7 +237,7 @@
       </property>
      </widget>
     </item>
-    <item row="17" column="0" colspan="2" alignment="Qt::AlignHCenter">
+    <item row="19" column="0" colspan="2" alignment="Qt::AlignHCenter">
      <widget class="QSlider" name="sld_amplituda">
       <property name="minimumSize">
        <size>
@@ -332,7 +332,7 @@
       </property>
      </widget>
     </item>
-    <item row="14" column="0" colspan="2">
+    <item row="16" column="0" colspan="2">
      <widget class="QCheckBox" name="amp_control">
       <property name="text">
        <string>Regulacija amplitude</string>
@@ -391,10 +391,38 @@
       </property>
      </widget>
     </item>
-    <item row="16" column="0" colspan="2" alignment="Qt::AlignHCenter">
+    <item row="18" column="0" colspan="2" alignment="Qt::AlignHCenter">
      <widget class="QLabel" name="lbl_amplituda">
       <property name="text">
        <string>230</string>
+      </property>
+     </widget>
+    </item>
+    <item row="14" column="0">
+     <widget class="QLabel" name="label_12">
+      <property name="text">
+       <string>DC regulacija</string>
+      </property>
+     </widget>
+    </item>
+    <item row="14" column="1">
+     <widget class="QComboBox" name="ctrl_dc_mode">
+      <item>
+       <property name="text">
+        <string>Voltage</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Current</string>
+       </property>
+      </item>
+     </widget>
+    </item>
+    <item row="15" column="0" colspan="2">
+     <widget class="Line" name="line_5">
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
       </property>
      </widget>
     </item>
