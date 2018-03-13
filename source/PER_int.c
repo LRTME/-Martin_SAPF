@@ -7,7 +7,7 @@
 #include    "PER_int.h"
 #include    "TIC_toc.h"
 
-enum    OUT_STATE out_control = REP;
+enum    OUT_STATE out_control = PI_REP;
 bool    amp_control = FALSE;
 
 // za oceno obremenjenosti CPU-ja
@@ -56,14 +56,14 @@ float   u_out_gain = ((1000 + 0.47) / (5 * 0.47)) * (3.3 / 4096);
 DC_float    u_dc_f = DC_FLOAT_DEFAULTS;
 float   u_dc_filtered = 0.0;
 
-// prvi harmonik in RMS vhodne omrežne napetosti (u_ac)
+// prvi harmonik in RMS vhodne omreÅ¾ne napetosti (u_ac)
 DFT_float   u_ac_dft = DFT_FLOAT_DEFAULTS;
 float   u_ac_rms = 0.0;
 float   u_ac_form = 0.0;
 float	u_ac_zeljena = 0.0;
 float	u_ac_kot = 0.0;
 
-// prvi harmonik in RMS vhodne omrežne napetosti (u_ac)
+// prvi harmonik in RMS vhodne omreÅ¾ne napetosti (u_ac)
 DFT_float   i_out_dft = DFT_FLOAT_DEFAULTS;
 float	i_out_rms = 0.0;
 float	i_out_form = 0.0;
@@ -94,11 +94,11 @@ float		u_out_RepReg_k_in = 1.0/DEL_UDC_REF;
 
 float		u_out_duty = 0.0;		// kar posiljam na FB2
 
-// sinhronizacija na omrežje
-float       sync_base_freq = SWITCH_FREQ;
+// sinhronizacija na omreÅ¾je
+float       sync_base_freq = SAMPLE_FREQ;
 PID_float   sync_reg    = PID_FLOAT_DEFAULTS;
-float       sync_switch_freq = SWITCH_FREQ;
-float       sync_grid_freq = (SWITCH_FREQ/SAMPLE_POINTS);
+float       sync_switch_freq = SAMPLE_FREQ;
+float       sync_grid_freq = (SAMPLE_FREQ/SAMPLE_POINTS);
 bool        sync_use = TRUE;
 
 // samo za statistiko meritev
@@ -146,7 +146,7 @@ void output_bridge_disable(void);
 void output_bridge_control(void);
 void check_limits(void);
 
-// spremenljikva s katero štejemo kolikokrat se je prekinitev predolgo izvajala
+// spremenljikva s katero Å¡tejemo kolikokrat se je prekinitev predolgo izvajala
 int interrupt_overflow_counter = 0;
 
 /**************************************************************
@@ -202,11 +202,11 @@ void interrupt PER_int(void)
     // spravim vrednosti v buffer za prikaz
     DLOG_GEN_update();
     
-    /* preverim, èe me sluèajno èaka nova prekinitev.
-       èe je temu tako, potem je nekaj hudo narobe
-       saj je èas izvajanja prekinitve predolg
+    /* preverim, Ã¨e me sluÃ¨ajno Ã¨aka nova prekinitev.
+       Ã¨e je temu tako, potem je nekaj hudo narobe
+       saj je Ã¨as izvajanja prekinitve predolg
        vse skupaj se mora zgoditi najmanj 10krat,
-       da reèemo da je to res problem
+       da reÃ¨emo da je to res problem
     */
     if (EPwm1Regs.ETFLG.bit.INT == TRUE)
     {
@@ -214,9 +214,9 @@ void interrupt PER_int(void)
         interrupt_overflow_counter = interrupt_overflow_counter + 1;
         
         // in ce se je vse skupaj zgodilo 10 krat se ustavim
-        // v kolikor uC krmili kakšen resen HW, potem moèno
-        // proporoèam lepše "hendlanje" takega dogodka
-        // beri:ugasni moènostno stopnjo, ...
+        // v kolikor uC krmili kakÅ¡en resen HW, potem moÃ¨no
+        // proporoÃ¨am lepÅ¡e "hendlanje" takega dogodka
+        // beri:ugasni moÃ¨nostno stopnjo, ...
         if (interrupt_overflow_counter >= 10)
         {
         	// izklopim mostic
@@ -261,8 +261,8 @@ void PER_int_setup(void)
 
     dlog.iptr1 = &u_ac;
     dlog.iptr2 = &u_out;
-    dlog.iptr3 = &u_out_dft.Out;
-    dlog.iptr4 = &u_out_err;
+    dlog.iptr3 = &u_out_err;
+    dlog.iptr4 = &i_out;
     dlog.iptr5 = &u_out_duty;
     dlog.iptr6 = &i_f;
     dlog.iptr7 = &u_f;
@@ -368,11 +368,11 @@ void PER_int_setup(void)
     // incializiram filter za u_ac
     DC_FLOAT_MACRO_INIT(u_ac_f);
 
-    // inicializiram štoparico
+    // inicializiram Å¡toparico
     TIC_init();
 
-    // Proženje prekinitve
-    EPwm1Regs.ETSEL.bit.INTSEL = ET_CTR_ZERO;    //sproži prekinitev na periodo
+    // ProÅ¾enje prekinitve
+    EPwm1Regs.ETSEL.bit.INTSEL = ET_CTR_ZERO;    //sproÅ¾i prekinitev na periodo
     EPwm1Regs.ETPS.bit.INTPRD = ET_1ST;         //ob vsakem prvem dogodku
     EPwm1Regs.ETCLR.bit.INT = 1;                //clear possible flag
     EPwm1Regs.ETSEL.bit.INTEN = 1;              //enable interrupt
@@ -384,8 +384,8 @@ void PER_int_setup(void)
     PieCtrlRegs.PIEACK.all = PIEACK_GROUP3;
     PieCtrlRegs.PIEIER3.bit.INTx1 = 1;
     IER |= M_INT3;
-    // da mi prekinitev teèe  tudi v real time naèinu
-    // (za razhoršèevanje main zanke in BACK_loop zanke)
+    // da mi prekinitev teÃ¨e  tudi v real time naÃ¨inu
+    // (za razhorÅ¡Ã¨evanje main zanke in BACK_loop zanke)
     SetDBGIER(M_INT3);
 }
 
@@ -462,11 +462,11 @@ void get_electrical(void)
     }
 
     // poracunam DFT napetosti
-    // vhodna omrežna napetost - u_ac
+    // vhodna omreÅ¾na napetost - u_ac
     u_ac_dft.In = u_ac;
     DFT_FLOAT_MACRO(u_ac_dft);
 
-    // naraèunam RMS omrežne napetosti - u_ac
+    // naraÃ¨unam RMS omreÅ¾ne napetosti - u_ac
     u_ac_rms = ZSQRT2 * sqrt(u_ac_dft.SumA * u_ac_dft.SumA + u_ac_dft.SumB *u_ac_dft.SumB);
 
     // normiram, da dobim obliko
@@ -486,7 +486,7 @@ void get_electrical(void)
     u_out_dft.In = u_out;
     DFT_FLOAT_MACRO(u_out_dft);
 
-    // naraèunam amplitudo izhodne napetosti - u_out
+    // naraÃ¨unam amplitudo izhodne napetosti - u_out
     u_out_rms = ZSQRT2 * sqrt(u_out_dft.SumA * u_out_dft.SumA + u_out_dft.SumB *u_out_dft.SumB);
 
     // naracunam napako
@@ -494,7 +494,7 @@ void get_electrical(void)
     // in merjeno napetostjo
     if (amp_control == FALSE)
     {
-        u_out_err = u_out_dft.Out - u_out;
+        u_out_err = (u_ac_rms / u_out_rms) * u_out_dft.Out - u_out;
     }
     // sicer pa ustrezno skaliram osnovni harmonik
     else
@@ -521,7 +521,7 @@ void get_electrical(void)
     i_out_dft.In = i_out;
     DFT_FLOAT_MACRO(i_out_dft);
 
-    // naraèunam RMS omrežne napetosti - u_ac
+    // naraÃ¨unam RMS omreÅ¾ne napetosti - u_ac
     i_out_rms = ZSQRT2 * sqrt(i_out_dft.SumA * i_out_dft.SumA + i_out_dft.SumB * i_out_dft.SumB);
 
     // normiram, da dobim obliko
@@ -602,7 +602,7 @@ void input_bridge_control(void)
         // napetostni PI regulator
         u_dc_reg.Ref = u_dc_slew.Out;
         u_dc_reg.Fdb = u_dc_filtered;
-        // uporabim ABF za oceno DC toka in posledièno feedforward
+        // uporabim ABF za oceno DC toka in poslediÃ¨no feedforward
         u_dc_reg.Ff = i_dc_abf * (230 / 24) * u_dc_filtered * SQRT2 / u_ac_rms;
 
         PID_FLOAT_CALC(u_dc_reg);
@@ -652,7 +652,7 @@ void output_bridge_enable(void)
 #pragma CODE_SECTION(output_bridge_enable, "ramfuncs");
 void output_bridge_disable(void)
 {
-	// zacetek izklopne rutine, pri kotu 0°
+	// zacetek izklopne rutine, pri kotu 0Â°
 		if (	(state == Disable)
 			&&	(PCB_CPLD_MOSFET_MCU_status() == FALSE)
 			&&	(PCB_relay3_status() == TRUE)
@@ -684,7 +684,15 @@ void output_bridge_control(void)
     	{
     		// PI regulator za odpravo DC offseta toka
     		u_out_DC_PIreg.Ref = 0;
-    		u_out_DC_PIreg.Fdb = u_out_f.Mean;
+    		if (dc_control == Voltage)
+    		{
+    		    u_out_DC_PIreg.Fdb = u_out_f.Mean;
+    		}
+    		else
+    		{
+    		    u_out_DC_PIreg.Fdb = i_f_f.Mean;
+    		}
+
     		u_out_DC_PIreg.Ff = 0.0;
     		PID_FLOAT_CALC(u_out_DC_PIreg);
 
@@ -730,7 +738,7 @@ void output_bridge_control(void)
     			break;
 
     		case RES:
-    			// resonanèni regulator
+    			// resonanÃ¨ni regulator
     		    u_out_duty = 0.0;
     			break;
 
@@ -775,7 +783,7 @@ void output_bridge_control(void)
 #pragma CODE_SECTION(check_limits, "ramfuncs");
 void check_limits(void)
 {
-    // samo èe je kalibracija konènana
+    // samo Ã¨e je kalibracija konÃ¨nana
     if (calibration_done == TRUE)
     {
          if (u_ac_rms > U_AC_RMS_MAX)

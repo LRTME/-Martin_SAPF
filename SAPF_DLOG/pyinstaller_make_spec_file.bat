@@ -1,2 +1,2 @@
-pyi-makespec --onefile --noconsole SAPF_GUI.py
+pyi-makespec --onefile --noconsole --icon=Logo_LRTME.ico SAPF_GUI.py
 pause

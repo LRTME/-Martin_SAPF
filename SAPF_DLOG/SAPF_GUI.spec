@@ -4,7 +4,7 @@ block_cipher = None
 
 
 a = Analysis(['SAPF_GUI.py'],
-             pathex=['D:\\Mitja\\Projekti\\SerijskiFilterEnoF\\Programi\\SAPF_final\\Martin_SAPF\\SAPF_GUI'],
+             pathex=['D:\\Mitja\\Projekti\\SerijskiFilterEnoF\\Programi\\SAPF_final\\Martin_SAPF\\SAPF_DLOG'],
              binaries=[],
              datas=[],
              hiddenimports=[],
@@ -22,8 +22,8 @@ exe = EXE(pyz,
           a.binaries,
           a.zipfiles,
           a.datas,
-          name='SAPF_DLOG',
+          name='SAPF_GUI',
           debug=False,
           strip=False,
           upx=True,
-          console=False )
+          console=False , icon='Logo_LRTME.ico')

@@ -14,6 +14,8 @@ volatile enum STATE state = Initialization;
 
 volatile enum MODE mode = Control;
 
+volatile enum DC_CONTROL dc_control = Voltage;
+
 //struktura z zastavicami napake
 struct FAULT_FLAGS fault_flags =
 {
