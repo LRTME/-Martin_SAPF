@@ -626,9 +626,13 @@ void UART_dc_ctrl_type(int *data)
 
     if (podatki == 0)
     {
-        dc_control = Voltage;
+        dc_control = None;
     }
     if (podatki == 1)
+    {
+        dc_control = Voltage;
+    }
+    if (podatki == 2)
     {
         dc_control = Current;
     }

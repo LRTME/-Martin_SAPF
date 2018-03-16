@@ -684,22 +684,32 @@ void output_bridge_control(void)
     	{
     		// PI regulator za odpravo DC offseta toka
     		u_out_DC_PIreg.Ref = 0;
+    		if (dc_control == None)
+    		{
+    		    u_out_DC_PIreg.Ui = 0.0;
+	            u_out_DC_PIreg.Out = 0.0;
+    		}
     		if (dc_control == Voltage)
     		{
     		    u_out_DC_PIreg.Fdb = u_out_f.Mean;
+                u_out_DC_PIreg.Ff = 0.0;
+                PID_FLOAT_CALC(u_out_DC_PIreg);
     		}
-    		else
+    		if (dc_control == Current)
     		{
     		    u_out_DC_PIreg.Fdb = i_f_f.Mean;
+                u_out_DC_PIreg.Ff = 0.0;
+                PID_FLOAT_CALC(u_out_DC_PIreg);
     		}
 
-    		u_out_DC_PIreg.Ff = 0.0;
-    		PID_FLOAT_CALC(u_out_DC_PIreg);
 
     		// izbira vrste regulacije izhodne napetosti poleg osnovnega PI regulatorja
     		switch (out_control)
     		{
     		case PI_ONLY:
+    		    // nicim repetitivni regulator
+    		    REP_float_zero(&u_out_RepReg);
+
                 // PI regulator
                 u_out_PIreg.Ref = 0.0;
                 u_out_PIreg.Fdb = u_out_err;
@@ -728,6 +738,9 @@ void output_bridge_control(void)
     		    break;
 
     		case REP:
+    		    // nicim PI regulator
+    		    u_out_PIreg.Ui = 0.0;
+
                 // repetitivni regulator
                 u_out_RepReg.in = u_out_RepReg_k_in * (0.0-u_out_err);
                 REP_float_calc(&u_out_RepReg);
@@ -739,7 +752,7 @@ void output_bridge_control(void)
 
     		case RES:
     			// resonanèni regulator
-    		    u_out_duty = 0.0;
+    		    u_out_duty = u_out_DC_PIreg.Out;
     			break;
 
     		default:

@@ -409,6 +409,11 @@
      <widget class="QComboBox" name="ctrl_dc_mode">
       <item>
        <property name="text">
+        <string>None</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
         <string>Voltage</string>
        </property>
       </item>

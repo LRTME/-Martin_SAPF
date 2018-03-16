@@ -24,7 +24,7 @@ extern volatile enum STATE { Initialization = 0, Startup, Charging, Standby, Ena
 extern volatile enum MODE { Open_loop = 0, Control} mode;
 
 // nacin regulacije DC komponente
-extern volatile enum DC_CONTROL {Voltage = 0, Current} dc_control;
+extern volatile enum DC_CONTROL {None = 0, Voltage, Current} dc_control;
 
 //struktura z zastavicami napake
 extern struct FAULT_FLAGS
